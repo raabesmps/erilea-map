@@ -17,15 +17,20 @@ interface Blob {
   w: number
 }
 
-// Rough, original interpretation of the geography (normalised coordinates).
+// Own interpretation of the geography. Place *positions* follow the book's map;
+// the coastline itself is generated, not traced (normalised coordinates).
 const BLOBS: Blob[] = [
-  { cx: 0.6, cy: 0.52, rx: 0.32, ry: 0.4, w: 1 }, // main continent
-  { cx: 0.54, cy: 0.19, rx: 0.2, ry: 0.15, w: 1 }, // far north
-  { cx: 0.12, cy: 0.5, rx: 0.1, ry: 0.3, w: 1 }, // western land
-  { cx: 0.88, cy: 0.84, rx: 0.045, ry: 0.07, w: 0.9 }, // islands
-  { cx: 0.26, cy: 0.12, rx: 0.04, ry: 0.05, w: 0.9 },
-  { cx: 0.3, cy: 0.9, rx: 0.05, ry: 0.04, w: 0.9 },
-  { cx: 0.93, cy: 0.3, rx: 0.025, ry: 0.06, w: 0.9 },
+  { cx: 0.70, cy: 0.14, rx: 0.17, ry: 0.13, w: 1 }, // Terrasen
+  { cx: 0.74, cy: 0.40, rx: 0.16, ry: 0.20, w: 1 }, // Adarlan
+  { cx: 0.65, cy: 0.60, rx: 0.22, ry: 0.16, w: 1 }, // centre / Melisande
+  { cx: 0.82, cy: 0.58, rx: 0.09, ry: 0.07, w: 1 }, // east bulge
+  { cx: 0.76, cy: 0.78, rx: 0.18, ry: 0.19, w: 1 }, // Eyllwe
+  { cx: 0.66, cy: 0.86, rx: 0.10, ry: 0.10, w: 1 }, // south-west marsh
+  { cx: 0.47, cy: 0.45, rx: 0.10, ry: 0.18, w: 1 }, // land bridge
+  { cx: 0.24, cy: 0.52, rx: 0.23, ry: 0.45, w: 1 }, // western lands
+  { cx: 0.93, cy: 0.64, rx: 0.015, ry: 0.025, w: 0.9 }, // Dead Islands
+  { cx: 0.95, cy: 0.74, rx: 0.012, ry: 0.02, w: 0.9 },
+  { cx: 0.5, cy: 0.93, rx: 0.04, ry: 0.03, w: 0.9 },
 ]
 
 function mulberry32(seed: number) {
@@ -143,7 +148,7 @@ export function renderTerrain(W = MAP_W, H = MAP_H, seed = 11): HTMLCanvasElemen
   drawGlyphs(ctx, W, H, at, rnd, n2)
   drawAging(ctx, W, H)
   drawFrame(ctx, W, H)
-  drawCompass(ctx, W * 0.9, H * 0.13, 92)
+  drawCompass(ctx, W * 0.95, H * 0.905, 54)
   return canvas
 }
 

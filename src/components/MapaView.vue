@@ -33,7 +33,7 @@ function drawPins() {
       permanent: true,
       direction: 'bottom',
       offset: [0, 16],
-      className: `pin-label${p.tipo === 'regiao' ? ' region-label' : ''}`,
+      className: `pin-label${p.tipo === 'regiao' || p.tipo === 'saida' ? ' region-label' : ''}`,
     })
     m.on('click', () => store.openPlace(p.id === store.placeId ? null : p.id))
     pinLayer.addLayer(m)
@@ -133,8 +133,9 @@ onMounted(() => {
   const portrait = size.x / size.y < MAP_W / MAP_H
   const fit = map.getBoundsZoom(bounds, false)
   const zoom = portrait ? (fit + map.getBoundsZoom(bounds, true)) / 2 : fit
-  map.setView(bounds.getCenter(), zoom, { animate: false })
-  map.setMinZoom(zoom - 0.5)
+  if (portrait) map.setView(bounds.getCenter(), zoom, { animate: false })
+  else map.fitBounds(bounds, { paddingTopLeft: [0, 96], paddingBottomRight: [0, 28], animate: false })
+  map.setMinZoom(map.getZoom() - 0.5)
   map.on('click', () => store.openPlace(null))
   drawPins()
   drawRoutes()
