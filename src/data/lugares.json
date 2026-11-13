@@ -1,109 +1,498 @@
 [
   {
-    "id": "skulls-bay", "x": 0.40, "y": 0.86, "tipo": "porto", "livro": 0,
-    "nome": { "pt": "Baía da Caveira", "en": "Skull's Bay" },
+    "id": "skulls-bay",
+    "x": 0.91,
+    "y": 0.685,
+    "tipo": "porto",
+    "livro": 0,
+    "nome": {
+      "pt": "Baía da Caveira",
+      "en": "Skull's Bay"
+    },
     "notas": [
-      { "livro": 0, "pt": "Porto sem lei, onde todo mundo tem um preço e ninguém pergunta o seu.", "en": "A lawless harbour where everyone has a price and nobody asks yours." }
+      {
+        "livro": 0,
+        "pt": "Porto sem lei, onde todo mundo tem um preço e ninguém pergunta o seu.",
+        "en": "A lawless harbour where everyone has a price and nobody asks yours."
+      }
     ]
   },
   {
-    "id": "rifthold", "x": 0.57, "y": 0.47, "tipo": "cidade", "livro": 1,
-    "nome": { "pt": "Rifthold", "en": "Rifthold" },
+    "id": "deserto-vermelho",
+    "x": 0.245,
+    "y": 0.755,
+    "tipo": "regiao",
+    "livro": 0,
+    "nome": {
+      "pt": "Deserto Vermelho",
+      "en": "Red Desert"
+    },
     "notas": [
-      { "livro": 1, "pt": "Capital de Adarlan. Por fora, pedra escura e fumaça; no alto, um castelo que brilha como cristal.", "en": "Capital of Adarlan. Dark stone and smoke below, a castle that glitters like crystal above." },
-      { "livro": 4, "pt": "Voltar aqui nunca é só voltar.", "en": "Coming back here is never just coming back." }
+      {
+        "livro": 0,
+        "pt": "Areia vermelha a perder de vista, onde se aprende que o silêncio tem preço.",
+        "en": "Red sand as far as the eye can see, where silence is learned and priced."
+      }
     ]
   },
   {
-    "id": "endovier", "x": 0.49, "y": 0.60, "tipo": "mina", "livro": 1,
-    "nome": { "pt": "Endovier", "en": "Endovier" },
+    "id": "rifthold",
+    "x": 0.776,
+    "y": 0.47,
+    "tipo": "cidade",
+    "livro": 1,
+    "nome": {
+      "pt": "Forte da Fenda",
+      "en": "Rifthold"
+    },
     "notas": [
-      { "livro": 1, "pt": "Minas de sal onde ninguém quer chegar. Quem sai, sai mudado.", "en": "Salt mines nobody wants to reach. Whoever leaves is changed." }
+      {
+        "livro": 1,
+        "pt": "Capital de Adarlan, à beira do Rio Avery. Por fora, pedra escura e fumaça; no alto, um castelo que brilha como cristal.",
+        "en": "Capital of Adarlan on the Avery River. Dark stone and smoke below, a castle that glitters like crystal above."
+      },
+      {
+        "livro": 4,
+        "pt": "Voltar aqui nunca é só voltar.",
+        "en": "Coming back here is never just coming back."
+      }
     ]
   },
   {
-    "id": "eyllwe", "x": 0.40, "y": 0.68, "tipo": "regiao", "livro": 1,
-    "nome": { "pt": "Eyllwe", "en": "Eyllwe" },
+    "id": "endovier",
+    "x": 0.665,
+    "y": 0.295,
+    "tipo": "mina",
+    "livro": 1,
+    "nome": {
+      "pt": "Mina de Sal de Endovier",
+      "en": "Endovier Salt Mines"
+    },
     "notas": [
-      { "livro": 1, "pt": "O reino do sul, quente e orgulhoso, de onde vem uma amizade que importa.", "en": "The warm, proud kingdom of the south, where an important friendship begins." }
+      {
+        "livro": 1,
+        "pt": "Minas de sal onde ninguém quer chegar. Quem sai, sai mudado.",
+        "en": "Salt mines nobody wants to reach. Whoever leaves is changed."
+      }
     ]
   },
   {
-    "id": "orynth", "x": 0.57, "y": 0.18, "tipo": "cidade", "livro": 1,
-    "nome": { "pt": "Orynth", "en": "Orynth" },
+    "id": "adarlan",
+    "x": 0.756,
+    "y": 0.364,
+    "tipo": "regiao",
+    "livro": 1,
+    "nome": {
+      "pt": "Adarlan",
+      "en": "Adarlan"
+    },
     "notas": [
-      { "livro": 1, "pt": "A capital de Terrasen, lá no norte. Mais falada do que visitada, no começo.", "en": "Terrasen's capital in the far north. Spoken of more than visited, at first." },
-      { "livro": 3, "pt": "Um nome que ainda pesa para muita gente.", "en": "A name that still weighs on many people." }
+      {
+        "livro": 1,
+        "pt": "O império que engoliu meio continente. Grande demais para ser gentil.",
+        "en": "The empire that swallowed half a continent. Too large to be kind."
+      }
     ]
   },
   {
-    "id": "terrasen", "x": 0.47, "y": 0.22, "tipo": "regiao", "livro": 1,
-    "nome": { "pt": "Terrasen", "en": "Terrasen" },
+    "id": "terrasen",
+    "x": 0.735,
+    "y": 0.075,
+    "tipo": "regiao",
+    "livro": 1,
+    "nome": {
+      "pt": "Terrasen",
+      "en": "Terrasen"
+    },
     "notas": [
-      { "livro": 1, "pt": "O reino do norte: frio, teimoso e difícil de esquecer.", "en": "The northern kingdom: cold, stubborn and hard to forget." }
+      {
+        "livro": 1,
+        "pt": "O reino do norte: frio, teimoso e difícil de esquecer.",
+        "en": "The northern kingdom: cold, stubborn and hard to forget."
+      }
     ]
   },
   {
-    "id": "fenharrow", "x": 0.32, "y": 0.55, "tipo": "regiao", "livro": 2,
-    "nome": { "pt": "Fenharrow", "en": "Fenharrow" },
+    "id": "orynth",
+    "x": 0.747,
+    "y": 0.157,
+    "tipo": "cidade",
+    "livro": 1,
+    "nome": {
+      "pt": "Orynth",
+      "en": "Orynth"
+    },
     "notas": [
-      { "livro": 2, "pt": "Terras baixas e campos largos, com uma história que ainda dói.", "en": "Low lands and wide fields, with a history that still hurts." }
+      {
+        "livro": 1,
+        "pt": "A capital de Terrasen, lá no norte. Mais falada do que visitada, no começo.",
+        "en": "Terrasen's capital in the far north. Spoken of more than visited, at first."
+      },
+      {
+        "livro": 3,
+        "pt": "Um nome que ainda pesa para muita gente.",
+        "en": "A name that still weighs on many people."
+      }
     ]
   },
   {
-    "id": "ilium", "x": 0.47, "y": 0.77, "tipo": "cidade", "livro": 3,
-    "nome": { "pt": "Ilium", "en": "Ilium" },
+    "id": "eyllwe",
+    "x": 0.785,
+    "y": 0.793,
+    "tipo": "regiao",
+    "livro": 1,
+    "nome": {
+      "pt": "Eyllwe",
+      "en": "Eyllwe"
+    },
     "notas": [
-      { "livro": 3, "pt": "Cidade do sul, entre o calor e a esperança de quem resiste.", "en": "A southern city, caught between the heat and the hope of those who resist." }
+      {
+        "livro": 1,
+        "pt": "O reino do sul, quente e orgulhoso, de onde vem uma amizade que importa.",
+        "en": "The warm, proud kingdom of the south, where an important friendship begins."
+      }
     ]
   },
   {
-    "id": "wendlyn", "x": 0.12, "y": 0.62, "tipo": "regiao", "livro": 3,
-    "nome": { "pt": "Wendlyn", "en": "Wendlyn" },
+    "id": "meah",
+    "x": 0.78,
+    "y": 0.316,
+    "tipo": "cidade",
+    "livro": 2,
+    "nome": {
+      "pt": "Meah",
+      "en": "Meah"
+    },
     "notas": [
-      { "livro": 3, "pt": "Terra além do mar, onde as regras são outras.", "en": "A land across the sea where the rules are different." }
+      {
+        "livro": 2,
+        "pt": "Cidade da costa leste, onde o vento traz sal e boatos.",
+        "en": "An eastern coastal city where the wind carries salt and rumours."
+      }
     ]
   },
   {
-    "id": "doranelle", "x": 0.11, "y": 0.44, "tipo": "cidade", "livro": 3,
-    "nome": { "pt": "Doranelle", "en": "Doranelle" },
+    "id": "suria",
+    "x": 0.846,
+    "y": 0.168,
+    "tipo": "cidade",
+    "livro": 2,
+    "nome": {
+      "pt": "Suria",
+      "en": "Suria"
+    },
     "notas": [
-      { "livro": 3, "pt": "Cidade antiga e vigiada, bonita demais para ser inocente.", "en": "An ancient, watchful city, too beautiful to be innocent." }
+      {
+        "livro": 2,
+        "pt": "Porto no extremo nordeste, de frente para o mar frio.",
+        "en": "A port in the far northeast, facing the cold sea."
+      }
     ]
   },
   {
-    "id": "mistward", "x": 0.15, "y": 0.34, "tipo": "fortaleza", "livro": 3,
-    "nome": { "pt": "Mistward", "en": "Mistward" },
+    "id": "melisande",
+    "x": 0.631,
+    "y": 0.626,
+    "tipo": "regiao",
+    "livro": 2,
+    "nome": {
+      "pt": "Melisande",
+      "en": "Melisande"
+    },
     "notas": [
-      { "livro": 3, "pt": "Uma fortaleza no limite, cercada de névoa e de perguntas.", "en": "A fortress on the edge, wrapped in mist and questions." }
+      {
+        "livro": 2,
+        "pt": "Reino a sudoeste de Adarlan, de rios sinuosos e costumes próprios.",
+        "en": "A kingdom southwest of Adarlan, of winding rivers and customs of its own."
+      }
     ]
   },
   {
-    "id": "oakwood", "x": 0.52, "y": 0.27, "tipo": "floresta", "livro": 3,
-    "nome": { "pt": "Floresta de Oakwood", "en": "Oakwood" },
+    "id": "calaculla",
+    "x": 0.747,
+    "y": 0.757,
+    "tipo": "mina",
+    "livro": 2,
+    "nome": {
+      "pt": "Calacúlia",
+      "en": "Calaculla"
+    },
     "notas": [
-      { "livro": 3, "pt": "Carvalhos antigos que guardam mais do que sombra.", "en": "Ancient oaks that keep more than shade." }
+      {
+        "livro": 2,
+        "pt": "Campo de trabalho forçado no sul. Um lugar que o mapa preferia não ter.",
+        "en": "A forced-labour camp in the south. A place the map would rather not have."
+      }
     ]
   },
   {
-    "id": "white-fang", "x": 0.70, "y": 0.33, "tipo": "montanha", "livro": 3,
-    "nome": { "pt": "Montanhas Presa Branca", "en": "White Fang Mountains" },
+    "id": "oakwald",
+    "x": 0.686,
+    "y": 0.373,
+    "tipo": "floresta",
+    "livro": 3,
+    "nome": {
+      "pt": "Floresta Carvalhal",
+      "en": "Oakwald"
+    },
     "notas": [
-      { "livro": 3, "pt": "A muralha de picos entre o norte e o resto do mundo.", "en": "A wall of peaks between the north and the rest of the world." }
+      {
+        "livro": 3,
+        "pt": "Carvalhos antigos que guardam mais do que sombra.",
+        "en": "Ancient oaks that keep more than shade."
+      }
     ]
   },
   {
-    "id": "anielle", "x": 0.65, "y": 0.27, "tipo": "fortaleza", "livro": 5,
-    "nome": { "pt": "Anielle", "en": "Anielle" },
+    "id": "canino-branco",
+    "x": 0.577,
+    "y": 0.517,
+    "tipo": "montanha",
+    "livro": 3,
+    "nome": {
+      "pt": "Montanhas Canino Branco",
+      "en": "White Fang Mountains"
+    },
     "notas": [
-      { "livro": 5, "pt": "Terra de passagens estreitas e gente que não se dobra fácil.", "en": "A land of narrow passes and people who do not bend easily." }
+      {
+        "livro": 3,
+        "pt": "A muralha de picos entre o norte e o resto do mundo.",
+        "en": "A wall of peaks between the north and the rest of the world."
+      }
     ]
   },
   {
-    "id": "morath", "x": 0.80, "y": 0.52, "tipo": "fortaleza", "livro": 5,
-    "nome": { "pt": "Morath", "en": "Morath" },
+    "id": "ruhnn",
+    "x": 0.6,
+    "y": 0.32,
+    "tipo": "montanha",
+    "livro": 3,
+    "nome": {
+      "pt": "Montanhas Ruhnn",
+      "en": "Ruhnn Mountains"
+    },
     "notas": [
-      { "livro": 5, "pt": "Uma sombra no leste que o mapa preferia não ter.", "en": "A shadow in the east the map would rather not have." }
+      {
+        "livro": 3,
+        "pt": "Cordilheira alta e fria, longe de qualquer estrada confortável.",
+        "en": "A high, cold range far from any comfortable road."
+      }
+    ]
+  },
+  {
+    "id": "banjali",
+    "x": 0.814,
+    "y": 0.866,
+    "tipo": "cidade",
+    "livro": 3,
+    "nome": {
+      "pt": "Banjali",
+      "en": "Banjali"
+    },
+    "notas": [
+      {
+        "livro": 3,
+        "pt": "Cidade na ponta sul de Eyllwe, onde o mar encontra a terra quente.",
+        "en": "A city at Eyllwe's southern tip, where the sea meets warm land."
+      }
+    ]
+  },
+  {
+    "id": "pantano-pedra",
+    "x": 0.658,
+    "y": 0.873,
+    "tipo": "regiao",
+    "livro": 3,
+    "nome": {
+      "pt": "Pântano de Pedra",
+      "en": "Stone Marshes"
+    },
+    "notas": [
+      {
+        "livro": 3,
+        "pt": "Pântano largo e difícil de atravessar, no sudoeste.",
+        "en": "A wide, hard-to-cross marsh in the southwest."
+      }
+    ]
+  },
+  {
+    "id": "wendlyn",
+    "x": 0.952,
+    "y": 0.47,
+    "tipo": "saida",
+    "livro": 3,
+    "nome": {
+      "pt": "Para Wendlyn →",
+      "en": "To Wendlyn →"
+    },
+    "notas": [
+      {
+        "livro": 3,
+        "pt": "Além do Grande Oceano, a leste, fica Wendlyn. O mapa só deixa a seta.",
+        "en": "Beyond the Great Ocean to the east lies Wendlyn. The map only leaves the arrow."
+      }
+    ]
+  },
+  {
+    "id": "perranth",
+    "x": 0.713,
+    "y": 0.245,
+    "tipo": "cidade",
+    "livro": 4,
+    "nome": {
+      "pt": "Perranth",
+      "en": "Perranth"
+    },
+    "notas": [
+      {
+        "livro": 4,
+        "pt": "Cidade de Terrasen que se lembra do que já foi.",
+        "en": "A Terrasen city that remembers what it once was."
+      }
+    ]
+  },
+  {
+    "id": "tribo-lobos",
+    "x": 0.6,
+    "y": 0.115,
+    "tipo": "regiao",
+    "livro": 4,
+    "nome": {
+      "pt": "Tribo dos Lobos",
+      "en": "Wolf Tribe"
+    },
+    "notas": [
+      {
+        "livro": 4,
+        "pt": "Gente das montanhas do norte, que protege o que é seu.",
+        "en": "People of the northern mountains, who guard what is theirs."
+      }
+    ]
+  },
+  {
+    "id": "enseada-sino",
+    "x": 0.853,
+    "y": 0.603,
+    "tipo": "porto",
+    "livro": 4,
+    "nome": {
+      "pt": "Enseada do Sino",
+      "en": "Bellhaven"
+    },
+    "notas": [
+      {
+        "livro": 4,
+        "pt": "Enseada na costa leste, onde os navios param antes de partir.",
+        "en": "A cove on the east coast where ships stop before they leave."
+      }
+    ]
+  },
+  {
+    "id": "anielle",
+    "x": 0.65,
+    "y": 0.473,
+    "tipo": "fortaleza",
+    "livro": 5,
+    "nome": {
+      "pt": "Anielle",
+      "en": "Anielle"
+    },
+    "notas": [
+      {
+        "livro": 5,
+        "pt": "Terra de passagens estreitas e gente que não se dobra fácil.",
+        "en": "A land of narrow passes and people who do not bend easily."
+      }
+    ]
+  },
+  {
+    "id": "morath",
+    "x": 0.688,
+    "y": 0.561,
+    "tipo": "fortaleza",
+    "livro": 5,
+    "nome": {
+      "pt": "Morath",
+      "en": "Morath"
+    },
+    "notas": [
+      {
+        "livro": 5,
+        "pt": "Uma sombra no centro do continente que o mapa preferia não ter.",
+        "en": "A shadow in the heart of the continent the map would rather not have."
+      }
+    ]
+  },
+  {
+    "id": "ilhas-mortas",
+    "x": 0.876,
+    "y": 0.656,
+    "tipo": "regiao",
+    "livro": 5,
+    "nome": {
+      "pt": "Ilhas Mortas",
+      "en": "Dead Islands"
+    },
+    "notas": [
+      {
+        "livro": 5,
+        "pt": "Ilhas ao largo da costa, com fama ruim entre marinheiros.",
+        "en": "Islands off the coast with a bad name among sailors."
+      }
+    ]
+  },
+  {
+    "id": "desertos-congelados",
+    "x": 0.586,
+    "y": 0.235,
+    "tipo": "regiao",
+    "livro": 5,
+    "nome": {
+      "pt": "Desertos Congelados",
+      "en": "Frozen Wastes"
+    },
+    "notas": [
+      {
+        "livro": 5,
+        "pt": "Gelo e vento no noroeste, onde pouca coisa teima em viver.",
+        "en": "Ice and wind in the northwest, where little insists on living."
+      }
+    ]
+  },
+  {
+    "id": "reino-bruxas",
+    "x": 0.27,
+    "y": 0.37,
+    "tipo": "regiao",
+    "livro": 5,
+    "nome": {
+      "pt": "Reino das Bruxas",
+      "en": "Witch Kingdom"
+    },
+    "notas": [
+      {
+        "livro": 5,
+        "pt": "Terras do oeste de que se fala em voz baixa.",
+        "en": "Western lands spoken of in low voices."
+      }
+    ]
+  },
+  {
+    "id": "desertos-oeste",
+    "x": 0.42,
+    "y": 0.31,
+    "tipo": "regiao",
+    "livro": 5,
+    "nome": {
+      "pt": "Desertos do Oeste",
+      "en": "Western Wastes"
+    },
+    "notas": [
+      {
+        "livro": 5,
+        "pt": "Ermos no oeste, longe de tudo e de todos.",
+        "en": "Wastelands in the west, far from everything and everyone."
+      }
     ]
   }
 ]

@@ -10,5 +10,6 @@ export const ICONS: Record<PlaceType, string> = {
   montanha: wrap('<path d="M3 20l6-11 4 6 3-4 5 9z"/>'),
   regiao: wrap('<path d="M12 3l7 9-7 9-7-9z"/>'),
   porto: wrap('<circle cx="12" cy="5" r="2"/><path d="M12 7v14M6 13a6 6 0 0 0 12 0M8 10h8"/>'),
+  saida: wrap('<path d="M4 12h14M13 6l6 6-6 6"/>'),
   mina: wrap('<path d="M5 19L15 9M9 5c4-2 8 0 10 4M15 9l-3-3"/>'),
 }

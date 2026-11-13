@@ -21,6 +21,7 @@ const en: typeof pt = {
     regiao: 'Region',
     porto: 'Harbour',
     mina: 'Mines',
+    saida: 'Overseas',
   },
   footer: 'Fan project, non-profit, not affiliated with the author or the publisher.',
   interpretive: 'Fan-made interpretive map: positions and names are a personal reading.',
