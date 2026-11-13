@@ -76,6 +76,15 @@
   padding: 0;
 }
 
+.pin-label.label-hidden {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+.pin-label {
+  transition: opacity 0.2s ease;
+}
+
 .pin-label::before {
   display: none;
 }

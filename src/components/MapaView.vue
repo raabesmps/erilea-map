@@ -18,8 +18,36 @@ let raf = 0
 const toLL = (x: number, y: number) => L.latLng((1 - y) * MAP_H, x * MAP_W)
 const allRoutes = rotasData as Route[]
 
+// Lower number = label wins when two labels collide.
+const PRIORITY: Record<string, number> = { cidade: 0, fortaleza: 1, porto: 2, mina: 3, floresta: 4, montanha: 5, saida: 6, regiao: -1, mar: 8 }
+let markers: { m: L.Marker; id: string; tipo: string; livro: number }[] = []
+
+const hit = (a: DOMRect, b: DOMRect, pad = 3) =>
+  a.left < b.right + pad && a.right > b.left - pad && a.top < b.bottom + pad && a.bottom > b.top - pad
+
+/** Hide labels that would overlap a stronger label or any other pin. */
+function declutter() {
+  requestAnimationFrame(() => {
+    const entries = markers.map((e) => ({ ...e, label: e.m.getTooltip()?.getElement() as HTMLElement | undefined, pin: e.m.getElement() as HTMLElement | undefined }))
+    const pinRects = entries.map((e) => e.pin?.getBoundingClientRect())
+    const order = entries
+      .map((e, i) => ({ e, i }))
+      .sort((a, b) => Number(b.e.id === store.placeId) - Number(a.e.id === store.placeId) || PRIORITY[a.e.tipo]! - PRIORITY[b.e.tipo]! || a.e.livro - b.e.livro)
+    const taken: DOMRect[] = []
+    for (const { e, i } of order) {
+      if (!e.label) continue
+      e.label.classList.remove('label-hidden')
+      const r = e.label.getBoundingClientRect()
+      const clash = taken.some((t) => hit(r, t)) || pinRects.some((p, j) => j !== i && p && hit(r, p, 1))
+      if (clash && e.id !== store.placeId) e.label.classList.add('label-hidden')
+      else taken.push(r)
+    }
+  })
+}
+
 function drawPins() {
   pinLayer.clearLayers()
+  markers = []
   for (const p of store.places) {
     const classes = ['pin', p.id === store.placeId ? 'active' : '', p.livro === store.book && p.livro > 0 ? 'new' : '']
     const icon = L.divIcon({
@@ -33,11 +61,13 @@ function drawPins() {
       permanent: true,
       direction: 'bottom',
       offset: [0, 16],
-      className: `pin-label${p.tipo === 'regiao' || p.tipo === 'saida' ? ' region-label' : ''}`,
+      className: `pin-label${['regiao', 'saida', 'mar'].includes(p.tipo) ? ' region-label' : ''}`,
     })
     m.on('click', () => store.openPlace(p.id === store.placeId ? null : p.id))
     pinLayer.addLayer(m)
+    markers.push({ m, id: p.id, tipo: p.tipo, livro: p.livro })
   }
+  declutter()
 }
 
 function drawRoutes() {
@@ -137,6 +167,7 @@ onMounted(() => {
   else map.fitBounds(bounds, { paddingTopLeft: [0, 96], paddingBottomRight: [0, 28], animate: false })
   map.setMinZoom(map.getZoom() - 0.5)
   map.on('click', () => store.openPlace(null))
+  map.on('zoomend', declutter)
   drawPins()
   drawRoutes()
 })
