@@ -11,6 +11,8 @@ export default {
   routes: 'Rotas',
   play: 'Animar viagem',
   language: 'Idioma',
+  style: { label: 'Estilo do mapa', color: 'Colorido', classic: 'Sépia' },
+  painting: 'Pintando o mapa…',
   types: {
     cidade: 'Cidade',
     fortaleza: 'Fortaleza',

@@ -11,6 +11,13 @@ export function useUrlState(router: Router) {
   const lang = q.lang === 'en' || q.lang === 'pt' ? q.lang : (i18n.global.locale.value as 'pt' | 'en')
   store.setLang(lang)
   store.setBook(q.livro ?? 1)
+  let savedStyle: string | null = null
+  try {
+    savedStyle = localStorage.getItem('erilea-style')
+  } catch {
+    /* storage unavailable */
+  }
+  store.setStyle((q.estilo ?? savedStyle) === 'classico' ? 'classico' : 'colorido')
   if (typeof q.lugar === 'string') store.openPlace(q.lugar)
 
   watch(
@@ -23,10 +30,11 @@ export function useUrlState(router: Router) {
   )
 
   watch(
-    () => [store.book, store.lang, store.placeId] as const,
-    ([book, lang, lugar]) => {
+    () => [store.book, store.lang, store.placeId, store.style] as const,
+    ([book, lang, lugar, estilo]) => {
       const query: Record<string, string> = { livro: String(book), lang }
       if (lugar) query.lugar = lugar
+      if (estilo === 'classico') query.estilo = estilo
       router.replace({ query })
     },
     { immediate: true },

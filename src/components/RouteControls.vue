@@ -56,7 +56,7 @@ button:hover {
 @media (max-width: 720px) {
   .routes {
     bottom: auto;
-    top: 150px;
+    top: 212px;
     left: var(--gutter);
   }
 }

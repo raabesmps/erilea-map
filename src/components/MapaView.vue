@@ -1,19 +1,29 @@
 <script setup lang="ts">
 import L from 'leaflet'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAppStore } from '../stores/app'
-import { MAP_H, MAP_W, renderTerrain } from '../lib/terreno'
-import { ICONS } from '../lib/icons'
+import { MAP_H, MAP_W, renderTerrain, type MapStyle } from '../lib/terreno'
+import { iconFor } from '../lib/icons'
 import rotasData from '../data/rotas.json'
 import type { Route } from '../types'
 
 const store = useAppStore()
+const { t } = useI18n()
 const el = ref<HTMLDivElement>()
 let map: L.Map
 const pinLayer = L.layerGroup()
 const routeLayer = L.layerGroup()
 const animLayer = L.layerGroup()
 let raf = 0
+let overlay: L.ImageOverlay
+const painting = ref(false)
+const cache: Partial<Record<MapStyle, string>> = {}
+
+function overlayUrl(style: MapStyle) {
+  cache[style] ??= renderTerrain(MAP_W, MAP_H, 11, style).toDataURL('image/jpeg', 0.92)
+  return cache[style]!
+}
 
 const toLL = (x: number, y: number) => L.latLng((1 - y) * MAP_H, x * MAP_W)
 const allRoutes = rotasData as Route[]
@@ -49,10 +59,10 @@ function drawPins() {
   pinLayer.clearLayers()
   markers = []
   for (const p of store.places) {
-    const classes = ['pin', p.id === store.placeId ? 'active' : '', p.livro === store.book && p.livro > 0 ? 'new' : '']
+    const classes = ['pin', p.icone ? p.icone : '', p.id === store.placeId ? 'active' : '', p.livro === store.book && p.livro > 0 ? 'new' : '']
     const icon = L.divIcon({
       className: '',
-      html: `<div class="${classes.join(' ')}">${ICONS[p.tipo]}</div>`,
+      html: `<div class="${classes.join(' ')}">${iconFor(p)}</div>`,
       iconSize: [34, 34],
       iconAnchor: [17, 17],
     })
@@ -152,8 +162,7 @@ onMounted(() => {
   })
   const bounds = L.latLngBounds([0, 0], [MAP_H, MAP_W])
   map.setMaxBounds(bounds.pad(0.25))
-  const canvas = renderTerrain()
-  L.imageOverlay(canvas.toDataURL('image/jpeg', 0.92), bounds).addTo(map)
+  overlay = L.imageOverlay(overlayUrl(store.style), bounds).addTo(map)
   L.control.zoom({ position: 'bottomright' }).addTo(map)
   pinLayer.addTo(map)
   routeLayer.addTo(map)
@@ -180,6 +189,17 @@ onBeforeUnmount(() => {
 watch(() => [store.places, store.lang, store.placeId, store.book], drawPins)
 watch(() => store.routes, drawRoutes)
 watch(
+  () => store.style,
+  (st) => {
+    painting.value = true
+    // let the "painting" badge render before the (synchronous) repaint
+    setTimeout(() => {
+      overlay.setUrl(overlayUrl(st))
+      painting.value = false
+    }, 40)
+  },
+)
+watch(
   () => store.flyRequest,
   (req) => {
     const p = store.places.find((x) => x.id === req?.id)
@@ -193,12 +213,26 @@ watch(
 </script>
 
 <template>
-  <div ref="el" class="map" role="application" aria-label="Mapa de Erilea" />
+  <div class="wrap">
+    <div ref="el" class="map" role="application" aria-label="Mapa de Erilea" />
+    <div v-if="painting" class="surface painting" role="status">{{ t('painting') }}</div>
+  </div>
 </template>
 
 <style scoped>
+.wrap,
 .map {
   position: absolute;
   inset: 0;
+}
+.painting {
+  position: absolute;
+  z-index: 1300;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 12px 22px;
+  font-family: var(--font-title);
+  letter-spacing: 0.08em;
 }
 </style>

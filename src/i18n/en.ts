@@ -13,6 +13,8 @@ const en: typeof pt = {
   routes: 'Routes',
   play: 'Animate journey',
   language: 'Language',
+  style: { label: 'Map style', color: 'Color', classic: 'Sepia' },
+  painting: 'Painting the map…',
   types: {
     cidade: 'City',
     fortaleza: 'Fortress',

@@ -4,6 +4,7 @@ import livros from '../data/livros.json'
 import lugares from '../data/lugares.json'
 import rotas from '../data/rotas.json'
 import type { Book, Lang, Place, Route } from '../types'
+import type { MapStyle } from '../lib/terreno'
 import { clampBook, visiblePlaces, visibleRoutes } from '../lib/spoiler'
 
 export const BOOKS = livros as Book[]
@@ -15,6 +16,7 @@ export const useAppStore = defineStore('app', () => {
   const book = ref(1)
   const lang = ref<Lang>('pt')
   const placeId = ref<string | null>(null)
+  const style = ref<MapStyle>('colorido')
   /** Monotonic tokens so the map can react to one-shot requests. */
   const flyRequest = ref<{ id: string; n: number } | null>(null)
   const playRequest = ref<{ id: string; n: number } | null>(null)
@@ -38,6 +40,15 @@ export const useAppStore = defineStore('app', () => {
     }
   }
 
+  function setStyle(value: MapStyle) {
+    style.value = value
+    try {
+      localStorage.setItem('erilea-style', value)
+    } catch {
+      /* storage unavailable */
+    }
+  }
+
   function openPlace(id: string | null) {
     placeId.value = id && places.value.some((p) => p.id === id) ? id : null
   }
@@ -51,5 +62,5 @@ export const useAppStore = defineStore('app', () => {
     playRequest.value = { id, n: (playRequest.value?.n ?? 0) + 1 }
   }
 
-  return { book, lang, placeId, places, routes, currentPlace, flyRequest, playRequest, setBook, setLang, openPlace, flyTo, play }
+  return { book, lang, placeId, style, setStyle, places, routes, currentPlace, flyRequest, playRequest, setBook, setLang, openPlace, flyTo, play }
 })

@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import MapaView from '../components/MapaView.vue'
 import BookSelector from '../components/BookSelector.vue'
 import LangToggle from '../components/LangToggle.vue'
+import StyleToggle from '../components/StyleToggle.vue'
 import SearchBox from '../components/SearchBox.vue'
 import PlaceCard from '../components/PlaceCard.vue'
 import RouteControls from '../components/RouteControls.vue'
@@ -25,6 +26,7 @@ useUrlState(useRouter())
       <BookSelector class="center" />
       <div class="tools">
         <SearchBox />
+        <StyleToggle />
         <LangToggle />
       </div>
     </header>
@@ -86,9 +88,10 @@ h1 {
   .tools {
     grid-column: 1 / -1;
     grid-row: 3;
+    flex-wrap: wrap;
   }
   .tools > :first-child {
-    flex: 1;
+    flex: 1 1 100%;
     width: auto;
   }
   .brand p {
