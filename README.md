@@ -30,6 +30,7 @@
 - **Busca** que voa até o lugar (só acha o que já está liberado). *Fly-to search, spoiler-aware.*
 - **Link que lembra tudo** — `?livro=3&lang=pt&lugar=rifthold`. *Shareable state in the URL.*
 - **Pergaminho gerado por código**: costa em tinta, hachuras de mar, cadeias de montanhas, bosques, moldura e bússola, sem nenhum texto na imagem (por isso o mesmo mapa serve aos dois idiomas).
+- **Rótulos inteligentes**: nomes que colidem somem na visão geral e voltam ao dar zoom.
 - Responsivo, com foco por teclado e `prefers-reduced-motion`.
 
 <p align="center">
@@ -91,14 +92,16 @@ Tipos: `cidade`, `fortaleza`, `floresta`, `montanha`, `regiao`, `porto`, `mina`.
 
 ## 🗺️ Roadmap
 
-- [x] **Fase 1 — O mapa vivo**: pergaminho, 27 lugares, seletor de livro, PT/EN
+- [x] **Fase 1 — O mapa vivo**: pergaminho, 42 lugares, seletor de livro, PT/EN
 - [x] **Fase 2 — Rotas e viagem**: 3 rotas com animação
 - [x] **Fase 3 — Mimos (parte)**: busca e link compartilhável
 - [ ] Anotações pessoais (guardadas no navegador) e som ambiente opcional
 - [ ] Trocar o terreno procedural pela arte desenhada à mão (tiles)
 - [x] Posições e nomes conferidos com o mapa impresso da edição brasileira (Forte da Fenda, Canino Branco…)
 - [ ] Conferir **em qual livro cada lugar aparece** (a trava de spoiler é palpite) e as leituras incertas do mapa
-- [ ] Preencher a metade oeste (Terras Desérticas, Areias Cantantes…) e o continente do sul (Antica), que não está no mapa impresso
+- [x] Metade oeste completa (Reino das Bruxas, Terra Desértica, Deserto Vermelho, Golfo de Oro…) e rótulos dos mares
+- [ ] Continente do sul (Antica): não está no mapa impresso, precisa de outra fonte
+- [ ] Lugares da metade oeste com leitura duvidosa na digitalização (Oásis, Areias Negras, Cordilheiras Vulcânicas, Yurpa…) ficaram de fora
 - [ ] Modo escuro "à luz de vela"
 
 ## ⚠️ Aviso sobre o conteúdo
