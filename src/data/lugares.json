@@ -56,7 +56,8 @@
         "pt": "Voltar aqui nunca é só voltar.",
         "en": "Coming back here is never just coming back."
       }
-    ]
+    ],
+    "icone": "vidro"
   },
   {
     "id": "endovier",
@@ -133,7 +134,8 @@
         "pt": "Um nome que ainda pesa para muita gente.",
         "en": "A name that still weighs on many people."
       }
-    ]
+    ],
+    "icone": "muralha"
   },
   {
     "id": "eyllwe",
@@ -568,14 +570,14 @@
     ]
   },
   {
-    "id": "penhasco-adustos",
+    "id": "penhasco-abutres",
     "x": 0.374,
     "y": 0.401,
     "tipo": "cidade",
     "livro": 6,
     "nome": {
-      "pt": "Penhasco dos Adustos",
-      "en": "Adust Cliff"
+      "pt": "Penhasco dos Abutres",
+      "en": "Vulture Cliff"
     },
     "notas": [
       {

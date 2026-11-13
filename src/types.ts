@@ -19,8 +19,12 @@ export interface Note {
   en: string
 }
 
+export type IconKey = PlaceType | 'vidro' | 'muralha'
+
 export interface Place {
   id: string
+  /** Optional special icon that overrides the one implied by `tipo`. */
+  icone?: 'vidro' | 'muralha'
   /** Normalised position over the map image (0..1). */
   x: number
   y: number

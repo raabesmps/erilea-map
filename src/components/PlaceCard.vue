@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { BOOKS, useAppStore } from '../stores/app'
 import { visibleNotes } from '../lib/spoiler'
-import { ICONS } from '../lib/icons'
+import { iconFor } from '../lib/icons'
 
 const store = useAppStore()
 const { t } = useI18n()
@@ -16,7 +16,7 @@ const notes = computed(() => (place.value ? visibleNotes(place.value, store.book
     <aside v-if="place" :key="place.id" class="surface card" role="dialog" :aria-label="place.nome[store.lang]">
       <button class="close" :aria-label="t('close')" @click="store.openPlace(null)">×</button>
       <div class="kind">
-        <span class="ico" v-html="ICONS[place.tipo]" />
+        <span class="ico" v-html="iconFor(place)" />
         {{ t(`types.${place.tipo}`) }}
       </div>
       <h2>{{ place.nome[store.lang] }}</h2>
