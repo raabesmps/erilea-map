@@ -1,5 +1,5 @@
-import { createNoise2D } from 'simplex-noise'
-import { paintColorido } from './colorir'
+﻿import { paintColorido } from './colorir'
+import { criarGeografia, mulberry32, MAP_H, MAP_W, type GeoId } from './geografia'
 
 export type MapStyle = 'colorido' | 'classico'
 
@@ -9,48 +9,7 @@ export type MapStyle = 'colorido' | 'classico'
  * Replace it later by the hand-drawn art without touching the data.
  */
 
-export const MAP_W = 2400
-export const MAP_H = 1680
-
-interface Blob {
-  cx: number
-  cy: number
-  rx: number
-  ry: number
-  w: number
-}
-
-// Own interpretation of the geography. Place *positions* follow the book's map;
-// the coastline itself is generated, not traced (normalised coordinates).
-const BLOBS: Blob[] = [
-  { cx: 0.70, cy: 0.14, rx: 0.17, ry: 0.13, w: 1 }, // Terrasen
-  { cx: 0.74, cy: 0.40, rx: 0.16, ry: 0.20, w: 1 }, // Adarlan
-  { cx: 0.65, cy: 0.60, rx: 0.22, ry: 0.16, w: 1 }, // centre / Melisande
-  { cx: 0.82, cy: 0.58, rx: 0.09, ry: 0.07, w: 1 }, // east bulge
-  { cx: 0.76, cy: 0.78, rx: 0.18, ry: 0.19, w: 1 }, // Eyllwe
-  { cx: 0.66, cy: 0.86, rx: 0.10, ry: 0.10, w: 1 }, // south-west marsh
-  { cx: 0.47, cy: 0.45, rx: 0.10, ry: 0.18, w: 1 }, // land bridge
-  { cx: 0.30, cy: 0.20, rx: 0.20, ry: 0.20, w: 1 }, // north-west land
-  { cx: 0.40, cy: 0.36, rx: 0.12, ry: 0.10, w: 1 }, // its south-east shoulder
-  { cx: 0.36, cy: 0.55, rx: 0.09, ry: 0.08, w: 1 }, // link to the Bogdano forest
-  { cx: 0.25, cy: 0.72, rx: 0.17, ry: 0.24, w: 1 }, // desert peninsula
-  { cx: 0.20, cy: 0.90, rx: 0.05, ry: 0.05, w: 0.95 }, // its southern tail
-  { cx: 0.15, cy: 0.50, rx: 0.02, ry: 0.04, w: 0.9 }, // western islets
-  { cx: 0.19, cy: 0.45, rx: 0.02, ry: 0.025, w: 0.9 },
-  { cx: 0.93, cy: 0.64, rx: 0.015, ry: 0.025, w: 0.9 }, // Dead Islands
-  { cx: 0.95, cy: 0.74, rx: 0.012, ry: 0.02, w: 0.9 },
-  { cx: 0.5, cy: 0.93, rx: 0.04, ry: 0.03, w: 0.9 },
-]
-
-function mulberry32(seed: number) {
-  let a = seed
-  return () => {
-    a = (a + 0x6d2b79f5) | 0
-    let t = Math.imul(a ^ (a >>> 15), 1 | a)
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
-}
+export { MAP_W, MAP_H } from './geografia'
 
 const INK: [number, number, number] = [62, 44, 28]
 const LAND: [number, number, number] = [238, 222, 182]
@@ -58,40 +17,12 @@ const LAND_HI: [number, number, number] = [214, 190, 142]
 const SEA: [number, number, number] = [205, 192, 154]
 const SEA_DEEP: [number, number, number] = [188, 172, 132]
 
-export function renderTerrain(W = MAP_W, H = MAP_H, seed = 11, style: MapStyle = 'colorido'): HTMLCanvasElement {
+export function renderTerrain(W = MAP_W, H = MAP_H, seed = 11, style: MapStyle = 'colorido', geo: GeoId = 'v1'): HTMLCanvasElement {
   const rnd = mulberry32(seed)
-  const n1 = createNoise2D(rnd)
-  const n2 = createNoise2D(rnd)
-  const fbm = (x: number, y: number) => {
-    let a = 1
-    let f = 1
-    let s = 0
-    let t = 0
-    for (let i = 0; i < 5; i++) {
-      s += a * n1(x * f, y * f)
-      t += a
-      a *= 0.5
-      f *= 2
-    }
-    return s / t
-  }
+  const { elevacao, ruido: n2 } = criarGeografia(rnd, W, H, geo)
 
   const elev = new Float32Array(W * H)
-  for (let y = 0; y < H; y++) {
-    for (let x = 0; x < W; x++) {
-      const nx = x / W
-      const ny = y / H
-      const wx = nx + 0.035 * n2(nx * 3.1, ny * 3.1)
-      const wy = ny + 0.035 * n2(nx * 3.1 + 9, ny * 3.1 + 9)
-      let m = -1
-      for (const b of BLOBS) {
-        const dx = (wx - b.cx) / b.rx
-        const dy = (wy - b.cy) / b.ry
-        m = Math.max(m, (1 - (dx * dx + dy * dy)) * b.w)
-      }
-      elev[y * W + x] = m + 0.32 * fbm(x / W * 7, y / W * 7) - 0.04
-    }
-  }
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) elev[y * W + x] = elevacao(x, y)
 
   const canvas = document.createElement('canvas')
   canvas.width = W
