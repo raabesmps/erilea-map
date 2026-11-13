@@ -164,12 +164,14 @@ function drawGlyphs(
       const y = gy + (rnd() - 0.5) * step * 0.9
       const e = at(Math.round(x), Math.round(y))
       if (e < 0.08) continue
-      const ridge = Math.abs(noise(x / W * 9 + 30, y / W * 9 + 30))
-      if (e > 0.42 && ridge < 0.5 && rnd() < 0.55) {
+      // low-frequency noise groups the glyphs into mountain ranges and woods
+      const range = noise((x / W) * 5 + 30, (y / W) * 5 + 30)
+      const wood = noise((x / W) * 6 + 60, (y / W) * 6)
+      if (range > 0.28 && e > 0.18 && rnd() < 0.65) {
         mountain(ctx, x, y, 12 + rnd() * 10)
-      } else if (e > 0.1 && e < 0.4 && noise(x / W * 6 + 60, y / W * 6) > 0.18 && rnd() < 0.5) {
+      } else if (wood > 0.12 && e > 0.1 && rnd() < 0.55) {
         tree(ctx, x, y, 6 + rnd() * 4)
-      } else if (e > 0.08 && e < 0.2 && rnd() < 0.04) {
+      } else if (rnd() < 0.025) {
         hill(ctx, x, y, 10 + rnd() * 6)
       }
     }

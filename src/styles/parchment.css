@@ -107,3 +107,9 @@
     animation: none;
   }
 }
+
+@media (max-width: 720px) {
+  .leaflet-control-zoom {
+    display: none;
+  }
+}

@@ -128,8 +128,13 @@ onMounted(() => {
   pinLayer.addTo(map)
   routeLayer.addTo(map)
   animLayer.addTo(map)
-  map.fitBounds(bounds)
-  map.setMinZoom(map.getZoom() - 0.5)
+  // portrait screens: cover the height instead of letting the dark background show
+  const size = map.getSize()
+  const portrait = size.x / size.y < MAP_W / MAP_H
+  const fit = map.getBoundsZoom(bounds, false)
+  const zoom = portrait ? (fit + map.getBoundsZoom(bounds, true)) / 2 : fit
+  map.setView(bounds.getCenter(), zoom, { animate: false })
+  map.setMinZoom(zoom - 0.5)
   map.on('click', () => store.openPlace(null))
   drawPins()
   drawRoutes()
