@@ -29,12 +29,15 @@
 - **Rotas animadas** de viagem sobre o mapa. *Animated journey routes.*
 - **Busca** que voa até o lugar (só acha o que já está liberado). *Fly-to search, spoiler-aware.*
 - **Link que lembra tudo** — `?livro=3&lang=pt&lugar=rifthold`. *Shareable state in the URL.*
-- **Pergaminho gerado por código**: costa em tinta, hachuras de mar, cadeias de montanhas, bosques, moldura e bússola, sem nenhum texto na imagem (por isso o mesmo mapa serve aos dois idiomas).
+- **Mapa colorido seguindo um guia de arte**: biomas por região (gelo, pinhal, deserto ocre e vermelho, selva, campos, savana, pântano), mares em três azuis, rios, montanhas com neve só no frio e árvores vistas de cima. A paleta vem de `src/data/biomas.json`, então ajustar uma região é editar dados.
+- **Botão Colorido / Sépia** para quem prefere o pergaminho clássico (guardado no navegador e na URL, `estilo=classico`).
+- **Pergaminho gerado por código**, sem nenhum texto na imagem (por isso o mesmo mapa serve aos dois idiomas).
 - **Rótulos inteligentes**: nomes que colidem somem na visão geral e voltam ao dar zoom.
 - Responsivo, com foco por teclado e `prefers-reduced-motion`.
 
 <p align="center">
-  <img src="docs/desktop-book1-en.png" alt="Book 1, English" width="560">
+  <img src="docs/desktop-book7-sepia.png" alt="Sepia style" width="400">
+  <img src="docs/desktop-book1-en.png" alt="Book 1, English" width="400">
   <img src="docs/mobile-pt.png" alt="Mobile, Portuguese" width="170">
 </p>
 
@@ -47,7 +50,7 @@
 | Idiomas | **vue-i18n** | PT/EN em tempo real |
 | URL | **vue-router** | estado compartilhável via query |
 | Mapa | **Leaflet** com `L.CRS.Simple` | mapa de imagem, não de mundo real |
-| Arte | Canvas 2D + **simplex-noise** | terra procedural original |
+| Arte | Canvas 2D + **simplex-noise** | terra, biomas e rios procedurais originais |
 | Testes | **Vitest** | a regra de spoiler é a que não pode errar |
 | Deploy | **Netlify** (estático) | `netlify.toml` incluso |
 
@@ -100,6 +103,8 @@ Tipos: `cidade`, `fortaleza`, `floresta`, `montanha`, `regiao`, `porto`, `mina`.
 - [x] Posições e nomes conferidos com o mapa impresso da edição brasileira (Forte da Fenda, Canino Branco…)
 - [ ] Conferir **em qual livro cada lugar aparece** (a trava de spoiler é palpite) e as leituras incertas do mapa
 - [x] Metade oeste completa (Reino das Bruxas, Terra Desértica, Deserto Vermelho, Golfo de Oro…) e rótulos dos mares
+- [x] Colorização por biomas, rios e botão Colorido/Sépia (guia de arte)
+- [ ] Lagos e mais rios, conforme as descrições do livro
 - [ ] Continente do sul (Antica): não está no mapa impresso, precisa de outra fonte
 - [ ] Lugares da metade oeste com leitura duvidosa na digitalização (Oásis, Areias Negras, Cordilheiras Vulcânicas, Yurpa…) ficaram de fora
 - [ ] Modo escuro "à luz de vela"
