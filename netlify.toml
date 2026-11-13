@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# history-mode routing: every path serves the app, query keeps the state
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
