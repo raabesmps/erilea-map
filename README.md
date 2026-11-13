@@ -91,18 +91,19 @@ Tipos: `cidade`, `fortaleza`, `floresta`, `montanha`, `regiao`, `porto`, `mina`.
 
 ## 🗺️ Roadmap
 
-- [x] **Fase 1 — O mapa vivo**: pergaminho, 15 lugares de exemplo, seletor de livro, PT/EN
-- [x] **Fase 2 — Rotas e viagem**: 3 rotas por livro com animação
+- [x] **Fase 1 — O mapa vivo**: pergaminho, 27 lugares, seletor de livro, PT/EN
+- [x] **Fase 2 — Rotas e viagem**: 3 rotas com animação
 - [x] **Fase 3 — Mimos (parte)**: busca e link compartilhável
 - [ ] Anotações pessoais (guardadas no navegador) e som ambiente opcional
 - [ ] Trocar o terreno procedural pela arte desenhada à mão (tiles)
-- [ ] Revisar nomes (edição brasileira) e posições com os livros na mão
-- [ ] Continente do sul como segundo mapa
+- [x] Posições e nomes conferidos com o mapa impresso da edição brasileira (Forte da Fenda, Canino Branco…)
+- [ ] Conferir **em qual livro cada lugar aparece** (a trava de spoiler é palpite) e as leituras incertas do mapa
+- [ ] Preencher a metade oeste (Terras Desérticas, Areias Cantantes…) e o continente do sul (Antica), que não está no mapa impresso
 - [ ] Modo escuro "à luz de vela"
 
 ## ⚠️ Aviso sobre o conteúdo
 
-Nomes e posições são uma **interpretação de fã** e ainda não foram revisados contra os livros; a ordem do seletor segue a de publicação. Cuidado com spoilers escondidos em frases curtas: a nota do livro 1 não pode antecipar o livro 5.
+As **posições** seguem o mapa impresso da edição brasileira e os **nomes** são os dessa edição (ex.: Rifthold = *Forte da Fenda*). A costa, porém, é gerada por código, não decalcada. O livro em que cada lugar aparece ainda é uma estimativa; a ordem do seletor segue a de publicação. Wendlyn não existe no mapa: só há uma seta "Para Wendlyn" no leste. Cuidado com spoilers escondidos em frases curtas: a nota do livro 1 não pode antecipar o livro 5.
 
 ## 📄 Licença
 
