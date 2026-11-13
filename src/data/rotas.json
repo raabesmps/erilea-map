@@ -1,0 +1,17 @@
+[
+  {
+    "id": "endovier-rifthold", "livro": 1,
+    "nome": { "pt": "De Endovier a Rifthold", "en": "Endovier to Rifthold" },
+    "pontos": [[0.49, 0.60], [0.50, 0.55], [0.54, 0.51], [0.57, 0.47]]
+  },
+  {
+    "id": "rifthold-wendlyn", "livro": 3,
+    "nome": { "pt": "Rifthold a Wendlyn (pelo mar)", "en": "Rifthold to Wendlyn (by sea)" },
+    "pontos": [[0.57, 0.47], [0.52, 0.62], [0.44, 0.76], [0.40, 0.86], [0.28, 0.80], [0.18, 0.66], [0.11, 0.44]]
+  },
+  {
+    "id": "anielle-orynth", "livro": 5,
+    "nome": { "pt": "De Anielle a Orynth", "en": "Anielle to Orynth" },
+    "pontos": [[0.65, 0.27], [0.62, 0.23], [0.60, 0.20], [0.57, 0.18]]
+  }
+]
