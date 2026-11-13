@@ -10,6 +10,7 @@ export type PlaceType =
   | 'porto'
   | 'mina'
   | 'saida'
+  | 'mar'
 
 export interface Note {
   /** First book in which this note is safe to show. */

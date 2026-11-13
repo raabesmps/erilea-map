@@ -19,8 +19,8 @@
   },
   {
     "id": "deserto-vermelho",
-    "x": 0.245,
-    "y": 0.755,
+    "x": 0.277,
+    "y": 0.771,
     "tipo": "regiao",
     "livro": 0,
     "nome": {
@@ -461,8 +461,8 @@
   },
   {
     "id": "reino-bruxas",
-    "x": 0.27,
-    "y": 0.37,
+    "x": 0.268,
+    "y": 0.312,
     "tipo": "regiao",
     "livro": 5,
     "nome": {
@@ -479,8 +479,8 @@
   },
   {
     "id": "desertos-oeste",
-    "x": 0.42,
-    "y": 0.31,
+    "x": 0.386,
+    "y": 0.32,
     "tipo": "regiao",
     "livro": 5,
     "nome": {
@@ -492,6 +492,276 @@
         "livro": 5,
         "pt": "Ermos no oeste, longe de tudo e de todos.",
         "en": "Wastelands in the west, far from everything and everyone."
+      }
+    ]
+  },
+  {
+    "id": "amaroth",
+    "x": 0.227,
+    "y": 0.056,
+    "tipo": "cidade",
+    "livro": 7,
+    "nome": {
+      "pt": "Amaroth",
+      "en": "Amaroth"
+    },
+    "notas": [
+      {
+        "livro": 7,
+        "pt": "Um ponto no extremo noroeste, quase fora do mundo.",
+        "en": "A speck in the far northwest, almost off the edge of the world."
+      }
+    ]
+  },
+  {
+    "id": "desertos-congelados-oeste",
+    "x": 0.286,
+    "y": 0.071,
+    "tipo": "regiao",
+    "livro": 5,
+    "nome": {
+      "pt": "Desertos Congelados",
+      "en": "Frozen Wastes"
+    },
+    "notas": [
+      {
+        "livro": 5,
+        "pt": "A mesma terra de gelo, vista do lado oeste.",
+        "en": "The same land of ice, seen from the west side."
+      }
+    ]
+  },
+  {
+    "id": "ruinas-morla",
+    "x": 0.281,
+    "y": 0.114,
+    "tipo": "fortaleza",
+    "livro": 6,
+    "nome": {
+      "pt": "As Ruínas de Morla",
+      "en": "The Ruins of Morla"
+    },
+    "notas": [
+      {
+        "livro": 6,
+        "pt": "Pedra caída em um lugar que já teve nome e dono.",
+        "en": "Fallen stone in a place that once had a name and an owner."
+      }
+    ]
+  },
+  {
+    "id": "selva-morla",
+    "x": 0.318,
+    "y": 0.167,
+    "tipo": "floresta",
+    "livro": 6,
+    "nome": {
+      "pt": "Selva de Morla",
+      "en": "Morla Jungle"
+    },
+    "notas": [
+      {
+        "livro": 6,
+        "pt": "Mata fechada e escura, que cresce sobre as ruínas.",
+        "en": "A dense, dark wood growing over the ruins."
+      }
+    ]
+  },
+  {
+    "id": "penhasco-adustos",
+    "x": 0.374,
+    "y": 0.401,
+    "tipo": "cidade",
+    "livro": 6,
+    "nome": {
+      "pt": "Penhasco dos Adustos",
+      "en": "Adust Cliff"
+    },
+    "notas": [
+      {
+        "livro": 6,
+        "pt": "Posto no limite do deserto, onde o chão acaba de repente.",
+        "en": "An outpost on the edge of the wastes, where the ground simply ends."
+      }
+    ]
+  },
+  {
+    "id": "selva-bogdano",
+    "x": 0.422,
+    "y": 0.555,
+    "tipo": "floresta",
+    "livro": 6,
+    "nome": {
+      "pt": "Selva Bogdano",
+      "en": "Bogdano Forest"
+    },
+    "notas": [
+      {
+        "livro": 6,
+        "pt": "Mata densa no meio do caminho entre o leste e o oeste.",
+        "en": "A dense forest midway between east and west."
+      }
+    ]
+  },
+  {
+    "id": "terra-desertica",
+    "x": 0.268,
+    "y": 0.66,
+    "tipo": "regiao",
+    "livro": 0,
+    "nome": {
+      "pt": "A Terra Desértica",
+      "en": "The Desert Land"
+    },
+    "notas": [
+      {
+        "livro": 0,
+        "pt": "Terra seca ao sudoeste, enorme e pouco hospitaleira.",
+        "en": "A vast, dry land in the southwest, not made for visitors."
+      }
+    ]
+  },
+  {
+    "id": "areias-cantantes",
+    "x": 0.263,
+    "y": 0.727,
+    "tipo": "regiao",
+    "livro": 1,
+    "nome": {
+      "pt": "As Areias Cantantes",
+      "en": "The Singing Sands"
+    },
+    "notas": [
+      {
+        "livro": 1,
+        "pt": "Dunas que, dizem, cantam quando o vento acerta o tom.",
+        "en": "Dunes that are said to sing when the wind finds the right note."
+      }
+    ]
+  },
+  {
+    "id": "assassinos-silenciosos",
+    "x": 0.33,
+    "y": 0.789,
+    "tipo": "fortaleza",
+    "livro": 0,
+    "nome": {
+      "pt": "Assassinos Silenciosos",
+      "en": "Silent Assassins"
+    },
+    "notas": [
+      {
+        "livro": 0,
+        "pt": "Um refúgio no deserto onde se aprende a não fazer barulho.",
+        "en": "A hideout in the desert where one learns to make no sound."
+      }
+    ]
+  },
+  {
+    "id": "xandria",
+    "x": 0.363,
+    "y": 0.824,
+    "tipo": "cidade",
+    "livro": 0,
+    "nome": {
+      "pt": "Xandria",
+      "en": "Xandria"
+    },
+    "notas": [
+      {
+        "livro": 0,
+        "pt": "Cidade do deserto, na borda do golfo.",
+        "en": "A desert city on the edge of the gulf."
+      }
+    ]
+  },
+  {
+    "id": "dunas-negras",
+    "x": 0.268,
+    "y": 0.845,
+    "tipo": "regiao",
+    "livro": 1,
+    "nome": {
+      "pt": "As Dunas Negras",
+      "en": "The Black Dunes"
+    },
+    "notas": [
+      {
+        "livro": 1,
+        "pt": "Dunas escuras ao sul do Deserto Vermelho.",
+        "en": "Dark dunes south of the Red Desert."
+      }
+    ]
+  },
+  {
+    "id": "noll",
+    "x": 0.175,
+    "y": 0.838,
+    "tipo": "cidade",
+    "livro": 1,
+    "nome": {
+      "pt": "Noll",
+      "en": "Noll"
+    },
+    "notas": [
+      {
+        "livro": 1,
+        "pt": "Um povoado miúdo no oeste do deserto.",
+        "en": "A tiny settlement in the western desert."
+      }
+    ]
+  },
+  {
+    "id": "golfo-oro",
+    "x": 0.43,
+    "y": 0.746,
+    "tipo": "mar",
+    "livro": 0,
+    "nome": {
+      "pt": "Golfo de Oro",
+      "en": "Gulf of Oro"
+    },
+    "notas": [
+      {
+        "livro": 0,
+        "pt": "Água calma entre o deserto e o centro do continente.",
+        "en": "Calm water between the desert and the heart of the continent."
+      }
+    ]
+  },
+  {
+    "id": "grande-oceano",
+    "x": 0.925,
+    "y": 0.31,
+    "tipo": "mar",
+    "livro": 1,
+    "nome": {
+      "pt": "Grande Oceano",
+      "en": "Great Ocean"
+    },
+    "notas": [
+      {
+        "livro": 1,
+        "pt": "O mar largo a leste. Do outro lado, Wendlyn.",
+        "en": "The wide sea to the east. On the far side, Wendlyn."
+      }
+    ]
+  },
+  {
+    "id": "mar-norte",
+    "x": 0.88,
+    "y": 0.06,
+    "tipo": "mar",
+    "livro": 2,
+    "nome": {
+      "pt": "Mar do Norte",
+      "en": "Northern Sea"
+    },
+    "notas": [
+      {
+        "livro": 2,
+        "pt": "Água fria batendo na costa de Terrasen.",
+        "en": "Cold water against Terrasen's coast."
       }
     ]
   }

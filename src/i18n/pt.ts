@@ -20,6 +20,7 @@ export default {
     porto: 'Porto',
     mina: 'Minas',
     saida: 'Além-mar',
+    mar: 'Mar',
   },
   footer: 'Projeto de fã, sem fins lucrativos, sem vínculo com a autora ou a editora.',
   interpretive: 'Mapa interpretativo feito por fã: posições e nomes são uma leitura pessoal.',
