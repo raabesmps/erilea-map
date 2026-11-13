@@ -1,0 +1,109 @@
+/* ---------- shared parchment surface ---------- */
+.surface {
+  background:
+    radial-gradient(circle at 20% 10%, rgba(255, 250, 230, 0.55), transparent 55%),
+    linear-gradient(180deg, var(--paper-light), var(--paper));
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow), inset 0 0 0 3px rgba(184, 137, 47, 0.25);
+}
+
+/* ---------- leaflet overrides ---------- */
+.leaflet-container {
+  background: #1d130a;
+  font-family: var(--font-body);
+  outline: none;
+}
+
+.leaflet-image-layer {
+  filter: saturate(1.02) contrast(1.02);
+}
+
+/* ---------- pins ---------- */
+.pin {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--paper-light);
+  border: 2px solid var(--ink);
+  box-shadow: 0 2px 6px rgba(30, 18, 6, 0.55);
+  color: var(--ink);
+  transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
+  animation: pin-in 0.45s cubic-bezier(0.2, 1.2, 0.4, 1) both;
+}
+
+.pin svg {
+  width: 20px;
+  height: 20px;
+}
+
+.pin:hover,
+.pin.active {
+  transform: scale(1.18);
+  background: var(--wax);
+  color: var(--paper-light);
+  border-color: var(--night);
+}
+
+.pin.new {
+  box-shadow: 0 0 0 4px rgba(184, 137, 47, 0.55), 0 2px 6px rgba(30, 18, 6, 0.55);
+}
+
+@keyframes pin-in {
+  from {
+    opacity: 0;
+    transform: scale(0.2) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.pin-label {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--ink);
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  text-shadow: 0 0 3px var(--paper-light), 0 0 3px var(--paper-light), 0 0 6px var(--paper-light);
+  padding: 0;
+}
+
+.pin-label::before {
+  display: none;
+}
+
+.region-label {
+  font-size: 15px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-style: italic;
+  opacity: 0.85;
+}
+
+/* ---------- animated travel marker ---------- */
+.traveler {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--wax);
+  border: 2px solid var(--paper-light);
+  box-shadow: 0 0 0 3px rgba(122, 46, 43, 0.35), 0 0 14px rgba(122, 46, 43, 0.7);
+}
+
+.route-line {
+  filter: drop-shadow(0 1px 1px rgba(30, 18, 6, 0.6));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pin {
+    animation: none;
+  }
+}
