@@ -27,7 +27,13 @@ const BLOBS: Blob[] = [
   { cx: 0.76, cy: 0.78, rx: 0.18, ry: 0.19, w: 1 }, // Eyllwe
   { cx: 0.66, cy: 0.86, rx: 0.10, ry: 0.10, w: 1 }, // south-west marsh
   { cx: 0.47, cy: 0.45, rx: 0.10, ry: 0.18, w: 1 }, // land bridge
-  { cx: 0.24, cy: 0.52, rx: 0.23, ry: 0.45, w: 1 }, // western lands
+  { cx: 0.30, cy: 0.20, rx: 0.20, ry: 0.20, w: 1 }, // north-west land
+  { cx: 0.40, cy: 0.36, rx: 0.12, ry: 0.10, w: 1 }, // its south-east shoulder
+  { cx: 0.36, cy: 0.55, rx: 0.09, ry: 0.08, w: 1 }, // link to the Bogdano forest
+  { cx: 0.25, cy: 0.72, rx: 0.17, ry: 0.24, w: 1 }, // desert peninsula
+  { cx: 0.20, cy: 0.90, rx: 0.05, ry: 0.05, w: 0.95 }, // its southern tail
+  { cx: 0.15, cy: 0.50, rx: 0.02, ry: 0.04, w: 0.9 }, // western islets
+  { cx: 0.19, cy: 0.45, rx: 0.02, ry: 0.025, w: 0.9 },
   { cx: 0.93, cy: 0.64, rx: 0.015, ry: 0.025, w: 0.9 }, // Dead Islands
   { cx: 0.95, cy: 0.74, rx: 0.012, ry: 0.02, w: 0.9 },
   { cx: 0.5, cy: 0.93, rx: 0.04, ry: 0.03, w: 0.9 },
