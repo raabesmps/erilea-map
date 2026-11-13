@@ -1,4 +1,7 @@
 import { createNoise2D } from 'simplex-noise'
+import { paintColorido } from './colorir'
+
+export type MapStyle = 'colorido' | 'classico'
 
 /**
  * Procedural parchment map of an invented continent. Pure canvas, no text:
@@ -55,7 +58,7 @@ const LAND_HI: [number, number, number] = [214, 190, 142]
 const SEA: [number, number, number] = [205, 192, 154]
 const SEA_DEEP: [number, number, number] = [188, 172, 132]
 
-export function renderTerrain(W = MAP_W, H = MAP_H, seed = 11): HTMLCanvasElement {
+export function renderTerrain(W = MAP_W, H = MAP_H, seed = 11, style: MapStyle = 'colorido'): HTMLCanvasElement {
   const rnd = mulberry32(seed)
   const n1 = createNoise2D(rnd)
   const n2 = createNoise2D(rnd)
@@ -94,9 +97,17 @@ export function renderTerrain(W = MAP_W, H = MAP_H, seed = 11): HTMLCanvasElemen
   canvas.width = W
   canvas.height = H
   const ctx = canvas.getContext('2d')!
+  const at = (x: number, y: number) => elev[Math.min(H - 1, Math.max(0, y)) * W + Math.min(W - 1, Math.max(0, x))]!
+
+  if (style === 'colorido') {
+    paintColorido({ ctx, W, H, elev, at, rnd, noise: n2 })
+    drawFrame(ctx, W, H)
+    drawCompass(ctx, W * 0.95, H * 0.905, 54, true)
+    return canvas
+  }
+
   const img = ctx.createImageData(W, H)
   const d = img.data
-  const at = (x: number, y: number) => elev[Math.min(H - 1, Math.max(0, y)) * W + Math.min(W - 1, Math.max(0, x))]!
 
   for (let y = 0; y < H; y++) {
     for (let x = 0; x < W; x++) {
@@ -154,7 +165,7 @@ export function renderTerrain(W = MAP_W, H = MAP_H, seed = 11): HTMLCanvasElemen
   drawGlyphs(ctx, W, H, at, rnd, n2)
   drawAging(ctx, W, H)
   drawFrame(ctx, W, H)
-  drawCompass(ctx, W * 0.95, H * 0.905, 54)
+  drawCompass(ctx, W * 0.95, H * 0.905, 54, false)
   return canvas
 }
 
@@ -278,7 +289,7 @@ function drawFrame(ctx: CanvasRenderingContext2D, W: number, H: number) {
   ctx.strokeRect(3, 3, W - 6, H - 6)
 }
 
-function drawCompass(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number) {
+function drawCompass(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number, gold: boolean) {
   ctx.save()
   ctx.translate(cx, cy)
   ctx.strokeStyle = 'rgb(62,44,28)'
@@ -303,10 +314,10 @@ function drawCompass(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: n
     ctx.stroke()
     ctx.restore()
   }
-  star(r * 0.8, r * 0.13, Math.PI / 4, 'rgba(236,220,178,0.9)')
-  star(r * 0.8, r * 0.13, -Math.PI / 4, 'rgba(236,220,178,0.9)')
-  star(r * 1.25, r * 0.17, 0, 'rgba(236,220,178,0.95)')
-  star(r * 1.25, r * 0.17, Math.PI / 2, 'rgba(236,220,178,0.95)')
+  star(r * 0.8, r * 0.13, Math.PI / 4, gold ? 'rgba(194,165,107,0.95)' : 'rgba(236,220,178,0.9)')
+  star(r * 0.8, r * 0.13, -Math.PI / 4, gold ? 'rgba(194,165,107,0.95)' : 'rgba(236,220,178,0.9)')
+  star(r * 1.25, r * 0.17, 0, gold ? '#C2A56B' : 'rgba(236,220,178,0.95)')
+  star(r * 1.25, r * 0.17, Math.PI / 2, gold ? '#C2A56B' : 'rgba(236,220,178,0.95)')
   // north point in wax red, drawn without lettering
   ctx.beginPath()
   ctx.moveTo(0, -r * 1.25)
