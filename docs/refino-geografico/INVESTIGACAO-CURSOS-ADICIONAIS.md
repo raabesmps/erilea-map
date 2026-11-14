@@ -8,7 +8,7 @@ qualquer um deles de ser desenhado antes da aprovação.
 
 | # | Curso | Decisão |
 |---|---|---|
-| 7 | Rio de Orynth | **Implementado experimentalmente** na branch `hidrografia`. Posição de Orynth e costa aprovada preservadas; segue só os pontos lidos, sem curvas nem afluentes. |
+| 7 | Rio de Orynth | **Aprovado.** Posição de Orynth e costa aprovada preservadas; segue só os pontos lidos, sem curvas nem afluentes. A curva inicial foi conferida: desvio médio 2,0 px e máximo 4,2 px contra a linha lida em grade, dentro da margem de 24 px; nada foi alterado. |
 | 7 | Saída do lago de Perranth | **Desativada.** |
 | 8 | Avery para o sul | **Não implementar.** A ligação com o lago não está confirmada. Se for confirmada, a colisão com Morath será tratada por deslocamento *visual* do marcador, sem alterar coordenadas geográficas, e o curso não será desviado. |
 | 9 | Tronco do Pântano | **Pendente**, junto com os afluentes: confirmar origem, confluência e continuidade. |
