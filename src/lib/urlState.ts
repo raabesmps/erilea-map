@@ -22,6 +22,7 @@ export function useUrlState(router: Router) {
   if (typeof q.lugar === 'string') store.openPlace(q.lugar)
   store.geo = q.geo === '1' ? 'v1' : q.geo === '2' ? 'v2' : GEO_PADRAO
   store.hidro = q.hidro === 'media' ? 'media' : q.hidro === 'nenhuma' ? 'nenhuma' : 'alta'
+  store.terrasen = q.terrasen === 'A' || q.terrasen === 'B' || q.terrasen === 'C' ? q.terrasen : null
 
   watch(
     () => store.lang,
@@ -40,6 +41,7 @@ export function useUrlState(router: Router) {
       if (estilo === 'classico') query.estilo = estilo
       if (store.geo !== GEO_PADRAO) query.geo = store.geo.slice(1)
       if (store.hidro !== 'alta') query.hidro = store.hidro
+      if (store.terrasen) query.terrasen = store.terrasen
       router.replace({ query })
     },
     { immediate: true },

@@ -21,8 +21,9 @@ const painting = ref(false)
 const cache: Record<string, string> = {}
 
 function overlayUrl(style: MapStyle) {
-  const key = `${store.geo}-${style}-${store.hidro}`
-  cache[key] ??= renderTerrain(MAP_W, MAP_H, 11, style, store.geo, store.hidro).toDataURL('image/jpeg', 0.92)
+  const key = `${store.geo}-${style}-${store.hidro}-${store.terrasen ?? 'x'}`
+  const proto = store.terrasen ? { estilo: store.terrasen } : undefined
+  cache[key] ??= renderTerrain(MAP_W, MAP_H, 11, style, store.geo, store.hidro, proto).toDataURL('image/jpeg', 0.92)
   return cache[key]!
 }
 
