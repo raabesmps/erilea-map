@@ -19,7 +19,7 @@ export function useUrlState(router: Router) {
   }
   store.setStyle((q.estilo ?? savedStyle) === 'classico' ? 'classico' : 'colorido')
   if (typeof q.lugar === 'string') store.openPlace(q.lugar)
-  store.geo = q.geo === '2' ? 'v2' : 'v1'
+  store.geo = q.geo === '3' ? 'v3' : q.geo === '2' ? 'v2' : 'v1'
 
   watch(
     () => store.lang,
@@ -36,7 +36,7 @@ export function useUrlState(router: Router) {
       const query: Record<string, string> = { livro: String(book), lang }
       if (lugar) query.lugar = lugar
       if (estilo === 'classico') query.estilo = estilo
-      if (store.geo === 'v2') query.geo = '2'
+      if (store.geo !== 'v1') query.geo = store.geo.slice(1)
       router.replace({ query })
     },
     { immediate: true },

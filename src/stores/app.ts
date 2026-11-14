@@ -18,7 +18,7 @@ export const useAppStore = defineStore('app', () => {
   const lang = ref<Lang>('pt')
   const placeId = ref<string | null>(null)
   const style = ref<MapStyle>('colorido')
-  /** Preview of the candidate coastline (?geo=2). The approved shape stays the default. */
+  /** Preview of a candidate coastline (?geo=2 or ?geo=3). The approved shape stays the default. */
   const geo = ref<GeoId>('v1')
   /** Monotonic tokens so the map can react to one-shot requests. */
   const flyRequest = ref<{ id: string; n: number } | null>(null)
