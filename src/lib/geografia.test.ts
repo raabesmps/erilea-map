@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { COSTA_MAX_PX, criarGeografia, distanciaCosta, encontrarLagos, GEOGRAFIAS, MAP_H, MAP_W, mulberry32, TERRA_MIN_PX, validarLugares } from './geografia'
+import { BLOBS_V3, COSTA_MAX_PX, CORDAS_COSTEIRAS, CORDA_MAX_PX, PONTOS_V3, criarGeografia, distanciaCosta, encontrarIlhotas, encontrarLagos, trechosRetos, GEOGRAFIAS, MAP_H, MAP_W, mulberry32, TERRA_MIN_PX, validarLugares } from './geografia'
 import lugaresJson from '../data/lugares.json'
 import type { Place } from '../types'
 
@@ -86,7 +86,7 @@ describe('geografia v1 (forma aprovada): coerência lugares x costa', () => {
   })
 
   it('as duas formas existem', () => {
-    expect(Object.keys(GEOGRAFIAS)).toEqual(['v1', 'v2'])
+    expect(Object.keys(GEOGRAFIAS)).toEqual(['v1', 'v2', 'v3'])
   })
 })
 
@@ -131,5 +131,94 @@ describe('geografia v2 (candidata): coerência lugares x costa', () => {
 
   it('não há água isolada: lagos não estão modelados, então seriam inventados', () => {
     expect(encontrarLagos(v2.elevacao)).toEqual([])
+  })
+})
+
+describe('geografia v3 (candidata): costa leste orgânica e entrada marítima do norte', () => {
+  const v3 = criarGeografia(mulberry32(11), MAP_W, MAP_H, 'v3')
+  const v2 = criarGeografia(mulberry32(11), MAP_W, MAP_H, 'v2')
+  const LESTE = { x0: 0.72, x1: 0.92, y0: 0.3, y1: 0.66 }
+
+  it('nenhum lugar, ponto de controle (com a entrada do norte) ou corda costeira é violado', () => {
+    expect(validarLugares(lugares, v3.elevacao, MAP_W, MAP_H, PONTOS_V3, CORDAS_COSTEIRAS)).toEqual([])
+  })
+
+  it('a v2 violava as cordas e a cauda do norte: a v3 corrige o que a v2 deixava', () => {
+    const viol = validarLugares(lugares, v2.elevacao, MAP_W, MAP_H, PONTOS_V3, CORDAS_COSTEIRAS)
+    expect(viol.some((v) => v.id.startsWith('corda'))).toBe(true)
+    expect(viol.some((v) => v.id.startsWith('controle'))).toBe(true)
+  })
+
+  it('a costa leste não tem trechos retos de régua (a v2 tinha)', () => {
+    expect(trechosRetos(v3.elevacao, LESTE, MAP_W, MAP_H, 90, 5)).toEqual([])
+    expect(trechosRetos(v2.elevacao, LESTE, MAP_W, MAP_H, 90, 5).length).toBeGreaterThan(0)
+  })
+
+  it('a corda de cada par de lugares costeiros fica a até 75 px da costa', () => {
+    expect(CORDA_MAX_PX).toBe(75)
+    for (const [a, b] of CORDAS_COSTEIRAS) {
+      const pa = lugares.find((l) => l.id === a)!
+      const pb = lugares.find((l) => l.id === b)!
+      for (let t = 0.05; t <= 0.951; t += 0.05) {
+        const d = distanciaCosta(v3.elevacao, (pa.x + (pb.x - pa.x) * t) * MAP_W, (pa.y + (pb.y - pa.y) * t) * MAP_H, 200)
+        expect(d, `${a}->${b} @${t}`).toBeLessThanOrEqual(CORDA_MAX_PX)
+      }
+    }
+  })
+
+  it('Forte da Fenda, Meah e Enseada do Sino continuam na costa e não se moveram', () => {
+    for (const [id, x, y] of [['rifthold', 0.776, 0.47], ['meah', 0.809, 0.317], ['enseada-sino', 0.853, 0.603]] as const) {
+      const p = lugares.find((l) => l.id === id)!
+      expect([p.x, p.y]).toEqual([x, y])
+      expect(v3.elevacao(p.x * MAP_W, p.y * MAP_H), id).toBeGreaterThan(0)
+      expect(distanciaCosta(v3.elevacao, p.x * MAP_W, p.y * MAP_H), id).toBeLessThanOrEqual(COSTA_MAX_PX)
+    }
+  })
+
+  it('a entrada marítima do norte existe e termina onde o impresso a termina (y ≈ 0,13)', () => {
+    const agua = (nx: number, ny: number) => v3.elevacao(nx * MAP_W, ny * MAP_H) <= 0
+    expect(agua(0.5, 0.03)).toBe(true)
+    expect(agua(0.48, 0.07)).toBe(true)
+    expect(agua(0.5, 0.12)).toBe(true)
+    // the old tail: nothing below the printed end
+    for (const ny of [0.17, 0.19, 0.21, 0.23]) expect(agua(0.51, ny), `y=${ny}`).toBe(false)
+  })
+
+  it('a água do sul não voltou: Desertos Congelados e Ruhnn seguem em terra firme', () => {
+    for (const id of ['desertos-congelados', 'ruhnn']) {
+      const p = lugares.find((l) => l.id === id)!
+      expect(distanciaCosta(v3.elevacao, p.x * MAP_W, p.y * MAP_H), id).toBeGreaterThanOrEqual(TERRA_MIN_PX)
+    }
+  })
+
+  it('não há água isolada', () => {
+    expect(encontrarLagos(v3.elevacao)).toEqual([])
+  })
+
+  it('a área de terra fica a 2% da v2', () => {
+    const fracao = (fn: (x: number, y: number) => number) => {
+      let n = 0
+      let t = 0
+      for (let j = 0; j < 56; j++) for (let i = 0; i < 80; i++) { t++; if (fn(((i + 0.5) / 80) * MAP_W, ((j + 0.5) / 56) * MAP_H) > 0) n++ }
+      return n / t
+    }
+    expect(Math.abs(fracao(v3.elevacao) - fracao(v2.elevacao))).toBeLessThan(0.02)
+  })
+
+  it('não há ilhotas de ruído: só as ilhas declaradas por elipses pequenas existem', () => {
+    const declaradas = BLOBS_V3.filter((b) => b.rx < 0.05 && b.ry < 0.05)
+    for (const i of encontrarIlhotas(v3.elevacao)) {
+      const perto = declaradas.some((b) => Math.hypot(i.x - b.cx, i.y - b.cy) < 0.04)
+      expect(perto, `ilhota inesperada em (${i.x.toFixed(3)}, ${i.y.toFixed(3)})`).toBe(true)
+    }
+  })
+
+  it('nenhuma partícula de terra com menos de 12 células (ruído do limiar)', () => {
+    expect(encontrarIlhotas(v3.elevacao).filter((i) => i.celulas < 12)).toEqual([])
+  })
+
+  it('a baía a leste do Forte da Fenda não tem ilhotas', () => {
+    const leste = encontrarIlhotas(v3.elevacao).filter((i) => i.x > 0.7 && i.x < 0.92 && i.y > 0.28 && i.y < 0.64)
+    expect(leste).toEqual([])
   })
 })

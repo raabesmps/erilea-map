@@ -16,10 +16,12 @@ export interface Blob {
   rx: number
   ry: number
   w: number
+  /** Optional rotation in radians, applied in pixel space (radii are then rx*W and ry*H px). */
+  rot?: number
 }
 
-/** 'v1' = approved base shape. 'v2' = candidate refit to the coastal constraints. */
-export type GeoId = 'v1' | 'v2'
+/** 'v1' = approved base shape. 'v2' = coastal-constraint refit. 'v3' = v2 with a smoothed east coast and a trimmed north inlet. */
+export type GeoId = 'v1' | 'v2' | 'v3'
 
 // Own interpretation of the geography. Place *positions* follow the book's map;
 // the coastline itself is generated, not traced (normalised coordinates).
@@ -73,7 +75,50 @@ export const BLOBS_V2: Blob[] = [
   { cx: 0.438, cy: 0.619, rx: 0.028, ry: 0.034, w: 1 },
 ]
 
-export const GEOGRAFIAS: Record<GeoId, Blob[]> = { v1: BLOBS_V1, v2: BLOBS_V2 }
+/**
+ * Candidate v3 (preview with ?geo=3), refitted from v2. The horizontal ellipse top that gave a
+ * ruler-straight shore east of the Forte da Fenda became a diagonal ellipse between the Forte and
+ * the Enseada do Sino (two places), a local roughness (RUGOSIDADE) breaks the geometry, and the
+ * northern sea inlet is trimmed to where the printed map ends it (PONTOS_V3). Fitted by
+ * constraint search against places, control points and coastal chords.
+ */
+export const BLOBS_V3: Blob[] = [
+  { cx: 0.6899, cy: 0.1612, rx: 0.1416, ry: 0.156, w: 1 },
+  { cx: 0.7014, cy: 0.3249, rx: 0.1462, ry: 0.1714, w: 1 },
+  { cx: 0.6548, cy: 0.6349, rx: 0.2139, ry: 0.1735, w: 1 },
+  { cx: 0.8147, cy: 0.5406, rx: 0.0897, ry: 0.026, w: 1, rot: 0.8527 },
+  { cx: 0.709, cy: 0.7572, rx: 0.1258, ry: 0.2067, w: 1 },
+  { cx: 0.6472, cy: 0.8093, rx: 0.0906, ry: 0.1019, w: 1 },
+  { cx: 0.473, cy: 0.4472, rx: 0.1037, ry: 0.1837, w: 1 },
+  { cx: 0.2891, cy: 0.1998, rx: 0.2237, ry: 0.2465, w: 1 },
+  { cx: 0.4121, cy: 0.2899, rx: 0.1141, ry: 0.0998, w: 1 },
+  { cx: 0.359, cy: 0.5203, rx: 0.0906, ry: 0.0935, w: 1 },
+  { cx: 0.2584, cy: 0.7177, rx: 0.2097, ry: 0.1966, w: 1 },
+  { cx: 0.2218, cy: 0.9332, rx: 0.0498, ry: 0.0507, w: 0.95 },
+  { cx: 0.1349, cy: 0.4686, rx: 0.0177, ry: 0.0304, w: 0.9 },
+  { cx: 0.1659, cy: 0.3748, rx: 0.0204, ry: 0.023, w: 0.9 },
+  { cx: 0.9411, cy: 0.6347, rx: 0.0167, ry: 0.0254, w: 0.9 },
+  { cx: 0.9132, cy: 0.7567, rx: 0.012, ry: 0.0192, w: 0.9 },
+  { cx: 0.5069, cy: 0.9458, rx: 0.0351, ry: 0.027, w: 0.9 },
+  { cx: 0.538, cy: 0.264, rx: 0.0607, ry: 0.1216, w: 1 },
+  { cx: 0.5302, cy: 0.2429, rx: 0.0354, ry: 0.0458, w: 1 },
+  { cx: 0.5847, cy: 0.4338, rx: 0.038, ry: 0.0474, w: 1 },
+  { cx: 0.4009, cy: 0.5594, rx: 0.0318, ry: 0.0315, w: 1 },
+  { cx: 0.5123, cy: 0.1516, rx: 0.0257, ry: 0.0404, w: 1 },
+]
+
+export const GEOGRAFIAS: Record<GeoId, Blob[]> = { v1: BLOBS_V1, v2: BLOBS_V2, v3: BLOBS_V3 }
+
+/** Local organic roughness: a gaussian patch that warps the domain and adds relief noise. */
+export interface Rugosidade {
+  cx: number
+  cy: number
+  r: number
+  warp: number
+  rug: number
+}
+
+export const RUGOSIDADE: Record<GeoId, Rugosidade[]> = { v1: [], v2: [], v3: [{ cx: 0.83, cy: 0.47, r: 0.12, warp: 0.019, rug: 0.06 }] }
 
 export function mulberry32(seed: number) {
   let a = seed
@@ -93,6 +138,7 @@ export type Elevacao = (x: number, y: number) => number
  */
 export function criarGeografia(rnd: () => number, W = MAP_W, H = MAP_H, geo: GeoId = 'v1') {
   const blobs = GEOGRAFIAS[geo]
+  const rugs = RUGOSIDADE[geo]
   const n1 = createNoise2D(rnd)
   const n2 = createNoise2D(rnd)
   const fbm = (x: number, y: number) => {
@@ -111,15 +157,36 @@ export function criarGeografia(rnd: () => number, W = MAP_W, H = MAP_H, geo: Geo
   const elevacao: Elevacao = (x, y) => {
     const nx = x / W
     const ny = y / H
-    const wx = nx + 0.035 * n2(nx * 3.1, ny * 3.1)
-    const wy = ny + 0.035 * n2(nx * 3.1 + 9, ny * 3.1 + 9)
+    let wx = nx + 0.035 * n2(nx * 3.1, ny * 3.1)
+    let wy = ny + 0.035 * n2(nx * 3.1 + 9, ny * 3.1 + 9)
+    let extra = 0
+    for (const g of rugs) {
+      const ddx = nx - g.cx
+      const ddy = (ny - g.cy) * 0.7
+      const k = Math.exp(-(ddx * ddx + ddy * ddy) / (g.r * g.r))
+      if (k < 0.01) continue
+      wx += g.warp * k * n2(nx * 18 + 5, ny * 18)
+      wy += g.warp * k * n2(nx * 18 + 11, ny * 18 + 4)
+      extra += g.rug * k * n2(nx * 26 + 2, ny * 26 + 9)
+    }
     let m = -1
     for (const b of blobs) {
-      const dx = (wx - b.cx) / b.rx
-      const dy = (wy - b.cy) / b.ry
+      let dx: number
+      let dy: number
+      if (b.rot) {
+        const px = (wx - b.cx) * W
+        const py = (wy - b.cy) * H
+        const c = Math.cos(b.rot)
+        const sn = Math.sin(b.rot)
+        dx = (px * c + py * sn) / (b.rx * W)
+        dy = (-px * sn + py * c) / (b.ry * H)
+      } else {
+        dx = (wx - b.cx) / b.rx
+        dy = (wy - b.cy) / b.ry
+      }
       m = Math.max(m, (1 - (dx * dx + dy * dy)) * b.w)
     }
-    return m + 0.32 * fbm((x / W) * 7, (y / W) * 7) - 0.04
+    return m + extra + 0.32 * fbm((x / W) * 7, (y / W) * 7) - 0.04
   }
   return { elevacao, ruido: n2 }
 }
@@ -169,6 +236,47 @@ export const PONTOS_DE_CONTROLE = {
   ],
 } as const
 
+export interface PontosControle {
+  readonly terra: readonly (readonly [number, number])[]
+  readonly mar: readonly (readonly [number, number])[]
+}
+
+/**
+ * v3 adds the northern sea inlet as printed (a "U" from the top edge that ends near y=.13)
+ * and land just south of it, so the old tail that v2 left cannot come back.
+ */
+export const PONTOS_V3: PontosControle = {
+  terra: [
+    ...PONTOS_DE_CONTROLE.terra,
+    [0.51, 0.17], // just south of the inlet's end
+    [0.52, 0.2],
+    [0.4, 0.08], // north-west land, west of the inlet
+    [0.6, 0.09], // Terrasen's north-west, east of the inlet
+  ],
+  mar: [
+    ...PONTOS_DE_CONTROLE.mar,
+    [0.5, 0.03],
+    [0.48, 0.07],
+    [0.5, 0.11],
+    [0.5, 0.12],
+  ],
+}
+
+/**
+ * Pairs of consecutive coastal places along the east coast. The shore between two of them
+ * must stay near the straight line (chord) joining them: derived from the places alone.
+ */
+export const CORDAS_COSTEIRAS: readonly (readonly [string, string])[] = [
+  ['suria', 'meah'],
+  ['meah', 'rifthold'],
+  ['rifthold', 'enseada-sino'],
+  ['enseada-sino', 'banjali'],
+]
+/** Max distance (px) from any sampled point of a chord to the nearest shore. */
+// 75px. Measured: the printed shore strays up to ~64px from the Meah-Forte chord; v3 peaks at 72px,
+// v2 at 116px. Sampled every 5% along each chord.
+export const CORDA_MAX_PX = 75
+
 export interface Violacao {
   id: string
   motivo: string
@@ -178,7 +286,14 @@ export interface Violacao {
  * Checks the declared `geo` of every place against the generated terrain:
  * 'mar' is water, 'costa' is land hugging the shore, 'terra' is land inland.
  */
-export function validarLugares(places: Place[], elevacao: Elevacao, W = MAP_W, H = MAP_H, comControle = true): Violacao[] {
+export function validarLugares(
+  places: Place[],
+  elevacao: Elevacao,
+  W = MAP_W,
+  H = MAP_H,
+  controle: boolean | PontosControle = true,
+  cordas: readonly (readonly [string, string])[] = [],
+): Violacao[] {
   const out: Violacao[] = []
   for (const p of places) {
     const x = p.x * W
@@ -196,14 +311,29 @@ export function validarLugares(places: Place[], elevacao: Elevacao, W = MAP_W, H
     if (p.geo === 'costa' && d > COSTA_MAX_PX) out.push({ id: p.id, motivo: `costeiro, mas a ${d}px da costa` })
     if (p.geo === 'terra' && d < TERRA_MIN_PX) out.push({ id: p.id, motivo: `interior, mas a ${d}px da costa` })
   }
-  if (!comControle) return out
-  for (const [nx, ny] of PONTOS_DE_CONTROLE.terra) {
+  for (const [a, b] of cordas) {
+    const pa = places.find((p) => p.id === a)
+    const pb = places.find((p) => p.id === b)
+    if (!pa || !pb) {
+      out.push({ id: `corda(${a},${b})`, motivo: 'lugar da corda não existe' })
+      continue
+    }
+    for (let t = 0.05; t <= 0.951; t += 0.05) {
+      const x = (pa.x + (pb.x - pa.x) * t) * W
+      const y = (pa.y + (pb.y - pa.y) * t) * H
+      const d = distanciaCosta(elevacao, x, y, 200)
+      if (d > CORDA_MAX_PX) out.push({ id: `corda(${a},${b})@${t.toFixed(2)}`, motivo: `a costa passa a ${d}px da reta entre os dois lugares` })
+    }
+  }
+  if (controle === false) return out
+  const pontos: PontosControle = controle === true ? PONTOS_DE_CONTROLE : controle
+  for (const [nx, ny] of pontos.terra) {
     const x = nx * W
     const y = ny * H
     if (elevacao(x, y) <= 0) out.push({ id: `controle-terra(${nx},${ny})`, motivo: 'ponto de terra firme caiu na água' })
     else if (distanciaCosta(elevacao, x, y) < 25) out.push({ id: `controle-terra(${nx},${ny})`, motivo: 'ponto de terra firme colado na costa' })
   }
-  for (const [nx, ny] of PONTOS_DE_CONTROLE.mar) {
+  for (const [nx, ny] of pontos.mar) {
     if (elevacao(nx * W, ny * H) > 0) out.push({ id: `controle-mar(${nx},${ny})`, motivo: 'ponto de mar caiu em terra' })
   }
   return out
@@ -260,4 +390,126 @@ export function encontrarLagos(elevacao: Elevacao, W = MAP_W, H = MAP_H, passo =
     id++
   }
   return lagos
+}
+
+export interface TrechoReto {
+  eixo: 'col' | 'lin'
+  /** Start of the straight window along the scan axis, px. */
+  pos: number
+  /** Largest deviation from the fitted straight line, px. */
+  desvio: number
+}
+
+/**
+ * Finds stretches of shore that are almost perfectly straight (what reads as "geometric").
+ * It follows the first land-to-water transition along columns and along rows inside a
+ * normalised region and fits a line to every `janela`-px window.
+ */
+export function trechosRetos(
+  elevacao: Elevacao,
+  regiao: { x0: number; x1: number; y0: number; y1: number },
+  W = MAP_W,
+  H = MAP_H,
+  janela = 90,
+  tolerancia = 3,
+): TrechoReto[] {
+  const passo = 6
+  const x0 = regiao.x0 * W
+  const x1 = regiao.x1 * W
+  const y0 = regiao.y0 * H
+  const y1 = regiao.y1 * H
+  const colunas: (number | null)[] = []
+  for (let x = x0; x <= x1; x += passo) {
+    let v: number | null = null
+    if (elevacao(x, y0) > 0) {
+      for (let y = y0; y <= y1; y += 3) {
+        if (elevacao(x, y) <= 0) {
+          v = y
+          break
+        }
+      }
+    }
+    colunas.push(v)
+  }
+  const linhas: (number | null)[] = []
+  for (let y = y0; y <= y1; y += passo) {
+    let v: number | null = null
+    if (elevacao(x0, y) > 0) {
+      for (let x = x0; x <= x1; x += 3) {
+        if (elevacao(x, y) <= 0) {
+          v = x
+          break
+        }
+      }
+    }
+    linhas.push(v)
+  }
+  const out: TrechoReto[] = []
+  const n = Math.round(janela / passo)
+  const analisar = (vals: (number | null)[], eixo: 'col' | 'lin', origem: number) => {
+    for (let i = 0; i + n <= vals.length; i++) {
+      const w = vals.slice(i, i + n)
+      if (w.some((v) => v === null)) continue
+      const ys = w as number[]
+      const mx = (n - 1) / 2
+      const my = ys.reduce((a, b) => a + b, 0) / n
+      let sxy = 0
+      let sxx = 0
+      for (let k = 0; k < n; k++) {
+        sxy += (k - mx) * (ys[k]! - my)
+        sxx += (k - mx) ** 2
+      }
+      const b = sxy / sxx
+      const desvio = Math.max(...ys.map((v, k) => Math.abs(v - (my + b * (k - mx)))))
+      if (desvio < tolerancia) out.push({ eixo, pos: origem + i * passo, desvio })
+    }
+  }
+  analisar(colunas, 'col', x0)
+  analisar(linhas, 'lin', y0)
+  return out
+}
+
+export interface Ilhota {
+  x: number
+  y: number
+  celulas: number
+}
+
+/**
+ * Small separate land masses (flood fill over land). Islands that the printed map has are
+ * declared by blobs on purpose; anything else small and isolated is a noise artefact.
+ */
+export function encontrarIlhotas(elevacao: Elevacao, W = MAP_W, H = MAP_H, passo = 6, maxCelulas = 400): Ilhota[] {
+  const gw = Math.ceil(W / passo)
+  const gh = Math.ceil(H / passo)
+  const terra = new Uint8Array(gw * gh)
+  for (let j = 0; j < gh; j++) for (let i = 0; i < gw; i++) terra[j * gw + i] = elevacao(i * passo, j * passo) > 0 ? 1 : 0
+  const visto = new Uint8Array(gw * gh)
+  const out: Ilhota[] = []
+  for (let s = 0; s < gw * gh; s++) {
+    if (!terra[s] || visto[s]) continue
+    const fila = [s]
+    visto[s] = 1
+    let sx = 0
+    let sy = 0
+    for (let q = 0; q < fila.length; q++) {
+      const c = fila[q]!
+      const x = c % gw
+      const y = (c / gw) | 0
+      sx += x
+      sy += y
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+        const nx = x + dx
+        const ny = y + dy
+        if (nx < 0 || ny < 0 || nx >= gw || ny >= gh) continue
+        const k = ny * gw + nx
+        if (terra[k] && !visto[k]) {
+          visto[k] = 1
+          fila.push(k)
+        }
+      }
+    }
+    if (fila.length <= maxCelulas) out.push({ x: ((sx / fila.length) * passo) / W, y: ((sy / fila.length) * passo) / H, celulas: fila.length })
+  }
+  return out
 }
