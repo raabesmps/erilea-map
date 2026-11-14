@@ -21,8 +21,14 @@ export interface Note {
 
 export type IconKey = PlaceType | 'vidro' | 'muralha'
 
+/** Where the place sits relative to the coastline, checked by the geography tests. */
+export type GeoKind = 'terra' | 'costa' | 'mar'
+
 export interface Place {
   id: string
+  geo: GeoKind
+  /** The name was read with low confidence from the printed map: review later. */
+  revisar?: boolean
   /** Optional special icon that overrides the one implied by `tipo`. */
   icone?: 'vidro' | 'muralha'
   /** Normalised position over the map image (0..1). */

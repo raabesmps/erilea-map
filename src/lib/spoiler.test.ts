@@ -1,9 +1,10 @@
-import { describe, expect, it } from 'vitest'
+﻿import { describe, expect, it } from 'vitest'
 import { clampBook, searchPlaces, visibleNotes, visiblePlaces, visibleRoutes } from './spoiler'
 import type { Place, Route } from '../types'
 
 const mk = (id: string, livro: number, notas: Place['notas'] = []): Place => ({
   id,
+  geo: 'terra',
   x: 0.5,
   y: 0.5,
   tipo: 'cidade',

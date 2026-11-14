@@ -18,11 +18,12 @@ const animLayer = L.layerGroup()
 let raf = 0
 let overlay: L.ImageOverlay
 const painting = ref(false)
-const cache: Partial<Record<MapStyle, string>> = {}
+const cache: Record<string, string> = {}
 
 function overlayUrl(style: MapStyle) {
-  cache[style] ??= renderTerrain(MAP_W, MAP_H, 11, style).toDataURL('image/jpeg', 0.92)
-  return cache[style]!
+  const key = `${store.geo}-${style}`
+  cache[key] ??= renderTerrain(MAP_W, MAP_H, 11, style, store.geo).toDataURL('image/jpeg', 0.92)
+  return cache[key]!
 }
 
 const toLL = (x: number, y: number) => L.latLng((1 - y) * MAP_H, x * MAP_W)

@@ -1,6 +1,7 @@
 [
   {
     "id": "skulls-bay",
+    "geo": "mar",
     "x": 0.91,
     "y": 0.685,
     "tipo": "porto",
@@ -19,6 +20,7 @@
   },
   {
     "id": "deserto-vermelho",
+    "geo": "terra",
     "x": 0.277,
     "y": 0.771,
     "tipo": "regiao",
@@ -37,6 +39,7 @@
   },
   {
     "id": "rifthold",
+    "geo": "costa",
     "x": 0.776,
     "y": 0.47,
     "tipo": "cidade",
@@ -61,6 +64,7 @@
   },
   {
     "id": "endovier",
+    "geo": "terra",
     "x": 0.665,
     "y": 0.295,
     "tipo": "mina",
@@ -79,6 +83,7 @@
   },
   {
     "id": "adarlan",
+    "geo": "terra",
     "x": 0.756,
     "y": 0.364,
     "tipo": "regiao",
@@ -97,6 +102,7 @@
   },
   {
     "id": "terrasen",
+    "geo": "terra",
     "x": 0.735,
     "y": 0.075,
     "tipo": "regiao",
@@ -115,6 +121,7 @@
   },
   {
     "id": "orynth",
+    "geo": "terra",
     "x": 0.747,
     "y": 0.157,
     "tipo": "cidade",
@@ -139,6 +146,7 @@
   },
   {
     "id": "eyllwe",
+    "geo": "terra",
     "x": 0.785,
     "y": 0.793,
     "tipo": "regiao",
@@ -157,8 +165,9 @@
   },
   {
     "id": "meah",
-    "x": 0.78,
-    "y": 0.316,
+    "geo": "costa",
+    "x": 0.809,
+    "y": 0.317,
     "tipo": "cidade",
     "livro": 2,
     "nome": {
@@ -175,6 +184,8 @@
   },
   {
     "id": "suria",
+    "geo": "costa",
+    "revisar": true,
     "x": 0.846,
     "y": 0.168,
     "tipo": "cidade",
@@ -193,6 +204,7 @@
   },
   {
     "id": "melisande",
+    "geo": "terra",
     "x": 0.631,
     "y": 0.626,
     "tipo": "regiao",
@@ -211,6 +223,8 @@
   },
   {
     "id": "calaculla",
+    "geo": "terra",
+    "revisar": true,
     "x": 0.747,
     "y": 0.757,
     "tipo": "mina",
@@ -229,6 +243,8 @@
   },
   {
     "id": "oakwald",
+    "geo": "terra",
+    "revisar": true,
     "x": 0.686,
     "y": 0.373,
     "tipo": "floresta",
@@ -247,6 +263,8 @@
   },
   {
     "id": "canino-branco",
+    "geo": "terra",
+    "revisar": true,
     "x": 0.577,
     "y": 0.517,
     "tipo": "montanha",
@@ -265,6 +283,7 @@
   },
   {
     "id": "ruhnn",
+    "geo": "terra",
     "x": 0.6,
     "y": 0.32,
     "tipo": "montanha",
@@ -283,6 +302,7 @@
   },
   {
     "id": "banjali",
+    "geo": "costa",
     "x": 0.814,
     "y": 0.866,
     "tipo": "cidade",
@@ -301,6 +321,7 @@
   },
   {
     "id": "pantano-pedra",
+    "geo": "terra",
     "x": 0.658,
     "y": 0.873,
     "tipo": "regiao",
@@ -319,6 +340,7 @@
   },
   {
     "id": "wendlyn",
+    "geo": "mar",
     "x": 0.952,
     "y": 0.47,
     "tipo": "saida",
@@ -337,6 +359,8 @@
   },
   {
     "id": "perranth",
+    "geo": "terra",
+    "revisar": true,
     "x": 0.713,
     "y": 0.245,
     "tipo": "cidade",
@@ -355,6 +379,8 @@
   },
   {
     "id": "tribo-lobos",
+    "geo": "terra",
+    "revisar": true,
     "x": 0.6,
     "y": 0.115,
     "tipo": "regiao",
@@ -373,6 +399,8 @@
   },
   {
     "id": "enseada-sino",
+    "geo": "costa",
+    "revisar": true,
     "x": 0.853,
     "y": 0.603,
     "tipo": "porto",
@@ -391,6 +419,7 @@
   },
   {
     "id": "anielle",
+    "geo": "terra",
     "x": 0.65,
     "y": 0.473,
     "tipo": "fortaleza",
@@ -409,6 +438,7 @@
   },
   {
     "id": "morath",
+    "geo": "terra",
     "x": 0.688,
     "y": 0.561,
     "tipo": "fortaleza",
@@ -427,6 +457,7 @@
   },
   {
     "id": "ilhas-mortas",
+    "geo": "mar",
     "x": 0.876,
     "y": 0.656,
     "tipo": "regiao",
@@ -445,6 +476,7 @@
   },
   {
     "id": "desertos-congelados",
+    "geo": "terra",
     "x": 0.586,
     "y": 0.235,
     "tipo": "regiao",
@@ -463,6 +495,7 @@
   },
   {
     "id": "reino-bruxas",
+    "geo": "terra",
     "x": 0.268,
     "y": 0.312,
     "tipo": "regiao",
@@ -481,6 +514,7 @@
   },
   {
     "id": "desertos-oeste",
+    "geo": "terra",
     "x": 0.386,
     "y": 0.32,
     "tipo": "regiao",
@@ -499,6 +533,7 @@
   },
   {
     "id": "amaroth",
+    "geo": "terra",
     "x": 0.227,
     "y": 0.056,
     "tipo": "cidade",
@@ -517,6 +552,7 @@
   },
   {
     "id": "desertos-congelados-oeste",
+    "geo": "terra",
     "x": 0.286,
     "y": 0.071,
     "tipo": "regiao",
@@ -535,6 +571,7 @@
   },
   {
     "id": "ruinas-morla",
+    "geo": "terra",
     "x": 0.281,
     "y": 0.114,
     "tipo": "fortaleza",
@@ -553,6 +590,7 @@
   },
   {
     "id": "selva-morla",
+    "geo": "terra",
     "x": 0.318,
     "y": 0.167,
     "tipo": "floresta",
@@ -570,14 +608,16 @@
     ]
   },
   {
-    "id": "penhasco-abutres",
+    "id": "penhasco-adustos",
+    "geo": "costa",
+    "revisar": true,
     "x": 0.374,
     "y": 0.401,
     "tipo": "cidade",
     "livro": 6,
     "nome": {
-      "pt": "Penhasco dos Abutres",
-      "en": "Vulture Cliff"
+      "pt": "Penhasco dos Adustos",
+      "en": "Adust Cliff"
     },
     "notas": [
       {
@@ -589,6 +629,7 @@
   },
   {
     "id": "selva-bogdano",
+    "geo": "terra",
     "x": 0.422,
     "y": 0.555,
     "tipo": "floresta",
@@ -607,6 +648,7 @@
   },
   {
     "id": "terra-desertica",
+    "geo": "terra",
     "x": 0.268,
     "y": 0.66,
     "tipo": "regiao",
@@ -625,6 +667,7 @@
   },
   {
     "id": "areias-cantantes",
+    "geo": "terra",
     "x": 0.263,
     "y": 0.727,
     "tipo": "regiao",
@@ -643,6 +686,8 @@
   },
   {
     "id": "assassinos-silenciosos",
+    "geo": "terra",
+    "revisar": true,
     "x": 0.33,
     "y": 0.789,
     "tipo": "fortaleza",
@@ -661,6 +706,8 @@
   },
   {
     "id": "xandria",
+    "geo": "costa",
+    "revisar": true,
     "x": 0.363,
     "y": 0.824,
     "tipo": "cidade",
@@ -679,6 +726,7 @@
   },
   {
     "id": "dunas-negras",
+    "geo": "terra",
     "x": 0.268,
     "y": 0.845,
     "tipo": "regiao",
@@ -697,6 +745,7 @@
   },
   {
     "id": "noll",
+    "geo": "terra",
     "x": 0.175,
     "y": 0.838,
     "tipo": "cidade",
@@ -715,6 +764,7 @@
   },
   {
     "id": "golfo-oro",
+    "geo": "mar",
     "x": 0.43,
     "y": 0.746,
     "tipo": "mar",
@@ -733,6 +783,7 @@
   },
   {
     "id": "grande-oceano",
+    "geo": "mar",
     "x": 0.925,
     "y": 0.31,
     "tipo": "mar",
@@ -751,6 +802,7 @@
   },
   {
     "id": "mar-norte",
+    "geo": "mar",
     "x": 0.88,
     "y": 0.06,
     "tipo": "mar",
