@@ -21,7 +21,7 @@ export function useUrlState(router: Router) {
   store.setStyle((q.estilo ?? savedStyle) === 'classico' ? 'classico' : 'colorido')
   if (typeof q.lugar === 'string') store.openPlace(q.lugar)
   store.geo = q.geo === '1' ? 'v1' : q.geo === '2' ? 'v2' : GEO_PADRAO
-  store.hidro = q.hidro === 'media' ? 'media' : 'alta'
+  store.hidro = q.hidro === 'media' ? 'media' : q.hidro === 'nenhuma' ? 'nenhuma' : 'alta'
 
   watch(
     () => store.lang,

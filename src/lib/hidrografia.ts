@@ -8,8 +8,8 @@ import { MAP_H, MAP_W } from './geografia'
  */
 
 export type Confianca = 'alta' | 'media' | 'baixa'
-/** Highest confidence tier that is drawn. 'alta' = only the clearest elements. */
-export type NivelHidro = 'alta' | 'media'
+/** Highest confidence tier that is drawn. 'nenhuma' = no hydrography (used to render "before" images). */
+export type NivelHidro = 'nenhuma' | 'alta' | 'media'
 
 export type Foz =
   | { tipo: 'mar' }
@@ -21,9 +21,14 @@ export type Foz =
 export interface LagoDef {
   id: string
   centro: [number, number]
-  /** Semi-axes in px at the 2400 px reference width. */
+  /** Semi-axes in px at the 2400 px reference width (ellipse approximation). */
   semi_px: [number, number]
   rot: number
+  /**
+   * Outline read from the printed map (normalised, clockwise). When present it replaces the ellipse:
+   * the lake is drawn through exactly these vertices, with no invented perturbation.
+   */
+  contorno?: [number, number][]
   confianca: Confianca
   nome: null
   ref?: string
@@ -43,6 +48,13 @@ export interface RioDef {
   substitui?: string
   /** The river is only drawn if this river id is also active. */
   depende_de?: string
+  /** Id of the place the river rises in (a justified origin right under a city icon). */
+  nasce_em?: string
+  /** Implemented as an experiment on a branch; the author still has to approve it. */
+  experimental?: boolean
+  /** Kept in the data but never drawn until the author decides. */
+  pendente?: boolean
+  motivo?: string
 }
 
 export interface Candidato {
@@ -53,6 +65,8 @@ export interface Candidato {
   origem: string
   destino: string
   pontos: [number, number][]
+  /** What the author decided about it. */
+  decisao?: string
 }
 
 export interface Hidrografia {
@@ -65,7 +79,8 @@ export interface Hidrografia {
 export const HIDROGRAFIA = hidrografiaJson as unknown as Hidrografia
 
 const ORDEM: Record<Confianca, number> = { alta: 0, media: 1, baixa: 2 }
-export const permite = (c: Confianca, nivel: NivelHidro) => ORDEM[c] <= ORDEM[nivel]
+const ORDEM_NIVEL: Record<NivelHidro, number> = { nenhuma: -1, alta: 0, media: 1 }
+export const permite = (c: Confianca, nivel: NivelHidro) => ORDEM[c] <= ORDEM_NIVEL[nivel]
 
 export interface HidroAtiva {
   lagos: LagoDef[]
@@ -77,7 +92,7 @@ export interface HidroAtiva {
 /** What is actually drawn at a given tier. Pending lakes and candidates are never active. */
 export function ativos(nivel: NivelHidro, h: Hidrografia = HIDROGRAFIA): HidroAtiva {
   const lagos = h.lagos.filter((l) => !l.pendente && permite(l.confianca, nivel))
-  const doNivel = h.rios.filter((r) => permite(r.confianca, nivel))
+  const doNivel = h.rios.filter((r) => !r.pendente && permite(r.confianca, nivel))
   // a dependency must itself be an active river; candidates never count
   const rios = doNivel.filter((r) => !r.depende_de || doNivel.some((o) => o.id === r.depende_de))
   const substituidos = new Set(rios.flatMap((r) => (r.substitui ? [r.substitui] : [])))
@@ -93,8 +108,30 @@ function hash(id: string): number {
   return h >>> 0
 }
 
-/** Organic closed outline of a lake (pixel coordinates), deterministic per id. */
+/** Closed Catmull-Rom spline through the vertices, sampled about every `step` px. */
+export function splineFechada(p: { x: number; y: number }[], step: number): [number, number][] {
+  const n = p.length
+  const out: [number, number][] = []
+  for (let i = 0; i < n; i++) {
+    const p0 = p[(i - 1 + n) % n]!
+    const p1 = p[i]!
+    const p2 = p[(i + 1) % n]!
+    const p3 = p[(i + 2) % n]!
+    const m = Math.max(2, Math.round(Math.hypot(p2.x - p1.x, p2.y - p1.y) / step))
+    for (let j = 0; j < m; j++) {
+      const t = j / m
+      const t2 = t * t
+      const t3 = t2 * t
+      const f = (a: number, b: number, c: number, d: number) => 0.5 * (2 * b + (-a + c) * t + (2 * a - 5 * b + 4 * c - d) * t2 + (-a + 3 * b - 3 * c + d) * t3)
+      out.push([f(p0.x, p1.x, p2.x, p3.x), f(p0.y, p1.y, p2.y, p3.y)])
+    }
+  }
+  return out
+}
+
+/** Closed outline of a lake (pixel coordinates). The read contour wins; otherwise an organic ellipse. */
 export function lagoPoligono(l: LagoDef, W = MAP_W, H = MAP_H, n = 72): [number, number][] {
+  if (l.contorno && l.contorno.length >= 3) return splineFechada(l.contorno.map(([x, y]) => ({ x: x * W, y: y * H })), 5 * (W / 2400))
   const k = W / 2400
   const [a, b] = [l.semi_px[0] * k, l.semi_px[1] * k]
   const h = hash(l.id)
