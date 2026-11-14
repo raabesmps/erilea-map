@@ -282,4 +282,55 @@ limites** do `L.imageOverlay`; os glifos são gravados do **mesmo código de des
 **Conclusão:** a sincronização é sólida porque o SVG usa os mesmos limites do raster e o Leaflet aplica a mesma transformação aos dois.
 A troca cor ↔ sépia deve usar a **estratégia de pré-carga com `visibility`**, e o SVG de cada modo deve ser gerado do mesmo código do canvas.
 Limites do gravador: não suporta `clip()` (estilo C usa); gradientes e sombras precisariam de suporte explícito.
-Nenhuma dessas mudanças foi levada ao app.
+Nenhuma dessas mudanças foi levada ao app na rodada 2.
+
+---
+
+# Rodada 3 (acabamento + camada vetorial experimental, ainda sem merge)
+
+A direção artística da rodada 2 foi aprovada (A em cor, B no sépia, paleta fria, massas e clareiras, lavagem 0,20, quatro cumeeiras, colinas).
+Esta rodada só faz o acabamento pedido e a versão experimental da camada vetorial. **A aprovação técnica abaixo não substitui a sua aprovação visual.**
+
+## 13. Acabamento
+
+| Item | O que mudou | Medição (rodada 2 → 3) |
+|---|---|---|
+| Maciço de Orynth | `escala` 0,84 e `tamMax` 24 no maciço; envelope das cumeeiras mais redondo; deriva suave de tamanho ao longo da cumeeira; vizinhos em três degraus (alto > médio > pequeno). Geometria das cumeeiras intacta; marcador de Orynth continua a ≥ 30 px de qualquer símbolo | maiores picos a nordeste de Orynth: 25,1 / 24,1 / 21,7 → 21,1 / 19,6 / 17,4 / 15,7 (cada um ≥ 80% do anterior); picos > 24 px no total: 6 → 4 |
+| Florestas densas | contorno de separação (halo) sob cada conífera, escuro em cor e claro no sépia; espaçamento das massas +5% (`rConifBase` 11 → 11,5); ordem de desenho de trás para frente já garantida e agora testada | coníferas 115 → 111 (densidade mantida); pares de copas muito sobrepostas 3 → 3 (limite do teste: 6) |
+| Montanhas B (sépia) | proporção (esbelta/larga, baixa/alta), inclinação do ápice (−0,4 a +0,25 da largura), densidade de hachuras e três composições (dois flancos, um flanco, ombro baixo), tudo derivado de `v` (determinístico) e dentro de limites | 60 amostras → ≥ 40 formas distintas; pico ≤ 1,75 × tam; nenhuma face fora da base |
+
+O estilo A (cor) não foi redesenhado, exceto pelo halo das coníferas.
+
+## 14. Camada vetorial experimental (no app, só com `?terrasen=`)
+
+- Ligada por padrão com `?terrasen=...`; `&vetor=0` mantém os símbolos no raster (para comparar). Sem `?terrasen`, **nada muda** (caminho original, uma só imagem).
+- Arquivos: `src/lib/proto/gravador-svg.ts` (grava o código de desenho do canvas em `<path>`), `camada-vetorial.ts` (um `<g>` por símbolo planejado), e as mudanças de `MapaView.vue`.
+- O raster não desenha os símbolos de Terrasen no modo vetorial (as lavagens e os demais símbolos ficam), então **não há duplicação**.
+- Cada modo tem seu par imagem + SVG, com `L.imageOverlay` e `L.svgOverlay` de **mesmos limites**. Os dois modos ficam decodificados; a troca decodifica e muda `visibility` dos quatro elementos no mesmo quadro.
+- Painéis próprios (z-index 390 imagens, 395 símbolos) ficam abaixo do painel das rotas (400) e dos marcadores (600).
+
+### Medições (Chrome, 1280 × 760, app real)
+
+| Verificação | Resultado |
+|---|---|
+| Alinhamento SVG × imagem: visão geral e 6 níveis de zoom, após pan | desvio **0 px** em todos |
+| Durante a animação de zoom (171 quadros, 3394 → 6788 px de largura) | desvio máx. **0 px**; 0 quadros > 1 px |
+| Troca cor ↔ sépia (147 quadros amostrados em 4 trocas) | 0 quadros incoerentes, 0 quadros sem nada visível |
+| Custo da primeira troca (renderiza o outro modo) | ≈ 2,2 s, atrás do aviso "pintando", como já era; trocas seguintes: só `visibility` |
+| Pan, 153 quadros | raster: média 16,66 ms, p95 17,3 ms; vetor: 16,67 ms, p95 17,4 ms |
+| Tempo até a imagem aparecer | sem Terrasen 2,8–4,2 s; Terrasen raster 2,6–2,7 s; Terrasen vetor 2,6–2,8 s (dentro do ruído) |
+| Tamanho do SVG | 151 símbolos, 2.020 `<path>`, 255 KB por modo |
+| Ordem das camadas | imagem 390 < símbolos 395 < rotas 400 < marcadores 600; `pointer-events: none` no SVG |
+| Duplicação | com o SVG oculto, o raster do modo vetorial não contém símbolos de Terrasen; com o SVG visível, os pixels fora das caixas dos símbolos são idênticos (0 diferenças). Resíduo de 123 px de 478 mil (0,03%) é borda de halo na comparação com o raster que ainda os desenha |
+| Erros no console | nenhum |
+
+Diferenças visuais esperadas: o traço vetorial é nítido (o raster é suavizado em 2,8×) e, no sépia, o SVG fica **acima** da textura de envelhecimento, então os símbolos de Terrasen não recebem o envelhecimento do papel. Se isso incomodar, dá para aplicar um filtro/mistura no SVG.
+
+Limites conhecidos: o gravador não suporta `clip()` (estilo C); a primeira troca de modo ainda renderiza o raster do outro modo de forma síncrona (já era assim). Ver [15 cor](15-r3-cor-raster-x-vetor.png) e [15 sépia](15-r3-sepia-raster-x-vetor.png).
+
+## 15. Comparações da rodada 3
+
+Rodada 2 × rodada 3: [cor, visão geral](13-r3-cor-visao-geral.png) · [sépia, visão geral](13-r3-sepia-visao-geral.png) · [cor, zoom máximo](14-r3-cor-zoom-maximo.png) · [sépia, zoom máximo](14-r3-sepia-zoom-maximo.png).
+Raster × vetor (recorte ×3 no zoom máximo): [cor](15-r3-cor-raster-x-vetor.png) · [sépia](15-r3-sepia-raster-x-vetor.png).
+
+Testes: 135 passam (124 anteriores + 11 de acabamento e vetor) e o build passa. Intocados e verificados: costa (impressão digital 9e05e5c1), hidrografia, lugares, rotas, outros biomas, interface visível.
