@@ -1,6 +1,9 @@
 import lugaresJson from '../../data/lugares.json'
 import type { Place } from '../../types'
-import type { Obstaculos } from '../hidrografia'
+import { distanciaAoCurso, type Obstaculos } from '../hidrografia'
+import arteJson from '../../data/terrasen-arte.json'
+import rotasJson from '../../data/rotas.json'
+import type { Route } from '../../types'
 
 /**
  * PROTOTYPE (branch bioma-terrasen, off by default: ?terrasen=A|B|C).
@@ -12,8 +15,16 @@ import type { Obstaculos } from '../hidrografia'
 export type EstiloTerrasen = 'A' | 'B' | 'C'
 export type ModoDesenho = 'cor' | 'sepia'
 export interface ProtoTerrasen {
+  /** Symbol style used in the colour map. */
   estilo: EstiloTerrasen
+  /** Symbol style used in the sepia map (defaults to `estilo`). */
+  estiloSepia?: EstiloTerrasen
+  ajuste?: Partial<AjusteTerrasen>
 }
+
+/** ?terrasen=AB means style A in colour and style B in sepia (the author's choice). */
+export type VariacaoTerrasen = EstiloTerrasen | 'AB'
+export const protoDe = (v: VariacaoTerrasen): ProtoTerrasen => (v === 'AB' ? { estilo: 'A', estiloSepia: 'B' } : { estilo: v })
 
 export const ZONAS_TERRASEN = (id: string) => id.startsWith('r03-')
 export const ZONA_MONTANHAS = 'r03-montanhas-norte'
@@ -86,47 +97,68 @@ export function criarPeso(
   }
 }
 
+export interface Cumeeira {
+  id: string
+  ref: string
+  pontos: [number, number][]
+  largura: number
+  forca: number
+  neve: boolean
+}
+
+export interface Nucleo {
+  id: string
+  ref: string
+  x: number
+  y: number
+  rx: number
+  ry: number
+  rot: number
+  forca: number
+}
+
+/**
+ * ARTISTIC limits (not geography): where ridges and forest cores are drawn. They live in
+ * terrasen-arte.json, read from the printed map, and can change without touching the approved
+ * coast, rivers, lakes, places or routes.
+ */
+export const ARTE = arteJson as unknown as { cumeeiras: Cumeeira[]; nucleos: Nucleo[]; lavagem: { clareira: number; massa: number } }
+
 /** Tunables of the planner (the probe sweeps them; the defaults are the proposal). */
 export interface AjusteTerrasen {
-  coreA: number
-  coreB: number
-  clearA: number
-  clearB: number
-  ridgeA: number
-  ridgeB: number
-  mtBase: number
-  limiarMontanha: number
-  limiarColina: number
-  pColina: number
-  rConifBase: number
-  rConifVar: number
   tamConifBase: number
   tamConifVar: number
-  stragglers: number
+  rConifBase: number
+  rConifVar: number
   pExp: number
-  rMontBase: number
-  rMontK: number
+  lavagemClareira: number
+  lavagemMassa: number
+  /** Clearance (px) from lakes and rivers, added to the glyph half-size. */
+  margemAgua: number
+  /** Clearance (px) from the journey routes. */
+  margemRota: number
+  /** Clearance (px) around place icons (labels get their own rectangle). */
+  folgaIcone: number
+  /** Mean spacing (px) between mountains along a ridge. */
+  passoCume: number
+  bosquesProb: number
+  clareiraMin: number
 }
 
 export const AJUSTE_PADRAO: AjusteTerrasen = {
-  coreA: 0.1,
-  coreB: 0.6,
-  clearA: 0.28,
-  clearB: 0.46,
-  ridgeA: 0.38,
-  ridgeB: 0.74,
-  mtBase: 0.3,
-  limiarMontanha: 0.3,
-  limiarColina: 0.3,
-  pColina: 0.08,
-  rConifBase: 10.5,
-  rConifVar: 22,
   tamConifBase: 6.5,
   tamConifVar: 5.5,
-  stragglers: 0.05,
-  pExp: 0.8,
-  rMontBase: 9,
-  rMontK: 0.38,
+  rConifBase: 11,
+  rConifVar: 21,
+  pExp: 0.85,
+  lavagemClareira: ARTE.lavagem.clareira,
+  lavagemMassa: ARTE.lavagem.massa,
+  margemAgua: 14,
+  margemRota: 13,
+  folgaIcone: 30,
+  passoCume: 21,
+  bosquesProb: 0.38,
+  clareiraMin: 62,
 }
 
 export interface GlifoT {
@@ -137,11 +169,21 @@ export interface GlifoT {
   neve: boolean
   rot: number
   v: number
+  /** Where the planner put it, for diagnostics. */
+  origem: 'nucleo' | 'bosque' | 'cume' | 'sope'
+}
+
+export interface Clareira {
+  x: number
+  y: number
+  rx: number
+  ry: number
+  rot: number
 }
 
 export interface PlanoTerrasen {
   glifos: GlifoT[]
-  clareiras: { x: number; y: number; r: number }[]
+  clareiras: Clareira[]
   massas: { x: number; y: number; r: number; a: number }[]
 }
 
@@ -153,46 +195,50 @@ export interface EntradaPlano {
   pesoT: (x: number, y: number) => number
   pesoMont: (x: number, y: number) => number
   obst?: Obstaculos
-  /** Extra clearance (px) kept around place icons. */
-  folgaIcone?: number
-  ajuste?: AjusteTerrasen
+  ajuste?: Partial<AjusteTerrasen>
 }
 
 const PINS = (lugaresJson as Place[]).map((p) => ({ x: p.x, y: p.y }))
+const ROTAS = (rotasJson as Route[]).map((r) => r.pontos)
 
-/** Density fields: forest cores, clearings and ridge lines, all from low-frequency noise. */
-export function campos(x: number, y: number, noise: (x: number, y: number) => number, a: AjusteTerrasen = AJUSTE_PADRAO) {
-  const f1 = noise(x / 330 + 11, y / 330)
-  const f2 = noise(x / 150 + 3, y / 150 + 9)
-  const core = sm(a.coreA, a.coreB, 0.65 * f1 + 0.35 * f2 + 0.1)
-  const clear = sm(a.clearA, a.clearB, noise(x / 100 + 7, y / 100 + 21))
-  const R = 1 - Math.abs(noise(x / 230 + 40, y / 230 + 5))
-  return { core, clear, R }
+/** Forest-core density (0..1): intentional cores with a warped, fractal fringe. */
+export function nucleoValor(x: number, y: number, noise: (x: number, y: number) => number, W: number, H: number): number {
+  const wx = x + 34 * noise(x / 90 + 3, y / 90)
+  const wy = y + 34 * noise(x / 90 + 9, y / 90 + 4)
+  let base = 0
+  for (const n of ARTE.nucleos) {
+    const dx = wx - n.x * W
+    const dy = wy - n.y * H
+    const c = Math.cos(n.rot)
+    const sn = Math.sin(n.rot)
+    const u = (dx * c + dy * sn) / (n.rx * W)
+    const v = (-dx * sn + dy * c) / (n.ry * H)
+    base = Math.max(base, n.forca * Math.exp(-(u * u + v * v) * 1.1))
+  }
+  const borda = 0.2 * noise(x / 44 + 1, y / 44 + 2) + 0.1 * noise(x / 19 + 5, y / 19 + 1)
+  return sm(0.28, 0.72, base + borda)
+}
+
+function dentroClareira(x: number, y: number, c: Clareira): number {
+  const dx = x - c.x
+  const dy = y - c.y
+  const cs = Math.cos(c.rot)
+  const sn = Math.sin(c.rot)
+  const u = (dx * cs + dy * sn) / c.rx
+  const v = (-dx * sn + dy * cs) / c.ry
+  return 1 - sm(0.75, 1.15, Math.sqrt(u * u + v * v))
 }
 
 /**
- * Plans forest masses, clearings and ridge chains with blue-noise (variable-radius Poisson) sampling.
- * Only inside Terrasen (feathered weight), only on land, never over water, place icons or lakes.
+ * Plans forest masses, intentional clearings, ridge-aligned mountains and small groves.
+ * Positions of ridges and cores come from terrasen-arte.json (artistic, from the printed map).
+ * Only inside Terrasen, on land, and clear of water, routes, place icons and their labels.
  */
 export function planejarTerrasen(e: EntradaPlano): PlanoTerrasen {
-  const { W, H, at, noise, pesoT, pesoMont, obst } = e
-  const A = e.ajuste ?? AJUSTE_PADRAO
-  const folga = e.folgaIcone ?? 26
+  const { W, H, at, noise, pesoT, obst } = e
+  const A = { ...AJUSTE_PADRAO, ...e.ajuste }
   const pinsPx = PINS.map((p) => ({ x: p.x * W, y: p.y * H }))
-  type Cand = { x: number; y: number; pri: number }
-  const cand: Cand[] = []
-  const x0 = 0.5 * W
-  const x1 = 0.92 * W
-  const y1 = 0.32 * H
-  for (let gy = 0; gy < y1; gy += 8) {
-    for (let gx = x0; gx < x1; gx += 8) {
-      const x = gx + (h2(gx, gy, 1) - 0.5) * 8
-      const y = gy + (h2(gx, gy, 2) - 0.5) * 8
-      cand.push({ x, y, pri: h2(gx, gy, 3) })
-    }
-  }
-  cand.sort((a, b) => b.pri - a.pri)
-
+  const rotasPx = ROTAS.map((r) => r.map(([x, y]) => ({ x: x * W, y: y * H })))
   const CELL = 40
   const grade = new Map<number, { x: number; y: number; r: number }[]>()
   const chave = (cx: number, cy: number) => cx * 4096 + cy
@@ -208,62 +254,159 @@ export function planejarTerrasen(e: EntradaPlano): PlanoTerrasen {
     }
     return true
   }
-
   const glifos: GlifoT[] = []
+  /** Common acceptance: land, Terrasen, icons+labels, water, routes, spacing. */
+  const tentar = (g: GlifoT, r: number, margem: number): boolean => {
+    const { x, y } = g
+    if (x < 8 || y < 8 || x > W - 8) return false
+    if (at(Math.round(x), Math.round(y)) < 0.08) return false
+    if (pesoT(x, y) < 0.12) return false
+    for (const p of pinsPx) {
+      if (Math.hypot(p.x - x, p.y - y) < A.folgaIcone) return false
+      // the label sits right under the icon
+      if (Math.abs(x - p.x) < 52 && y > p.y + 6 && y < p.y + 38) return false
+    }
+    if (obst?.perto(x, y, margem + g.tam * 0.8)) return false
+    for (const rota of rotasPx) if (distanciaAoCurso(x, y, rota) < A.margemRota + g.tam * 0.3) return false
+    if (!livre(x, y, r)) return false
+    const k = chave((x / CELL) | 0, (y / CELL) | 0)
+    const lista = grade.get(k) ?? []
+    lista.push({ x, y, r })
+    grade.set(k, lista)
+    glifos.push(g)
+    return true
+  }
+
+  // ---- 1. mountains along the ridges read from the printed map ----
+  for (const [ri, cume] of ARTE.cumeeiras.entries()) {
+    const pts = cume.pontos.map(([x, y]) => ({ x: x * W, y: y * H }))
+    const seg: number[] = []
+    let L = 0
+    for (let i = 1; i < pts.length; i++) {
+      seg.push(Math.hypot(pts[i]!.x - pts[i - 1]!.x, pts[i]!.y - pts[i - 1]!.y))
+      L += seg[i - 1]!
+    }
+    const larg = cume.largura * W
+    const em = (t: number) => {
+      let d = t
+      for (let i = 0; i < seg.length; i++) {
+        if (d <= seg[i]! || i === seg.length - 1) {
+          const f = Math.min(1, d / seg[i]!)
+          const a = pts[i]!
+          const b = pts[i + 1]!
+          const nx = -(b.y - a.y) / seg[i]!
+          const ny = (b.x - a.x) / seg[i]!
+          return { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f, nx, ny }
+        }
+        d -= seg[i]!
+      }
+      return { x: pts[0]!.x, y: pts[0]!.y, nx: 0, ny: 1 }
+    }
+    for (let t = 0, k = 0; t < L; k++) {
+      const p = em(t)
+      const env = Math.pow(Math.sin(Math.PI * Math.min(1, Math.max(0.04, t / L))), 0.55) * cume.forca
+      // irregular spacing and a lateral wander, so no two rows line up
+      const off = ((h2(ri, k, 11) - 0.5) * 2 * larg * 1.0 + noise(t / 70 + ri * 9, 3) * larg * 0.4) * (0.75 + 0.25 * env)
+      const x = p.x + p.nx * off
+      const y = p.y + p.ny * off
+      if (h2(ri, k, 12) < 0.3 * (1 - env)) {
+        t += A.passoCume * (0.5 + h2(ri, k, 13))
+        continue
+      }
+      const tam = (9 + 20 * env) * (0.8 + 0.4 * h2(ri, k, 14))
+      const neve = cume.neve && tam > 22 && env > 0.7
+      tentar({ x, y, tipo: 'montanha', tam, neve, rot: 0, v: h2(ri, k, 15), origem: 'cume' }, 8 + tam * 0.45, A.margemAgua - 4)
+      // a smaller, staggered neighbour, and a foothill on the skirt (never with snow)
+      if (cume.largura > 0.014 && h2(ri, k, 16) < 0.55) {
+        const lado = h2(ri, k, 17) < 0.5 ? -1 : 1
+        const t2 = tam * (0.5 + 0.2 * h2(ri, k, 18))
+        tentar({ x: x + p.nx * lado * larg * (0.55 + 0.5 * h2(ri, k, 26)), y: y + p.ny * lado * larg * (0.55 + 0.5 * h2(ri, k, 26)), tipo: 'montanha', tam: t2, neve: false, rot: 0, v: h2(ri, k, 19), origem: 'cume' }, 8 + t2 * 0.45, A.margemAgua - 4)
+      }
+      if (h2(ri, k, 20) < 0.22 * env + 0.05) {
+        const lado = h2(ri, k, 21) < 0.5 ? -1 : 1
+        const t3 = 8 + 4 * h2(ri, k, 22)
+        tentar({ x: x + p.nx * lado * larg * (1.4 + h2(ri, k, 23)), y: y + p.ny * lado * larg * (1.4 + h2(ri, k, 23)), tipo: 'colina', tam: t3, neve: false, rot: 0, v: h2(ri, k, 24), origem: 'sope' }, 13, A.margemAgua - 4)
+      }
+      t += A.passoCume * (0.35 + 1.5 * h2(ri, k, 25))
+    }
+  }
+
+  // ---- 2. intentional clearings inside the cores ----
+  const clareiras: Clareira[] = []
+  for (let gy = 0; gy < 0.32 * H; gy += 40) {
+    for (let gx = 0.5 * W; gx < 0.9 * W; gx += 40) {
+      if (clareiras.length >= 8) break
+      const x = gx + (h2(gx, gy, 31) - 0.5) * 40
+      const y = gy + (h2(gx, gy, 32) - 0.5) * 40
+      if (at(Math.round(x), Math.round(y)) < 0.08 || pesoT(x, y) < 0.6) continue
+      if (nucleoValor(x, y, noise, W, H) < 0.4 || h2(gx, gy, 33) > 0.85) continue
+      if (clareiras.some((c) => Math.hypot(c.x - x, c.y - y) < A.clareiraMin)) continue
+      if (pinsPx.some((p) => Math.hypot(p.x - x, p.y - y) < 60)) continue
+      if (obst?.perto(x, y, 30)) continue
+      clareiras.push({ x, y, rx: 28 + 30 * h2(gx, gy, 34), ry: 20 + 24 * h2(gx, gy, 35), rot: (h2(gx, gy, 36) - 0.5) * 1.6 })
+    }
+  }
+  const claro = (x: number, y: number) => {
+    let v = 0
+    for (const c of clareiras) v = Math.max(v, dentroClareira(x, y, c))
+    return v
+  }
+
+  // ---- 3. forest masses around the cores (blue-noise darts, irregular radii) ----
+  type Cand = { x: number; y: number; pri: number }
+  const cand: Cand[] = []
+  for (let gy = 0; gy < 0.32 * H; gy += 8) {
+    for (let gx = 0.5 * W; gx < 0.92 * W; gx += 8) {
+      cand.push({ x: gx + (h2(gx, gy, 1) - 0.5) * 8, y: gy + (h2(gx, gy, 2) - 0.5) * 8, pri: h2(gx, gy, 3) })
+    }
+  }
+  cand.sort((a, b) => b.pri - a.pri)
   for (const c of cand) {
     const { x, y } = c
-    if (at(Math.round(x), Math.round(y)) < 0.08) continue
     const wT = pesoT(x, y)
     if (wT < 0.12) continue
-    if (pinsPx.some((p) => Math.hypot(p.x - x, p.y - y) < folga)) continue
-    const { core, clear, R } = campos(x, y, noise, A)
-    const mt = A.mtBase + (1 - A.mtBase) * pesoMont(x, y)
-    const M = sm(A.ridgeA, A.ridgeB, R) * mt * Math.min(1, wT * 1.6)
-    const hh = h2(x, y, 4)
-    let tipo: GlifoT['tipo']
-    let r: number
-    let tam: number
-    let neve = false
-    if (M > A.limiarMontanha) {
-      tipo = 'montanha'
-      tam = (12 + 22 * Math.pow(M, 0.9)) * (0.85 + 0.3 * h2(x, y, 5))
-      r = A.rMontBase + tam * A.rMontK
-      neve = M > 0.8 && pesoMont(x, y) > 0.35
-    } else if (M > A.limiarColina && hh < A.pColina) {
-      tipo = 'colina'
-      tam = 8 + 5 * h2(x, y, 5)
-      r = 13
-    } else {
-      const prob = wT * (Math.pow(core, A.pExp) * (1 - 0.92 * clear) + A.stragglers * (1 - clear))
-      if (hh > prob) continue
-      tipo = 'conifera'
-      tam = (A.tamConifBase + A.tamConifVar * core) * (0.8 + 0.4 * h2(x, y, 5))
-      r = A.rConifBase + (1 - core) * A.rConifVar
+    const core = nucleoValor(x, y, noise, W, H)
+    const cl = claro(x, y)
+    const prob = wT * (Math.pow(core, A.pExp) * (1 - 0.95 * cl) + 0.025 * (1 - cl))
+    if (h2(x, y, 4) > prob) continue
+    const tam = (A.tamConifBase + A.tamConifVar * core) * (0.8 + 0.4 * h2(x, y, 5))
+    const r = (A.rConifBase + (1 - core) * A.rConifVar) * (0.85 + 0.35 * h2(x, y, 8))
+    tentar({ x, y, tipo: 'conifera', tam, neve: false, rot: (h2(x, y, 6) - 0.5) * 0.2, v: h2(x, y, 7), origem: 'nucleo' }, r, A.margemAgua)
+  }
+
+  // ---- 4. small groves (3 to 7 trees) on open ground, so the edges stay organic ----
+  for (let gy = 0; gy < 0.32 * H; gy += 62) {
+    for (let gx = 0.5 * W; gx < 0.92 * W; gx += 62) {
+      const px = gx + (h2(gx, gy, 41) - 0.5) * 62
+      const py = gy + (h2(gx, gy, 42) - 0.5) * 62
+      if (at(Math.round(px), Math.round(py)) < 0.08 || pesoT(px, py) < 0.45) continue
+      if (nucleoValor(px, py, noise, W, H) > 0.45 || claro(px, py) > 0.3) continue
+      if (h2(gx, gy, 43) > A.bosquesProb) continue
+      const n = 3 + Math.floor(h2(gx, gy, 44) * 5)
+      for (let i = 0; i < n; i++) {
+        const ang = h2(gx, gy, 50 + i) * Math.PI * 2
+        const rad = 4 + 13 * h2(gx, gy, 60 + i)
+        const tam = 6.5 + 2.5 * h2(gx, gy, 70 + i)
+        tentar({ x: px + Math.cos(ang) * rad, y: py + Math.sin(ang) * rad, tipo: 'conifera', tam, neve: false, rot: (h2(gx, gy, 80 + i) - 0.5) * 0.2, v: h2(gx, gy, 90 + i), origem: 'bosque' }, 9, A.margemAgua)
+      }
     }
-    if (!livre(x, y, r)) continue
-    if (obst?.perto(x, y, 8 + tam * 0.8)) continue
-    const lista = grade.get(chave((x / CELL) | 0, (y / CELL) | 0)) ?? []
-    lista.push({ x, y, r })
-    grade.set(chave((x / CELL) | 0, (y / CELL) | 0), lista)
-    glifos.push({ x, y, tipo, tam, neve, rot: (h2(x, y, 6) - 0.5) * 0.2, v: h2(x, y, 7) })
   }
   glifos.sort((a, b) => a.y - b.y)
 
-  const clareiras: PlanoTerrasen['clareiras'] = []
   const massas: PlanoTerrasen['massas'] = []
-  for (let gy = 0; gy < y1; gy += 16) {
-    for (let gx = x0; gx < x1; gx += 16) {
+  for (let gy = 0; gy < 0.32 * H; gy += 16) {
+    for (let gx = 0.5 * W; gx < 0.92 * W; gx += 16) {
       if (at(Math.round(gx), Math.round(gy)) < 0.08 || pesoT(gx, gy) < 0.5) continue
-      const { core, clear } = campos(gx, gy, noise, A)
-      if (clear > 0.6 && core > 0.3) clareiras.push({ x: gx, y: gy, r: 14 + clear * 6 })
-      else if (core > 0.6 && clear < 0.3) massas.push({ x: gx, y: gy, r: 18, a: 0.11 * core })
+      const core = nucleoValor(gx, gy, noise, W, H)
+      if (core > 0.6 && claro(gx, gy) < 0.3) massas.push({ x: gx, y: gy, r: 18, a: A.lavagemMassa * core })
     }
   }
   return { glifos, clareiras, massas }
 }
 
-/** Soft washes under the glyphs: shaded forest floor and pale clearings. */
-export function desenharWashes(ctx: CanvasRenderingContext2D, plano: PlanoTerrasen, modo: ModoDesenho) {
+/** Soft washes under the glyphs: shaded forest floor and pale clearings (intensity is a tunable). */
+export function desenharWashes(ctx: CanvasRenderingContext2D, plano: PlanoTerrasen, modo: ModoDesenho, ajuste?: Partial<AjusteTerrasen>) {
+  const A = { ...AJUSTE_PADRAO, ...ajuste }
   const { subbosque, clareira } = PALETA_TERRASEN
   const sub = modo === 'cor' ? subbosque : '#5a4630'
   const cla = modo === 'cor' ? clareira : '#efe3bd'
@@ -275,11 +418,17 @@ export function desenharWashes(ctx: CanvasRenderingContext2D, plano: PlanoTerras
     ctx.fillRect(m.x - m.r, m.y - m.r, m.r * 2, m.r * 2)
   }
   for (const c of plano.clareiras) {
-    const g = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, c.r)
-    g.addColorStop(0, hexA(cla, modo === 'cor' ? 0.42 : 0.5))
+    ctx.save()
+    ctx.translate(c.x, c.y)
+    ctx.rotate(c.rot)
+    ctx.scale(c.rx * 1.25, c.ry * 1.25)
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 1)
+    g.addColorStop(0, hexA(cla, A.lavagemClareira))
+    g.addColorStop(0.6, hexA(cla, A.lavagemClareira * 0.6))
     g.addColorStop(1, hexA(cla, 0))
     ctx.fillStyle = g
-    ctx.fillRect(c.x - c.r, c.y - c.r, c.r * 2, c.r * 2)
+    ctx.fillRect(-1, -1, 2, 2)
+    ctx.restore()
   }
 }
 
@@ -474,9 +623,9 @@ function montanha(ctx: CanvasRenderingContext2D, g: GlifoT, estilo: EstiloTerras
     cume(s * 0.6, s * 0.95, s * 0.7, false, false)
     cume(-s * 0.1, s * 1.4, s * 1.0, neve, false)
   } else if (estilo === 'B') {
-    cume(-s * 1.05, s * 0.8, s * 0.62, false, true)
-    cume(s * 1.05, s * 0.95, s * 0.66, false, true)
-    cume(0, s * 1.4, s * 0.86, neve, true)
+    cume(-s * 0.8, s * 0.8, s * 0.46, false, true)
+    cume(s * 0.82, s * 0.95, s * 0.5, false, true)
+    cume(0, s * 1.4, s * 0.68, neve, true)
   } else {
     // C: rounded engraved mass with vertical hatching on the shaded side and strata on the lit side
     ctx.beginPath()

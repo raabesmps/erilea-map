@@ -22,7 +22,7 @@ export function useUrlState(router: Router) {
   if (typeof q.lugar === 'string') store.openPlace(q.lugar)
   store.geo = q.geo === '1' ? 'v1' : q.geo === '2' ? 'v2' : GEO_PADRAO
   store.hidro = q.hidro === 'media' ? 'media' : q.hidro === 'nenhuma' ? 'nenhuma' : 'alta'
-  store.terrasen = q.terrasen === 'A' || q.terrasen === 'B' || q.terrasen === 'C' ? q.terrasen : null
+  store.terrasen = q.terrasen === 'A' || q.terrasen === 'B' || q.terrasen === 'C' || q.terrasen === 'AB' ? q.terrasen : null
 
   watch(
     () => store.lang,

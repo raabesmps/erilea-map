@@ -241,7 +241,7 @@ export function paintColorido(p: PaintCtx) {
   const obst = criarObstaculos(lagos, rios)
   const proto = p.proto ? planoProto(p, field, zonasUsadas, obst) : undefined
   drawWaves(p)
-  if (proto) desenharWashes(ctx, proto.plano, 'cor')
+  if (proto) desenharWashes(ctx, proto.plano, 'cor', p.proto?.ajuste)
   for (const poly of lagos) drawLake(ctx, poly)
   drawRiverSet(ctx, rios)
   drawGlyphs(p, field, obst, zonasUsadas, proto)
@@ -566,15 +566,15 @@ export interface ProtoPlano {
   pesoT: (x: number, y: number) => number
 }
 
-export function planoProto(p: Pick<PaintCtx, 'W' | 'H' | 'at' | 'noise'>, field: Field, zonas: Zona[], obst?: Obstaculos): ProtoPlano {
+export function planoProto(p: Pick<PaintCtx, 'W' | 'H' | 'at' | 'noise'> & { proto?: ProtoTerrasen }, field: Field, zonas: Zona[], obst?: Obstaculos): ProtoPlano {
   const pesoT = criarPeso(field, zonas, ZONAS_TERRASEN)
   const pesoMont = criarPeso(field, zonas, (id) => id === ZONA_MONTANHAS)
-  const plano = planejarTerrasen({ W: p.W, H: p.H, at: p.at, noise: p.noise, pesoT, pesoMont, obst })
+  const plano = planejarTerrasen({ W: p.W, H: p.H, at: p.at, noise: p.noise, pesoT, pesoMont, obst, ajuste: p.proto?.ajuste })
   return { plano, pesoT }
 }
 
 /** Sepia path: same plan, weights come from the default zones. */
-export function protoClassico(p: Pick<PaintCtx, 'W' | 'H' | 'at' | 'noise'>, obst?: Obstaculos): ProtoPlano {
+export function protoClassico(p: Pick<PaintCtx, 'W' | 'H' | 'at' | 'noise'> & { proto?: ProtoTerrasen }, obst?: Obstaculos): ProtoPlano {
   const zonas = aplicarPaleta(B.zonas)
   const field = buildField(p.W, p.H, p.noise, zonas)
   return planoProto(p, field, zonas, obst)

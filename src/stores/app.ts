@@ -7,7 +7,7 @@ import type { Book, Lang, Place, Route } from '../types'
 import type { MapStyle } from '../lib/terreno'
 import { GEO_PADRAO, type GeoId } from '../lib/geografia'
 import type { NivelHidro } from '../lib/hidrografia'
-import type { EstiloTerrasen } from '../lib/proto/terrasen'
+import type { VariacaoTerrasen } from '../lib/proto/terrasen'
 import { clampBook, visiblePlaces, visibleRoutes } from '../lib/spoiler'
 
 export const BOOKS = livros as Book[]
@@ -24,8 +24,8 @@ export const useAppStore = defineStore('app', () => {
   const geo = ref<GeoId>(GEO_PADRAO)
   /** Hydrography tier drawn: 'alta' (default) or 'media' (?hidro=media preview). */
   const hidro = ref<NivelHidro>('alta')
-  /** PROTOTYPE preview (?terrasen=A|B|C). Off by default. */
-  const terrasen = ref<EstiloTerrasen | null>(null)
+  /** PROTOTYPE preview (?terrasen=A|B|C|AB). Off by default. */
+  const terrasen = ref<VariacaoTerrasen | null>(null)
   /** Monotonic tokens so the map can react to one-shot requests. */
   const flyRequest = ref<{ id: string; n: number } | null>(null)
   const playRequest = ref<{ id: string; n: number } | null>(null)

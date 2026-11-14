@@ -1,0 +1,151 @@
+{
+  "_nota": "LIMITES ARTÍSTICOS de Terrasen (proposta, não aprovada). NÃO são geografia: a costa, a hidrografia, os lugares e as rotas são limites geográficos APROVADOS e imutáveis; as cumeeiras e os núcleos abaixo só dizem onde desenhar símbolos de montanha e de floresta, e podem ser mudados sem tocar na geografia. Posições lidas do mapa impresso (grade de coordenadas, ±0,01 da digitalização). Normalizado (0..1).",
+  "cumeeiras": [
+    {
+      "id": "noroeste",
+      "ref": "[MAPA] Faixa densa e diagonal de montanhas sob os rótulos 'Tribo dos Lobos' e 'Anascaé', do canto noroeste até o rótulo 'Rosamel'. Peso visual REDUZIDO a pedido da autora.",
+      "pontos": [
+        [
+          0.562,
+          0.128
+        ],
+        [
+          0.585,
+          0.142
+        ],
+        [
+          0.605,
+          0.158
+        ],
+        [
+          0.622,
+          0.178
+        ]
+      ],
+      "largura": 0.02,
+      "forca": 0.55,
+      "neve": false
+    },
+    {
+      "id": "norte-picos-altos",
+      "ref": "[MAPA] Fileira de picos altos (os únicos com capuz claro no impresso) logo abaixo do rótulo 'Terrasen', do noroeste até o maciço de Orynth.",
+      "pontos": [
+        [
+          0.626,
+          0.106
+        ],
+        [
+          0.65,
+          0.091
+        ],
+        [
+          0.678,
+          0.086
+        ],
+        [
+          0.704,
+          0.104
+        ],
+        [
+          0.727,
+          0.124
+        ]
+      ],
+      "largura": 0.016,
+      "forca": 0.9,
+      "neve": true
+    },
+    {
+      "id": "maciço-de-orynth",
+      "ref": "[MAPA] Bloco compacto de montanhas ('Montanhas Galhadas do …', fim do nome de leitura duvidosa) que envolve Orynth pelo norte e pelo leste.",
+      "pontos": [
+        [
+          0.727,
+          0.124
+        ],
+        [
+          0.752,
+          0.129
+        ],
+        [
+          0.774,
+          0.141
+        ],
+        [
+          0.787,
+          0.162
+        ]
+      ],
+      "largura": 0.018,
+      "forca": 0.8,
+      "neve": true
+    },
+    {
+      "id": "borda-da-floresta",
+      "ref": "[MAPA] Montanhas esparsas ao longo da borda oeste da grande floresta pontilhada. Termina onde a zona de Terrasen termina: o trecho sul pertence à floresta central e não é tocado.",
+      "pontos": [
+        [
+          0.628,
+          0.19
+        ],
+        [
+          0.64,
+          0.208
+        ],
+        [
+          0.65,
+          0.226
+        ]
+      ],
+      "largura": 0.012,
+      "forca": 0.45,
+      "neve": false
+    }
+  ],
+  "nucleos": [
+    {
+      "id": "floresta-oeste-alta",
+      "ref": "[MAPA] Topo da grande floresta pontilhada, colado sob as cumeeiras norte e noroeste.",
+      "x": 0.664,
+      "y": 0.175,
+      "rx": 0.042,
+      "ry": 0.05,
+      "rot": 0.2,
+      "forca": 1.0
+    },
+    {
+      "id": "floresta-oeste-baixa",
+      "ref": "[MAPA] Continuação da floresta para o sul, em direção à Floresta Carvalhal (fora de Terrasen).",
+      "x": 0.676,
+      "y": 0.232,
+      "rx": 0.036,
+      "ry": 0.058,
+      "rot": -0.15,
+      "forca": 0.9
+    },
+    {
+      "id": "bosque-noroeste",
+      "ref": "[ARTE] Bosque menor entre as cumeeiras noroeste e norte, para não deixar a região vazia.",
+      "x": 0.598,
+      "y": 0.208,
+      "rx": 0.03,
+      "ry": 0.034,
+      "rot": 0,
+      "forca": 0.75
+    },
+    {
+      "id": "borda-leste-da-floresta",
+      "ref": "[MAPA] Faixa leste da grande floresta pontilhada (x ≈ 0,70 a 0,72), onde ela encontra o terreno aberto a leste.",
+      "x": 0.708,
+      "y": 0.215,
+      "rx": 0.017,
+      "ry": 0.032,
+      "rot": 0.1,
+      "forca": 0.7
+    }
+  ],
+  "lavagem": {
+    "clareira": 0.2,
+    "massa": 0.085
+  }
+}
