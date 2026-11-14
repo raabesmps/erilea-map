@@ -1,6 +1,6 @@
 # Planejamento da hidrografia (lagos e cursos de água)
 
-**Status:** planejamento. Nada disto está implementado. Só entra depois da geografia (v3) ser aprovada.
+**Status (atualizado):** geografia v3 aprovada e integrada. **Implementado em `hidrografia`:** os dois lagos de alta confiança (Eyllwe e Perranth). **Pronto, mas desligado (prévia `?hidro=media`):** lago de Anielle, lago pequeno do Pântano e curso de Melisande. **Não desenhado:** lago de Orynth (pendente de confirmação), afluentes do Pântano (dependem do tronco) e os quatro cursos adicionais (ver `INVESTIGACAO-CURSOS-ADICIONAIS.md`).
 
 **Regra de ouro (decisão da autora):** não inventar nomes, formatos nem conexões. Cada elemento abaixo foi
 lido de uma digitalização de 736 px do mapa impresso, então **toda posição tem incerteza de ±0,01 do mapa**
