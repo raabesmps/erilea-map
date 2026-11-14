@@ -24,7 +24,7 @@ interpretação artística (do guia ou nossa).
 | Neve nas montanhas | 100% | só nos picos altos (16 de 52) |
 | ΔE pinhal × Selva vizinha | 7,4 (indistinguível) | 16,8 |
 | Tempo de renderização (cor) | 1744–1837 ms | 1725–1878 ms (dentro do ruído) |
-| Pixels diferentes **fora** de Terrasen | — | **0** (cor e sépia, três estilos) |
+| Pixels diferentes além de 1,6 × o raio das zonas de Terrasen | — | **0** (cor, rodada 2). Veja a correção na seção 8 e o alcance real na seção 11 |
 
 Comparações visuais: [cor](4-comparacao-cor.png), [sépia](5-comparacao-sepia.png), [zoom máximo](6-zoom-maximo.png).
 
@@ -141,7 +141,7 @@ mexer nos limites aprovados:
 | Renderização, cor | 1744–1837 ms | 1725 / 1878 / 1829 ms |
 | Renderização, sépia | 1408–1456 ms | 1530 / 1495 / 1514 ms |
 | Símbolos em Terrasen | ≈ 125 | 265 |
-| Pixels diferentes fora de Terrasen | — | **0** |
+| Pixels diferentes além de 1,6 × o raio das zonas | — | **0** (ver seção 11) |
 
 O custo extra é **dentro do ruído de medição** (±5%): a renderização é dominada pelos 4 milhões de pixels do terreno, e
 265 símbolos custam muito pouco.
@@ -162,7 +162,7 @@ Isso já suaviza os símbolos de hoje; com símbolos de **tinta fina e hachuras*
 
 | Restrição | Situação |
 |---|---|
-| Não alterar costa, rios ou lagos | **cumprido.** A impressão digital da costa continua verificada por teste; 0 pixels diferentes fora de Terrasen |
+| Não alterar costa, rios ou lagos | **cumprido.** A impressão digital da costa continua verificada por teste; nenhum pixel difere além de 1,6 × o raio das zonas de Terrasen (medição na seção 11; a frase anterior "0 pixels fora de Terrasen" estava imprecisa e foi substituída) |
 | Não mover cidades, marcadores ou rotas | **cumprido.** Nenhum dado de lugar ou rota foi tocado; símbolos ficam a ≥ 26 px dos marcadores |
 | Não alterar a interface | **cumprido.** Nenhum componente visível mudou. Existe um parâmetro de URL oculto (`?terrasen=`) e o encanamento da cache em `MapaView.vue` |
 | Não modificar outros biomas | **cumprido.** Um teste exige que todas as zonas fora de `r03-*` sejam idênticas às originais |
@@ -172,8 +172,8 @@ Isso já suaviza os símbolos de hoje; com símbolos de **tinta fina e hachuras*
 Testes: 118 passam (105 anteriores + 13 do protótipo) e o build passa.
 
 **Limite honesto:** a cor se mistura suavemente entre zonas vizinhas. Por isso a cor nova de Terrasen "vaza" um pouco
-para as bordas vizinhas, o que é desejável e é a transição. **Não medi** a largura exata desse vazamento: pelo alcance da mistura
-(1,25 × o raio de cada zona) deve ficar em torno de 0,04 do mapa. Fora da caixa de Terrasen (x ≥ 0,46, y ≤ 0,38), 0 pixels mudam.
+para as bordas vizinhas, o que é desejável e é a transição. **Correção (rodada 2):** na rodada 1 eu escrevi "0 pixels mudam fora de Terrasen". Isso só valia para uma caixa grande
+(x ≥ 0,46, y ≤ 0,38), não para o contorno do bioma, e a largura do vazamento não tinha sido medida. Agora está medida (seção 11).
 
 ## 9. Decisões em aberto (preciso de você)
 
@@ -195,10 +195,91 @@ para as bordas vizinhas, o que é desejável e é a transição. **Não medi** a
 4. Testes de aceitação: os mesmos dos protótipos, mais um teste de regressão pixel a pixel fora de Terrasen.
 5. Replicar o sistema nos demais biomas, um por vez, com a mesma bateria de medidas.
 
-**Critérios de aceitação:** coníferas ≥ 150, VMR > 1,6, nenhum vazio > 100 px, 0 pixels alterados fora do bioma, ΔE ≥ 12
+**Critérios de aceitação:** coníferas ≥ 150, VMR > 1,6, nenhum vazio > 100 px, 0 pixels alterados além de 1,6 × o raio das zonas, ΔE ≥ 12
 contra cada vizinho, ≤ +10% de tempo de renderização, e símbolos nítidos em zoom máximo.
 
 ## Como ver o protótipo
 
 `npm run dev` e abra, por exemplo, `?livro=7&lang=pt&terrasen=A` (ou `B`, `C`; acrescente `&estilo=classico` para o sépia).
 Sem o parâmetro, o mapa é exatamente o aprovado.
+
+**Rodada 2:** `?terrasen=AB` = estilo A em cor e estilo B no sépia (decisão 1 da rodada 2).
+
+---
+
+# Rodada 2 (refinamento visual, ainda sem merge)
+
+## 10b. Decisões artísticas aplicadas
+
+1. Estilo **A** em cor, **B** no sépia (`?terrasen=AB`).
+2. Só **coníferas** nas zonas de Terrasen (nenhum carvalho por proximidade com a Floresta Carvalhal).
+3. Paleta da rodada 1 mantida, de forma provisória.
+4. **Colinas de transição** sem neve nos sopés das cumeeiras; neve só nos picos altos.
+5. Solução vetorial priorizada, **não implementada** de forma definitiva: só um experimento descartável (seção 12).
+
+## 11. Validação técnica
+
+### 11.1 Limites geográficos aprovados × limites artísticos
+
+| | Limites **geográficos** (aprovados, imutáveis) | Limites **artísticos** (propostas, mutáveis) |
+|---|---|---|
+| O que são | costa, hidrografia (lagos e rios aprovados), posição dos lugares, rotas | elipses das zonas de bioma (`biomas.json`), cumeeiras e núcleos florestais (`terrasen-arte.json`) |
+| Onde vivem | `geografia.ts`, `hidrografia.json`, `lugares.json`, `rotas.json` | `biomas.json`, `terrasen-arte.json`, `proto/terrasen.ts` |
+| Mudou nesta rodada? | **Não** (impressão digital da costa 9e05e5c1 e dados protegidos intactos) | Sim, só `terrasen-arte.json` (novo) e o protótipo |
+| Função | dizem **onde está a terra, a água e os lugares** | dizem **onde desenhar** montanha e floresta; podem ser trocados sem tocar na geografia |
+
+O desenho é limitado pela geografia: símbolos ficam ≥ 14 px da água, ≥ 13 px das rotas e fora do ícone e do rótulo de cada lugar.
+
+### 11.2 Alcance real das mudanças de cor (medição, cor, protótipo × atual)
+
+229.732 pixels diferem; caixa normalizada [0,511; 0,010; 0,853; 0,277]. Por distância elíptica *d* até a zona `r03-*` mais próxima
+(1 = borda da zona):
+
+| Faixa | Pixels | Fortes (≥ 4/255) |
+|---|---|---|
+| d ≤ 1 (dentro) | 195.956 | — |
+| 1 < d ≤ 1,25 | 28.137 | 19.607 |
+| 1,25 < d ≤ 1,6 | 5.639 | 1.210 |
+| d > 1,6 | **0** | **0** |
+
+Maior diferença forte em d = 1,32; qualquer diferença até d = 1,45. No sépia: 71.239 pixels, todos em d ≤ 1,18.
+Logo a transição de cor alcança até ≈ 0,45 vezes o raio da zona além da borda; é a mistura suave desejada, não um vazamento arbitrário.
+
+### 11.3 Cumeeiras sobre o mapa impresso
+
+Ver [figura 7](7-cumeeiras-atual-vs-refinado.png): a zona atual (`r03-montanhas-norte`) não cobre o maciço de Orynth; as quatro
+cumeeiras lidas do impresso sim (noroeste, picos altos ao norte, maciço de Orynth, borda da floresta). A sobreposição ao impresso
+fica em `referencia-local/` (ignorada pelo git, por ser material do livro).
+
+### 11.4 Métricas anti-regularidade (testadas)
+
+Quase-colinearidade comparada a um **modelo nulo aleatório** confinado à mesma faixa (não a um limiar arbitrário): coníferas
+7% × 9% do aleatório; montanhas ≤ nulo + 0,04. VMR das coníferas 5,9 (> 1,6), CV de tamanho > 0,2, ≥ 4 clareiras, bosques > 8, nenhum vazio > 100 px.
+Lavagem das clareiras: 0,42/0,28/0,20/0,12 comparadas ([figura 12](12-intensidade-da-lavagem.png)); **0,20** escolhida; 0,42 parece névoa.
+
+### 11.5 Comparações finais
+
+[Cor, visão geral](8-final-cor-visao-geral.png) · [sépia, visão geral](9-final-sepia-visao-geral.png) ·
+[cor, zoom máximo](10-final-cor-zoom-maximo.png) · [sépia, zoom máximo](11-final-sepia-zoom-maximo.png).
+
+## 12. Camada vetorial × raster no Leaflet (experimento)
+
+Código descartável em `spikes/vetorial/` (`npm run dev`, `/spikes/vetorial/index.html`). Método: um `L.svgOverlay` com **exatamente os mesmos
+limites** do `L.imageOverlay`; os glifos são gravados do **mesmo código de desenho do canvas** (`GravadorSvg`), de modo que raster e vetor não divergem.
+
+| Verificação | Resultado |
+|---|---|
+| Alinhamento estático, zoom −1 a 1,5 | desvio máx. 0,32 a 0,67 px |
+| Depois de pan curto e longo | 0,46 px (igual ao estático) |
+| Durante a animação de zoom (52 quadros, largura 1697 → 6788 px) | desvio máx. **0,18 px**, 0 quadros > 1 px |
+| Ordem de empilhamento | raster < SVG de símbolos < rota; SVG com `pointer-events: none` |
+| Troca cor ↔ sépia, ingênua (`setUrl` + troca do SVG) | o SVG troca na hora e o raster só quando decodifica (19 ms no teste local); risco de um quadro incoerente |
+| Troca com pré-carga (dois overlays decodificados, uma troca de `visibility` no mesmo quadro) | 0 de 21 quadros incoerentes |
+| Pan, quadros de 16,67 ms | sem SVG: p95 17,1 ms; com SVG: p95 17,4 ms (sem perda) |
+| Custo | 148 glifos = 1.352 `<path>`, 175 KB; renderizar os dois rasters = 4,4 s |
+| Nitidez no zoom máximo | [raster](../../../spikes/vetorial/zoom-maximo-raster.png) × [vetor](../../../spikes/vetorial/zoom-maximo-vetor.png): o vetor mantém traço e hachura nítidos |
+
+**Conclusão:** a sincronização é sólida porque o SVG usa os mesmos limites do raster e o Leaflet aplica a mesma transformação aos dois.
+A troca cor ↔ sépia deve usar a **estratégia de pré-carga com `visibility`**, e o SVG de cada modo deve ser gerado do mesmo código do canvas.
+Limites do gravador: não suporta `clip()` (estilo C usa); gradientes e sombras precisariam de suporte explícito.
+Nenhuma dessas mudanças foi levada ao app.
