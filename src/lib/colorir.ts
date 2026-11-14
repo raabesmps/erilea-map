@@ -39,7 +39,7 @@ interface Biomas {
   padrao: { cor: string; arv: string; rocha: string; glifos: Partial<Record<GlyphKey, number>> }
   zonas: Zona[]
   mar: { padrao: { costeiro: string; medio: string; fundo: string }; zonas: MarZona[] }
-  rios: { id: string; x: number; y: number }[]
+  rios: { id: string; x?: number; y?: number; pontos?: [number, number][]; nome?: { pt: string; en: string } }[]
 }
 
 const B = biomasData as unknown as Biomas
@@ -292,13 +292,56 @@ function seaDistance(W: number, H: number, at: (x: number, y: number) => number)
   return get
 }
 
-/** Rivers wander from their sources down to the sea, widening as they go. */
-function drawRivers({ ctx, W, H, at, noise }: PaintCtx) {
+/** Catmull-Rom spline through the waypoints, sampled about every `step` px. */
+function catmullRom(p: { x: number; y: number }[], step: number) {
+  const out: { x: number; y: number }[] = []
+  for (let i = 0; i < p.length - 1; i++) {
+    const p0 = p[Math.max(0, i - 1)]!
+    const p1 = p[i]!
+    const p2 = p[i + 1]!
+    const p3 = p[Math.min(p.length - 1, i + 2)]!
+    const n = Math.max(2, Math.round(Math.hypot(p2.x - p1.x, p2.y - p1.y) / step))
+    for (let k = 0; k < n; k++) {
+      const t = k / n
+      const t2 = t * t
+      const t3 = t2 * t
+      const f = (a: number, b: number, c: number, d: number) => 0.5 * (2 * b + (-a + c) * t + (2 * a - 5 * b + 4 * c - d) * t2 + (-a + 3 * b - 3 * c + d) * t3)
+      out.push({ x: f(p0.x, p1.x, p2.x, p3.x), y: f(p0.y, p1.y, p2.y, p3.y) })
+    }
+  }
+  out.push(p[p.length - 1]!)
+  return out
+}
+
+export interface Rio {
+  id: string
+  pts: { x: number; y: number }[]
+}
+
+/** Rivers wander from their sources down to the sea (pure: no canvas involved). */
+export function tracarRios({ W, H, at, noise }: Pick<PaintCtx, 'W' | 'H' | 'at' | 'noise'>): Rio[] {
   const dist = seaDistance(W, H, at)
-  const rivers: { x: number; y: number }[][] = []
+  const rios: Rio[] = []
   B.rios.forEach((src, idx) => {
-    let x = src.x * W
-    let y = src.y * H
+    if (src.pontos) {
+      // named river with explicit waypoints (e.g. the Avery): smooth them, then run on to the sea
+      const way = src.pontos.map(([px, py]) => ({ x: px * W, y: py * H }))
+      const pts = catmullRom(way, 6)
+      const a = pts[pts.length - 2]!
+      const b = pts[pts.length - 1]!
+      const len = Math.hypot(b.x - a.x, b.y - a.y) || 1
+      let { x: ex, y: ey } = b
+      for (let n = 0; n < 160; n++) {
+        if (at(Math.round(ex), Math.round(ey)) <= 0) break
+        ex += ((b.x - a.x) / len) * 6
+        ey += ((b.y - a.y) / len) * 6
+        pts.push({ x: ex, y: ey })
+      }
+      rios.push({ id: src.id, pts })
+      return
+    }
+    let x = (src.x ?? 0) * W
+    let y = (src.y ?? 0) * H
     if (at(Math.round(x), Math.round(y)) <= 0.03) return
     const pts = [{ x, y }]
     for (let n = 0; n < 1200; n++) {
@@ -315,8 +358,15 @@ function drawRivers({ ctx, W, H, at, noise }: PaintCtx) {
       pts.push({ x, y })
       if (at(Math.round(x), Math.round(y)) <= 0) break
     }
-    if (pts.length > 25) rivers.push(pts)
+    if (pts.length > 25) rios.push({ id: src.id, pts })
   })
+  return rios
+}
+
+/** Draws the traced rivers, widening toward the mouth. */
+function drawRivers(p: PaintCtx) {
+  const { ctx } = p
+  const rivers = tracarRios(p).map((r) => r.pts)
   ctx.lineCap = 'round'
   ctx.lineJoin = 'round'
   for (const pass of [0, 1]) {

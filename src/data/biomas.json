@@ -1,96 +1,392 @@
 {
   "_nota": "Zonas de bioma em coordenadas normalizadas (0..1) sobre o mapa. As cores vêm do Guia de Direção de Arte. 'glifos' são probabilidades (0..1) de cada símbolo aparecer na zona. Bordas são deformadas por ruído, então as elipses nunca aparecem como elipses.",
   "padrao": {
-    "cor": "#A9AE7C", "arv": "#4D7255", "rocha": "#8C8A80",
-    "glifos": { "arvore": 0.14, "colina": 0.03 }
+    "cor": "#A9AE7C",
+    "arv": "#4D7255",
+    "rocha": "#8C8A80",
+    "glifos": {
+      "arvore": 0.14,
+      "colina": 0.03
+    }
   },
   "zonas": [
-    { "id": "r01-gelo-noroeste", "tipo": "gelo", "cx": 0.25, "cy": 0.12, "rx": 0.16, "ry": 0.13,
-      "cor": "#C9D6D8", "rocha": "#7F8E96", "neve": true,
-      "glifos": { "montanha": 0.8, "conifera": 0.04 } },
-    { "id": "r01-selva-morla", "tipo": "selva", "cx": 0.32, "cy": 0.17, "rx": 0.07, "ry": 0.05,
-      "cor": "#285B49", "arv": "#285B49", "peso": 1.1,
-      "glifos": { "arvore": 0.9, "conifera": 0.1 } },
-
-    { "id": "r02-desertos-oeste", "tipo": "deserto", "cx": 0.36, "cy": 0.33, "rx": 0.17, "ry": 0.11,
-      "cor": "#E0BE86", "rocha": "#A97755",
-      "glifos": { "montanha": 0.12, "duna": 0.1, "colina": 0.03 } },
-
-    { "id": "r03-terrasen", "tipo": "pinhal", "cx": 0.72, "cy": 0.12, "rx": 0.15, "ry": 0.11,
-      "cor": "#4D7255", "arv": "#254B3C", "rocha": "#78878D", "neve": true,
-      "glifos": { "conifera": 0.55, "montanha": 0.5, "arvore": 0.08 } },
-    { "id": "r03-pinhal-denso", "tipo": "pinhal", "cx": 0.70, "cy": 0.13, "rx": 0.09, "ry": 0.07,
-      "cor": "#254B3C", "arv": "#254B3C", "peso": 0.8,
-      "glifos": { "conifera": 0.85 } },
-    { "id": "r03-montanhas-norte", "tipo": "montanha", "cx": 0.60, "cy": 0.12, "rx": 0.07, "ry": 0.08,
-      "cor": "#7B806E", "rocha": "#78878D", "neve": true,
-      "glifos": { "montanha": 0.9 } },
-
-    { "id": "r04-cordilheira-ruhnn", "tipo": "montanha", "cx": 0.61, "cy": 0.30, "rx": 0.06, "ry": 0.13,
-      "cor": "#7B806E", "rocha": "#8C8A80",
-      "glifos": { "montanha": 0.85, "conifera": 0.1 } },
-    { "id": "r04-floresta-central", "tipo": "floresta", "cx": 0.67, "cy": 0.38, "rx": 0.045, "ry": 0.17,
-      "cor": "#52664F", "arv": "#42694B", "peso": 0.9,
-      "glifos": { "arvore": 0.7 } },
-    { "id": "r04-canino-branco", "tipo": "montanha", "cx": 0.58, "cy": 0.50, "rx": 0.06, "ry": 0.07,
-      "cor": "#8E8F82", "rocha": "#8C8A80",
-      "glifos": { "montanha": 0.85 } },
-
-    { "id": "r05-adarlan", "tipo": "campo", "cx": 0.78, "cy": 0.40, "rx": 0.12, "ry": 0.17,
-      "cor": "#8F9C62", "arv": "#42694B", "rocha": "#8C8A80",
-      "glifos": { "arvore": 0.25, "colina": 0.07 } },
-    { "id": "r05-adarlan-campos", "tipo": "campo", "cx": 0.80, "cy": 0.45, "rx": 0.07, "ry": 0.08,
-      "cor": "#B4AB74", "peso": 0.6,
-      "glifos": { "arvore": 0.07 } },
-
-    { "id": "r06-selva-bogdano", "tipo": "selva", "cx": 0.46, "cy": 0.54, "rx": 0.10, "ry": 0.045,
-      "cor": "#285B49", "arv": "#3C7859", "peso": 1.2,
-      "glifos": { "arvore": 0.92 } },
-
-    { "id": "r07-terra-desertica", "tipo": "deserto", "cx": 0.25, "cy": 0.62, "rx": 0.13, "ry": 0.12,
-      "cor": "#E0B77F", "rocha": "#B8683F",
-      "glifos": { "duna": 0.12, "montanha": 0.1 } },
-    { "id": "r07-deserto-vermelho", "tipo": "deserto-vermelho", "cx": 0.27, "cy": 0.80, "rx": 0.15, "ry": 0.13,
-      "cor": "#C0704A", "rocha": "#A9533E",
-      "glifos": { "duna": 0.15, "montanha": 0.2 } },
-    { "id": "r07-montanhas-sudoeste", "tipo": "montanha", "cx": 0.14, "cy": 0.74, "rx": 0.06, "ry": 0.09,
-      "cor": "#C9784C", "rocha": "#B8683F",
-      "glifos": { "montanha": 0.8 } },
-
-    { "id": "r08-melisande", "tipo": "planicie", "cx": 0.64, "cy": 0.64, "rx": 0.11, "ry": 0.09,
-      "cor": "#95A872", "arv": "#5E8460", "rocha": "#8C8A80",
-      "glifos": { "arvore": 0.16, "colina": 0.1 } },
-
-    { "id": "r09-eyllwe", "tipo": "savana", "cx": 0.77, "cy": 0.80, "rx": 0.14, "ry": 0.14,
-      "cor": "#86A468", "arv": "#4F8A5A",
-      "glifos": { "arvore": 0.26, "colina": 0.04 } },
-    { "id": "r09-eyllwe-ouro", "tipo": "savana", "cx": 0.80, "cy": 0.72, "rx": 0.07, "ry": 0.06,
-      "cor": "#C8B27C", "peso": 0.5,
-      "glifos": { "arvore": 0.06 } },
-    { "id": "r09-pantano-pedra", "tipo": "pantano", "cx": 0.66, "cy": 0.87, "rx": 0.09, "ry": 0.07,
-      "cor": "#6E7E52", "peso": 1,
-      "glifos": { "junco": 0.4, "arvore": 0.05 } }
+    {
+      "id": "r01-gelo-noroeste",
+      "tipo": "gelo",
+      "cx": 0.25,
+      "cy": 0.12,
+      "rx": 0.16,
+      "ry": 0.13,
+      "cor": "#C9D6D8",
+      "rocha": "#7F8E96",
+      "neve": true,
+      "glifos": {
+        "montanha": 0.8,
+        "conifera": 0.04
+      }
+    },
+    {
+      "id": "r01-selva-morla",
+      "tipo": "selva",
+      "cx": 0.32,
+      "cy": 0.17,
+      "rx": 0.07,
+      "ry": 0.05,
+      "cor": "#285B49",
+      "arv": "#285B49",
+      "peso": 1.1,
+      "glifos": {
+        "arvore": 0.9,
+        "conifera": 0.1
+      }
+    },
+    {
+      "id": "r02-desertos-oeste",
+      "tipo": "deserto",
+      "cx": 0.36,
+      "cy": 0.33,
+      "rx": 0.17,
+      "ry": 0.11,
+      "cor": "#E0BE86",
+      "rocha": "#A97755",
+      "glifos": {
+        "montanha": 0.12,
+        "duna": 0.1,
+        "colina": 0.03
+      }
+    },
+    {
+      "id": "r03-terrasen",
+      "tipo": "pinhal",
+      "cx": 0.72,
+      "cy": 0.12,
+      "rx": 0.15,
+      "ry": 0.11,
+      "cor": "#4D7255",
+      "arv": "#254B3C",
+      "rocha": "#78878D",
+      "neve": true,
+      "glifos": {
+        "conifera": 0.55,
+        "montanha": 0.5,
+        "arvore": 0.08
+      }
+    },
+    {
+      "id": "r03-pinhal-denso",
+      "tipo": "pinhal",
+      "cx": 0.7,
+      "cy": 0.13,
+      "rx": 0.09,
+      "ry": 0.07,
+      "cor": "#254B3C",
+      "arv": "#254B3C",
+      "peso": 0.8,
+      "glifos": {
+        "conifera": 0.85
+      }
+    },
+    {
+      "id": "r03-montanhas-norte",
+      "tipo": "montanha",
+      "cx": 0.6,
+      "cy": 0.12,
+      "rx": 0.07,
+      "ry": 0.08,
+      "cor": "#7B806E",
+      "rocha": "#78878D",
+      "neve": true,
+      "glifos": {
+        "montanha": 0.9
+      }
+    },
+    {
+      "id": "r04-cordilheira-ruhnn",
+      "tipo": "montanha",
+      "cx": 0.61,
+      "cy": 0.3,
+      "rx": 0.06,
+      "ry": 0.13,
+      "cor": "#7B806E",
+      "rocha": "#8C8A80",
+      "glifos": {
+        "montanha": 0.85,
+        "conifera": 0.1
+      }
+    },
+    {
+      "id": "r04-floresta-central",
+      "tipo": "floresta",
+      "cx": 0.67,
+      "cy": 0.38,
+      "rx": 0.045,
+      "ry": 0.17,
+      "cor": "#52664F",
+      "arv": "#42694B",
+      "peso": 0.9,
+      "glifos": {
+        "arvore": 0.7
+      }
+    },
+    {
+      "id": "r04-canino-branco",
+      "tipo": "montanha",
+      "cx": 0.58,
+      "cy": 0.5,
+      "rx": 0.06,
+      "ry": 0.07,
+      "cor": "#8E8F82",
+      "rocha": "#8C8A80",
+      "glifos": {
+        "montanha": 0.85
+      }
+    },
+    {
+      "id": "r05-adarlan",
+      "tipo": "campo",
+      "cx": 0.78,
+      "cy": 0.4,
+      "rx": 0.12,
+      "ry": 0.17,
+      "cor": "#8F9C62",
+      "arv": "#42694B",
+      "rocha": "#8C8A80",
+      "glifos": {
+        "arvore": 0.25,
+        "colina": 0.07
+      }
+    },
+    {
+      "id": "r05-adarlan-campos",
+      "tipo": "campo",
+      "cx": 0.8,
+      "cy": 0.45,
+      "rx": 0.07,
+      "ry": 0.08,
+      "cor": "#B4AB74",
+      "peso": 0.6,
+      "glifos": {
+        "arvore": 0.07
+      }
+    },
+    {
+      "id": "r06-selva-bogdano",
+      "tipo": "selva",
+      "cx": 0.46,
+      "cy": 0.54,
+      "rx": 0.1,
+      "ry": 0.045,
+      "cor": "#285B49",
+      "arv": "#3C7859",
+      "peso": 1.2,
+      "glifos": {
+        "arvore": 0.92
+      }
+    },
+    {
+      "id": "r07-terra-desertica",
+      "tipo": "deserto",
+      "cx": 0.25,
+      "cy": 0.62,
+      "rx": 0.13,
+      "ry": 0.12,
+      "cor": "#E0B77F",
+      "rocha": "#B8683F",
+      "glifos": {
+        "duna": 0.12,
+        "montanha": 0.1
+      }
+    },
+    {
+      "id": "r07-deserto-vermelho",
+      "tipo": "deserto-vermelho",
+      "cx": 0.27,
+      "cy": 0.8,
+      "rx": 0.15,
+      "ry": 0.13,
+      "cor": "#C0704A",
+      "rocha": "#A9533E",
+      "glifos": {
+        "duna": 0.15,
+        "montanha": 0.2
+      }
+    },
+    {
+      "id": "r07-montanhas-sudoeste",
+      "tipo": "montanha",
+      "cx": 0.14,
+      "cy": 0.74,
+      "rx": 0.06,
+      "ry": 0.09,
+      "cor": "#C9784C",
+      "rocha": "#B8683F",
+      "glifos": {
+        "montanha": 0.8
+      }
+    },
+    {
+      "id": "r08-melisande",
+      "tipo": "planicie",
+      "cx": 0.64,
+      "cy": 0.64,
+      "rx": 0.11,
+      "ry": 0.09,
+      "cor": "#95A872",
+      "arv": "#5E8460",
+      "rocha": "#8C8A80",
+      "glifos": {
+        "arvore": 0.16,
+        "colina": 0.1
+      }
+    },
+    {
+      "id": "r09-eyllwe",
+      "tipo": "savana",
+      "cx": 0.77,
+      "cy": 0.8,
+      "rx": 0.14,
+      "ry": 0.14,
+      "cor": "#86A468",
+      "arv": "#4F8A5A",
+      "glifos": {
+        "arvore": 0.26,
+        "colina": 0.04
+      }
+    },
+    {
+      "id": "r09-eyllwe-ouro",
+      "tipo": "savana",
+      "cx": 0.8,
+      "cy": 0.72,
+      "rx": 0.07,
+      "ry": 0.06,
+      "cor": "#C8B27C",
+      "peso": 0.5,
+      "glifos": {
+        "arvore": 0.06
+      }
+    },
+    {
+      "id": "r09-pantano-pedra",
+      "tipo": "pantano",
+      "cx": 0.66,
+      "cy": 0.87,
+      "rx": 0.09,
+      "ry": 0.07,
+      "cor": "#6E7E52",
+      "peso": 1,
+      "glifos": {
+        "junco": 0.4,
+        "arvore": 0.05
+      }
+    }
   ],
   "mar": {
-    "padrao": { "costeiro": "#A5C4C8", "medio": "#568CA4", "fundo": "#315E79" },
+    "padrao": {
+      "costeiro": "#A5C4C8",
+      "medio": "#568CA4",
+      "fundo": "#315E79"
+    },
     "zonas": [
-      { "id": "r10-mar-do-norte", "cx": 0.84, "cy": 0.05, "rx": 0.17, "ry": 0.12, "medio": "#4A6B7C", "fundo": "#34576B" },
-      { "id": "r06-golfo-de-oro", "cx": 0.43, "cy": 0.75, "rx": 0.09, "ry": 0.13, "costeiro": "#9CCBC8", "medio": "#4D8BA2", "fundo": "#3D7488" }
+      {
+        "id": "r10-mar-do-norte",
+        "cx": 0.84,
+        "cy": 0.05,
+        "rx": 0.17,
+        "ry": 0.12,
+        "medio": "#4A6B7C",
+        "fundo": "#34576B"
+      },
+      {
+        "id": "r06-golfo-de-oro",
+        "cx": 0.43,
+        "cy": 0.75,
+        "rx": 0.09,
+        "ry": 0.13,
+        "costeiro": "#9CCBC8",
+        "medio": "#4D8BA2",
+        "fundo": "#3D7488"
+      }
     ]
   },
   "rios": [
-    { "id": "avery", "x": 0.72, "y": 0.43 },
-    { "id": "norte-1", "x": 0.70, "y": 0.18 },
-    { "id": "norte-2", "x": 0.66, "y": 0.10 },
-    { "id": "ruhnn", "x": 0.62, "y": 0.34 },
-    { "id": "adarlan-1", "x": 0.80, "y": 0.34 },
-    { "id": "melisande-1", "x": 0.62, "y": 0.60 },
-    { "id": "melisande-2", "x": 0.68, "y": 0.66 },
-    { "id": "eyllwe-1", "x": 0.76, "y": 0.76 },
-    { "id": "eyllwe-2", "x": 0.80, "y": 0.86 },
-    { "id": "bogdano", "x": 0.45, "y": 0.52 },
-    { "id": "oeste-1", "x": 0.34, "y": 0.28 },
-    { "id": "noroeste-1", "x": 0.28, "y": 0.20 },
-    { "id": "deserto-1", "x": 0.26, "y": 0.70 }
+    {
+      "id": "avery",
+      "nome": {
+        "pt": "Rio Avery",
+        "en": "Avery River"
+      },
+      "_ref": "Rotulado no mapa impresso; corre do cruzamento a leste de Floresta Carvalhal até a costa no Forte da Fenda.",
+      "pontos": [
+        [
+          0.665,
+          0.43
+        ],
+        [
+          0.7,
+          0.44
+        ],
+        [
+          0.74,
+          0.462
+        ],
+        [
+          0.776,
+          0.47
+        ]
+      ]
+    },
+    {
+      "id": "melisande-1",
+      "x": 0.62,
+      "y": 0.6,
+      "_ref": "Corresponde aproximadamente ao curso enrolado de Melisande; sem nome no impresso."
+    }
+  ],
+  "_rios_removidos": [
+    {
+      "id": "norte-1",
+      "motivo": "corre para sudoeste e termina na baía interna; o rio impresso perto de Orynth corre para sudeste"
+    },
+    {
+      "id": "norte-2",
+      "motivo": "sem curso de água correspondente no impresso (e já era descartado por ser curto)"
+    },
+    {
+      "id": "ruhnn",
+      "motivo": "sem curso correspondente; era descartado por ser curto"
+    },
+    {
+      "id": "adarlan-1",
+      "motivo": "sem curso correspondente (a linha a leste é a própria costa); era descartado por ser curto"
+    },
+    {
+      "id": "melisande-2",
+      "motivo": "corre no sentido oposto ao da rede de afluentes do Pântano de Pedra"
+    },
+    {
+      "id": "eyllwe-1",
+      "motivo": "corre para a costa leste; o impresso tem um lago ali, não um rio"
+    },
+    {
+      "id": "eyllwe-2",
+      "motivo": "sem curso correspondente perto de Banjali"
+    },
+    {
+      "id": "bogdano",
+      "motivo": "o impresso não tem rio na Selva Bogdano"
+    },
+    {
+      "id": "oeste-1",
+      "motivo": "o oeste não tem nenhum rio no impresso"
+    },
+    {
+      "id": "noroeste-1",
+      "motivo": "o oeste não tem nenhum rio no impresso"
+    },
+    {
+      "id": "deserto-1",
+      "motivo": "o oeste não tem nenhum rio no impresso"
+    }
   ]
 }
