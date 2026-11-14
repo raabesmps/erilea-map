@@ -20,6 +20,9 @@ export interface ProtoTerrasen {
   /** Symbol style used in the sepia map (defaults to `estilo`). */
   estiloSepia?: EstiloTerrasen
   ajuste?: Partial<AjusteTerrasen>
+  /** EXPERIMENTAL vector layer: the raster leaves the Terrasen symbols out (washes stay) and `aoPlanejar` receives the plan. */
+  vetorial?: boolean
+  aoPlanejar?: (plano: PlanoTerrasen) => void
 }
 
 /** ?terrasen=AB means style A in colour and style B in sepia (the author's choice). */
@@ -104,6 +107,9 @@ export interface Cumeeira {
   largura: number
   forca: number
   neve: boolean
+  /** Round 3: overall size factor (<1 lightens a heavy ridge) and an absolute cap on the tallest peak (px). */
+  escala?: number
+  tamMax?: number
 }
 
 export interface Nucleo {
@@ -148,7 +154,7 @@ export interface AjusteTerrasen {
 export const AJUSTE_PADRAO: AjusteTerrasen = {
   tamConifBase: 6.5,
   tamConifVar: 5.5,
-  rConifBase: 11,
+  rConifBase: 11.5,
   rConifVar: 21,
   pExp: 0.85,
   lavagemClareira: ARTE.lavagem.clareira,
@@ -304,7 +310,8 @@ export function planejarTerrasen(e: EntradaPlano): PlanoTerrasen {
     }
     for (let t = 0, k = 0; t < L; k++) {
       const p = em(t)
-      const env = Math.pow(Math.sin(Math.PI * Math.min(1, Math.max(0.04, t / L))), 0.55) * cume.forca
+      // a rounder envelope (exponent 0.8) so peaks climb and fall gradually instead of plateauing
+      const env = Math.pow(Math.sin(Math.PI * Math.min(1, Math.max(0.04, t / L))), 0.8) * cume.forca
       // irregular spacing and a lateral wander, so no two rows line up
       const off = ((h2(ri, k, 11) - 0.5) * 2 * larg * 1.0 + noise(t / 70 + ri * 9, 3) * larg * 0.4) * (0.75 + 0.25 * env)
       const x = p.x + p.nx * off
@@ -313,13 +320,19 @@ export function planejarTerrasen(e: EntradaPlano): PlanoTerrasen {
         t += A.passoCume * (0.5 + h2(ri, k, 13))
         continue
       }
-      const tam = (9 + 20 * env) * (0.8 + 0.4 * h2(ri, k, 14))
-      const neve = cume.neve && tam > 22 && env > 0.7
+      // slow size drift along the ridge (low-frequency noise) plus a small per-peak jitter: neighbours stay related
+      const deriva = 1 + 0.13 * noise(t / 55 + ri * 7, 5) + 0.07 * (h2(ri, k, 14) - 0.5) * 2
+      const tam = Math.min(cume.tamMax ?? 99, (9 + 20 * env) * (cume.escala ?? 1) * deriva)
+      const neve = cume.neve && tam > 21 && env > 0.65
       tentar({ x, y, tipo: 'montanha', tam, neve, rot: 0, v: h2(ri, k, 15), origem: 'cume' }, 8 + tam * 0.45, A.margemAgua - 4)
-      // a smaller, staggered neighbour, and a foothill on the skirt (never with snow)
+      // a medium and a small neighbour, staggered, so the sizes step down high > medium > small
       if (cume.largura > 0.014 && h2(ri, k, 16) < 0.55) {
         const lado = h2(ri, k, 17) < 0.5 ? -1 : 1
         const t2 = tam * (0.5 + 0.2 * h2(ri, k, 18))
+        if (tam > 18 && h2(ri, k, 27) < 0.5) {
+          const tm = tam * (0.68 + 0.1 * h2(ri, k, 28))
+          tentar({ x: x - p.nx * lado * larg * (0.5 + 0.4 * h2(ri, k, 29)) + p.ny * 6, y: y - p.ny * lado * larg * (0.5 + 0.4 * h2(ri, k, 29)) - p.nx * 6, tipo: 'montanha', tam: tm, neve: false, rot: 0, v: h2(ri, k, 30), origem: 'cume' }, 8 + tm * 0.45, A.margemAgua - 4)
+        }
         tentar({ x: x + p.nx * lado * larg * (0.55 + 0.5 * h2(ri, k, 26)), y: y + p.ny * lado * larg * (0.55 + 0.5 * h2(ri, k, 26)), tipo: 'montanha', tam: t2, neve: false, rot: 0, v: h2(ri, k, 19), origem: 'cume' }, 8 + t2 * 0.45, A.margemAgua - 4)
       }
       if (h2(ri, k, 20) < 0.22 * env + 0.05) {
@@ -448,6 +461,8 @@ interface Cores {
   neveSombra: string
   tinta: string
   hachura: string
+  /** Thin rim drawn under each tree so overlapping crowns keep a readable contour. */
+  halo: string
 }
 
 const cores = (modo: ModoDesenho): Cores =>
@@ -463,6 +478,7 @@ const cores = (modo: ModoDesenho): Cores =>
         neveSombra: PALETA_TERRASEN.neveSombra,
         tinta: 'rgba(64,56,45,0.9)',
         hachura: 'rgba(40,36,30,0.55)',
+        halo: 'rgba(14,30,28,0.62)',
       }
     : {
         escuro: 'rgba(78,62,40,0.78)',
@@ -475,6 +491,7 @@ const cores = (modo: ModoDesenho): Cores =>
         neveSombra: '#e2d2a6',
         tinta: 'rgba(62,44,28,0.92)',
         hachura: 'rgba(62,44,28,0.6)',
+        halo: 'rgba(238,226,190,0.8)',
       }
 
 function tri(ctx: CanvasRenderingContext2D, ax: number, ay: number, bx: number, by: number, cx: number, cy: number, fill: string) {
@@ -496,6 +513,21 @@ function conifera(ctx: CanvasRenderingContext2D, g: GlifoT, estilo: EstiloTerras
   ctx.lineJoin = 'round'
   ctx.lineCap = 'round'
   if (estilo === 'A') {
+    // rim first: one silhouette (the three tiers) in the halo colour, slightly wider than the tree
+    ctx.strokeStyle = c.halo
+    ctx.fillStyle = c.halo
+    ctx.lineWidth = 2.6
+    for (let i = 0; i < 3; i++) {
+      const w = s * (0.98 - 0.24 * i)
+      const base = s * 0.15 - i * s * 0.52
+      ctx.beginPath()
+      ctx.moveTo(-w, base)
+      ctx.lineTo(0, base - s * 0.95)
+      ctx.lineTo(w, base)
+      ctx.closePath()
+      ctx.fill()
+      ctx.stroke()
+    }
     ctx.strokeStyle = c.tinta
     ctx.lineWidth = 1
     for (let i = 0; i < 3; i++) {
@@ -518,6 +550,16 @@ function conifera(ctx: CanvasRenderingContext2D, g: GlifoT, estilo: EstiloTerras
   } else if (estilo === 'B') {
     const w = s * 0.62
     const top = -s * 1.7
+    ctx.strokeStyle = c.halo
+    ctx.fillStyle = c.halo
+    ctx.lineWidth = 2.6
+    ctx.beginPath()
+    ctx.moveTo(-w, 0)
+    ctx.lineTo(0, top)
+    ctx.lineTo(w, 0)
+    ctx.closePath()
+    ctx.fill()
+    ctx.stroke()
     tri(ctx, -w, 0, 0, top, w, 0, c.luz)
     tri(ctx, 0, 0, 0, top, w, 0, c.escuro)
     ctx.strokeStyle = c.hachura
@@ -581,40 +623,45 @@ function montanha(ctx: CanvasRenderingContext2D, g: GlifoT, estilo: EstiloTerras
   ctx.lineJoin = 'round'
   ctx.lineCap = 'round'
   ctx.strokeStyle = c.tinta
-  const cume = (cx: number, h: number, w: number, snow: boolean, hatch: boolean) => {
-    tri(ctx, cx - w, 0, cx - w * 0.1, -h, cx + w * 0.1, 0, c.rochaLuz)
-    tri(ctx, cx - w * 0.1, -h, cx + w, 0, cx + w * 0.1, 0, c.rochaSombra)
+  /** `a` = apex offset as a fraction of w (default -0.1 keeps the original look); `nh` hatch lines; `wl` left-foot factor. */
+  const cume = (cx: number, h: number, w: number, snow: boolean, hatch: boolean, a = -0.1, nh = 4, wl = 1) => {
+    const ax = cx + w * a
+    const bx = ax + w * 0.2
+    const wr = w // right foot
+    tri(ctx, cx - w * wl, 0, ax, -h, bx, 0, c.rochaLuz)
+    tri(ctx, ax, -h, cx + wr, 0, bx, 0, c.rochaSombra)
     if (hatch) {
       ctx.strokeStyle = c.hachura
       ctx.lineWidth = 0.8
-      for (let i = 1; i <= 4; i++) {
-        const t = i / 5
+      const span = cx + wr - bx
+      for (let i = 1; i <= nh; i++) {
+        const t = i / (nh + 1)
         ctx.beginPath()
-        ctx.moveTo(cx + w * 0.1 + w * 0.8 * t * 0.5, -h * (1 - t) + h * 0.05)
-        ctx.lineTo(cx + w * 0.1 + w * 0.8 * t * 0.9, -h * (1 - t) * 0.5 - h * 0.05 + h * 0.2 * t)
+        ctx.moveTo(bx + span * 0.55 * t * 0.9, -h * (1 - t) + h * 0.05)
+        ctx.lineTo(bx + span * 1.0 * t * 0.9, -h * (1 - t) * 0.5 - h * 0.05 + h * 0.2 * t)
         ctx.stroke()
       }
     }
     if (snow) {
       const k = 0.36
       ctx.beginPath()
-      ctx.moveTo(cx - w * 0.1, -h)
-      ctx.lineTo(cx - w * 0.1 - w * k, -h * (1 - k * 1.1))
-      ctx.lineTo(cx - w * 0.1 - w * k * 0.35, -h * (1 - k * 0.95))
-      ctx.lineTo(cx - w * 0.02, -h * (1 - k * 1.15))
-      ctx.lineTo(cx + w * 0.12, -h * (1 - k * 0.95))
-      ctx.lineTo(cx - w * 0.1 + w * k, -h * (1 - k * 1.1))
+      ctx.moveTo(ax, -h)
+      ctx.lineTo(ax - w * k, -h * (1 - k * 1.1))
+      ctx.lineTo(ax - w * k * 0.35, -h * (1 - k * 0.95))
+      ctx.lineTo(ax + w * 0.08, -h * (1 - k * 1.15))
+      ctx.lineTo(bx + w * 0.02, -h * (1 - k * 0.95))
+      ctx.lineTo(ax + w * k, -h * (1 - k * 1.1))
       ctx.closePath()
       ctx.fillStyle = c.neve
       ctx.fill()
-      tri(ctx, cx - w * 0.1, -h, cx - w * 0.1 + w * k, -h * (1 - k * 1.1), cx + w * 0.12, -h * (1 - k * 0.95), c.neveSombra)
+      tri(ctx, ax, -h, ax + w * k, -h * (1 - k * 1.1), bx + w * 0.02, -h * (1 - k * 0.95), c.neveSombra)
     }
     ctx.strokeStyle = c.tinta
     ctx.lineWidth = 1.4
     ctx.beginPath()
-    ctx.moveTo(cx - w, 0)
-    ctx.lineTo(cx - w * 0.1, -h)
-    ctx.lineTo(cx + w, 0)
+    ctx.moveTo(cx - w * wl, 0)
+    ctx.lineTo(ax, -h)
+    ctx.lineTo(cx + wr, 0)
     ctx.stroke()
   }
   if (g.tipo === 'colina') {
@@ -623,9 +670,31 @@ function montanha(ctx: CanvasRenderingContext2D, g: GlifoT, estilo: EstiloTerras
     cume(s * 0.6, s * 0.95, s * 0.7, false, false)
     cume(-s * 0.1, s * 1.4, s * 1.0, neve, false)
   } else if (estilo === 'B') {
-    cume(-s * 0.8, s * 0.8, s * 0.46, false, true)
-    cume(s * 0.82, s * 0.95, s * 0.5, false, true)
-    cume(0, s * 1.4, s * 0.68, neve, true)
+    // B: controlled variation driven by g.v (deterministic): proportion, lean, hatch density, and the
+    // composition (main + both flanks / main + one flank / main + a low shoulder). Light always from the left.
+    const v = g.v
+    const q = (k: number) => {
+      const s = Math.sin(v * 127.1 + k * 311.7) * 43758.5453
+      return s - Math.floor(s) // deterministic 0..1 per facet
+    }
+    const comp = v < 0.4 ? 0 : v < 0.7 ? 1 : 2
+    const wMain = s * (0.56 + 0.24 * q(1)) // slender .. broad
+    const hMain = s * (1.22 + 0.34 * q(2)) // low .. tall
+    const lean = -0.4 + 0.65 * q(3) // apex offset: leans left (-.4) or right (+.25)
+    const nh = 3 + Math.floor(q(4) * 3)
+    if (comp === 0) {
+      cume(-s * (0.74 + 0.14 * q(5)), s * (0.66 + 0.2 * q(6)), s * (0.4 + 0.1 * q(7)), false, true, -0.1 + 0.2 * (q(8) - 0.5), 3)
+      cume(s * (0.74 + 0.16 * q(9)), s * (0.8 + 0.2 * q(10)), s * (0.42 + 0.12 * q(11)), false, true, -0.1 + 0.3 * (q(12) - 0.5), 3)
+      cume(0, hMain, wMain, neve, true, lean, nh)
+    } else if (comp === 1) {
+      const lado = q(13) < 0.5 ? -1 : 1
+      cume(lado * s * (0.7 + 0.2 * q(14)), s * (0.7 + 0.25 * q(15)), s * (0.4 + 0.14 * q(16)), false, true, -0.1 + 0.3 * (q(17) - 0.5), 3)
+      cume(-lado * s * 0.08, hMain, wMain * 1.08, neve, true, lean, nh)
+    } else {
+      cume(-s * 0.45, hMain * 0.72, wMain * 0.8, false, true, lean * 0.6, 3)
+      cume(s * 0.35, hMain, wMain * 0.95, neve, true, lean, nh)
+      cume(s * 1.0, s * 0.62, s * 0.36, false, false, -0.15, 3)
+    }
   } else {
     // C: rounded engraved mass with vertical hatching on the shaded side and strata on the lit side
     ctx.beginPath()
