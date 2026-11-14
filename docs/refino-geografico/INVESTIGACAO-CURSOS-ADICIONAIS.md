@@ -4,6 +4,17 @@
 `src/data/hidrografia.json` como `candidatos` com `status: "aguardando-decisao"`, e há testes que impedem
 qualquer um deles de ser desenhado antes da aprovação.
 
+## Decisões da autora (registradas em `hidrografia.json`, campo `decisao`)
+
+| # | Curso | Decisão |
+|---|---|---|
+| 7 | Rio de Orynth | **Implementado experimentalmente** na branch `hidrografia`. Posição de Orynth e costa aprovada preservadas; segue só os pontos lidos, sem curvas nem afluentes. |
+| 7 | Saída do lago de Perranth | **Desativada.** |
+| 8 | Avery para o sul | **Não implementar.** A ligação com o lago não está confirmada. Se for confirmada, a colisão com Morath será tratada por deslocamento *visual* do marcador, sem alterar coordenadas geográficas, e o curso não será desviado. |
+| 9 | Tronco do Pântano | **Pendente**, junto com os afluentes: confirmar origem, confluência e continuidade. |
+| 10 | Desfiladeiro de Ferro | **Não implementar como rio:** a linha pode representar outro elemento geográfico. |
+| — | Lago de Orynth | **Desativado e pendente** de confirmação. |
+
 **Método:** cada região do mapa impresso foi ampliada de 7× a 9× (digitalização de 736 px, então toda posição tem
 incerteza de ±0,01 do mapa, ≈ 24 px). Os cursos foram colocados sobre a geografia aprovada (v3) e medidos por
 código, não só a olho. Coordenadas normalizadas (0 a 1), contadas do canto superior esquerdo.

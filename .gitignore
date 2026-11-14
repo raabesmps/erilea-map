@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# local reference sheets that contain the printed map (never published)
+referencia-local/
