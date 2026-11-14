@@ -104,7 +104,7 @@ Tipos: `cidade`, `fortaleza`, `floresta`, `montanha`, `regiao`, `porto`, `mina`.
 - [ ] Conferir **em qual livro cada lugar aparece** (a trava de spoiler é palpite) e as leituras incertas do mapa
 - [x] Metade oeste completa (Reino das Bruxas, Terra Desértica, Deserto Vermelho, Golfo de Oro…) e rótulos dos mares
 - [x] Colorização por biomas, rios e botão Colorido/Sépia (guia de arte)
-- [ ] Lagos e mais rios, conforme as descrições do livro
+- [x] Hidrografia lida do impresso: lagos de Eyllwe e de Perranth (contorno lido) e rio de Orynth; demais cursos e lagos documentados e desativados em `docs/refino-geografico/`
 - [ ] Continente do sul (Antica): não está no mapa impresso, precisa de outra fonte
 - [ ] Lugares da metade oeste com leitura duvidosa na digitalização (Oásis, Areias Negras, Cordilheiras Vulcânicas, Yurpa…) ficaram de fora
 - [ ] Modo escuro "à luz de vela"

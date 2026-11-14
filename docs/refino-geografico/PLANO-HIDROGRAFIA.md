@@ -1,6 +1,6 @@
 # Planejamento da hidrografia (lagos e cursos de água)
 
-**Status:** planejamento. Nada disto está implementado. Só entra depois da geografia (v3) ser aprovada.
+**Status (atualizado):** hidrografia aprovada pela autora. **Ativos:** lago ao norte de Eyllwe (contorno lido, 26 vértices), lago de Perranth (contorno lido) e rio de Orynth (sem afluentes). **Desativados e documentados:** lago de Anielle, curso de Melisande, lago pequeno do Pântano, tronco e afluentes do Pântano, Avery para o sul, linha do Desfiladeiro de Ferro, lago de Orynth e saída do lago de Perranth.
 
 **Regra de ouro (decisão da autora):** não inventar nomes, formatos nem conexões. Cada elemento abaixo foi
 lido de uma digitalização de 736 px do mapa impresso, então **toda posição tem incerteza de ±0,01 do mapa**

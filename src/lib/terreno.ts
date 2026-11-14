@@ -1,4 +1,5 @@
-﻿import { paintColorido } from './colorir'
+﻿import { desenharHidroClassico, paintColorido, tracarRios } from './colorir'
+import { ativos, criarObstaculos, lagoPoligono, rioPontos, type NivelHidro, type Obstaculos } from './hidrografia'
 import { criarGeografia, GEO_PADRAO, mulberry32, MAP_H, MAP_W, type GeoId } from './geografia'
 
 export type MapStyle = 'colorido' | 'classico'
@@ -17,7 +18,7 @@ const LAND_HI: [number, number, number] = [214, 190, 142]
 const SEA: [number, number, number] = [205, 192, 154]
 const SEA_DEEP: [number, number, number] = [188, 172, 132]
 
-export function renderTerrain(W = MAP_W, H = MAP_H, seed = 11, style: MapStyle = 'colorido', geo: GeoId = GEO_PADRAO): HTMLCanvasElement {
+export function renderTerrain(W = MAP_W, H = MAP_H, seed = 11, style: MapStyle = 'colorido', geo: GeoId = GEO_PADRAO, nivel: NivelHidro = 'alta'): HTMLCanvasElement {
   const rnd = mulberry32(seed)
   const { elevacao, ruido: n2 } = criarGeografia(rnd, W, H, geo)
 
@@ -31,7 +32,7 @@ export function renderTerrain(W = MAP_W, H = MAP_H, seed = 11, style: MapStyle =
   const at = (x: number, y: number) => elev[Math.min(H - 1, Math.max(0, y)) * W + Math.min(W - 1, Math.max(0, x))]!
 
   if (style === 'colorido') {
-    paintColorido({ ctx, W, H, elev, at, rnd, noise: n2 })
+    paintColorido({ ctx, W, H, elev, at, rnd, noise: n2, hidro: ativos(nivel) })
     drawFrame(ctx, W, H)
     drawCompass(ctx, W * 0.95, H * 0.905, 54, true)
     return canvas
@@ -93,7 +94,11 @@ export function renderTerrain(W = MAP_W, H = MAP_H, seed = 11, style: MapStyle =
   }
   ctx.putImageData(img, 0, 0)
 
-  drawGlyphs(ctx, W, H, at, rnd, n2)
+  const hidro = ativos(nivel)
+  const lagos = hidro.lagos.map((l) => lagoPoligono(l, W, H))
+  const rios = [...tracarRios({ W, H, at, noise: n2 }, hidro.substituidos).map((r) => r.pts), ...hidro.rios.map((r) => rioPontos(r, W, H, at))]
+  desenharHidroClassico(ctx, lagos, rios)
+  drawGlyphs(ctx, W, H, at, rnd, n2, criarObstaculos(lagos, rios))
   drawAging(ctx, W, H)
   drawFrame(ctx, W, H)
   drawCompass(ctx, W * 0.95, H * 0.905, 54, false)
@@ -107,6 +112,7 @@ function drawGlyphs(
   at: (x: number, y: number) => number,
   rnd: () => number,
   noise: (x: number, y: number) => number,
+  obst?: Obstaculos,
 ) {
   ctx.lineJoin = 'round'
   ctx.lineCap = 'round'
@@ -120,12 +126,16 @@ function drawGlyphs(
       // low-frequency noise groups the glyphs into mountain ranges and woods
       const range = noise((x / W) * 5 + 30, (y / W) * 5 + 30)
       const wood = noise((x / W) * 6 + 60, (y / W) * 6)
+      // same random draws as always; glyphs touching water are skipped only at draw time
       if (range > 0.28 && e > 0.18 && rnd() < 0.65) {
-        mountain(ctx, x, y, 12 + rnd() * 10)
+        const s = 12 + rnd() * 10
+        if (!obst?.perto(x, y, 6 + s * 0.8)) mountain(ctx, x, y, s)
       } else if (wood > 0.12 && e > 0.1 && rnd() < 0.55) {
-        tree(ctx, x, y, 6 + rnd() * 4)
+        const s = 6 + rnd() * 4
+        if (!obst?.perto(x, y, 6 + s * 0.8)) tree(ctx, x, y, s)
       } else if (rnd() < 0.025) {
-        hill(ctx, x, y, 10 + rnd() * 6)
+        const s = 10 + rnd() * 6
+        if (!obst?.perto(x, y, 6 + s * 0.8)) hill(ctx, x, y, s)
       }
     }
   }

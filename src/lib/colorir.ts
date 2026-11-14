@@ -1,4 +1,5 @@
 import biomasData from '../data/biomas.json'
+import { ativos, catmullRom, criarObstaculos, dentroDoPoligono, lagoPoligono, rioPontos, type HidroAtiva, type Obstaculos } from './hidrografia'
 
 /**
  * Coloured painter, following the project's art direction guide.
@@ -52,6 +53,8 @@ export interface PaintCtx {
   at: (x: number, y: number) => number
   rnd: () => number
   noise: (x: number, y: number) => number
+  /** Active lakes and rivers read from the printed map; defaults to the highest-confidence tier. */
+  hidro?: HidroAtiva
 }
 
 const INK: RGB = [64, 56, 45] // #40382D from the guide
@@ -78,7 +81,7 @@ interface Field {
   best: Uint8Array
 }
 
-function buildField(W: number, H: number, noise: (x: number, y: number) => number): Field {
+export function buildField(W: number, H: number, noise: (x: number, y: number) => number): Field {
   const LW = Math.ceil(W / S)
   const LH = Math.ceil(H / S)
   const r = new Float32Array(LW * LH)
@@ -228,9 +231,13 @@ export function paintColorido(p: PaintCtx) {
   }
   ctx.putImageData(img, 0, 0)
 
+  const hidro = p.hidro ?? ativos('alta')
+  const lagos = hidro.lagos.map((l) => lagoPoligono(l, W, H))
+  const rios = [...tracarRios(p, hidro.substituidos).map((r) => r.pts), ...hidro.rios.map((r) => rioPontos(r, W, H, at))]
   drawWaves(p)
-  drawRivers(p)
-  drawGlyphs(p, field)
+  for (const poly of lagos) drawLake(ctx, poly)
+  drawRiverSet(ctx, rios)
+  drawGlyphs(p, field, criarObstaculos(lagos, rios))
 
   // aged-paper vignette, lighter than the sepia style so the colour stays readable
   const g = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.4, W / 2, H / 2, Math.max(W, H) * 0.72)
@@ -292,37 +299,17 @@ function seaDistance(W: number, H: number, at: (x: number, y: number) => number)
   return get
 }
 
-/** Catmull-Rom spline through the waypoints, sampled about every `step` px. */
-function catmullRom(p: { x: number; y: number }[], step: number) {
-  const out: { x: number; y: number }[] = []
-  for (let i = 0; i < p.length - 1; i++) {
-    const p0 = p[Math.max(0, i - 1)]!
-    const p1 = p[i]!
-    const p2 = p[i + 1]!
-    const p3 = p[Math.min(p.length - 1, i + 2)]!
-    const n = Math.max(2, Math.round(Math.hypot(p2.x - p1.x, p2.y - p1.y) / step))
-    for (let k = 0; k < n; k++) {
-      const t = k / n
-      const t2 = t * t
-      const t3 = t2 * t
-      const f = (a: number, b: number, c: number, d: number) => 0.5 * (2 * b + (-a + c) * t + (2 * a - 5 * b + 4 * c - d) * t2 + (-a + 3 * b - 3 * c + d) * t3)
-      out.push({ x: f(p0.x, p1.x, p2.x, p3.x), y: f(p0.y, p1.y, p2.y, p3.y) })
-    }
-  }
-  out.push(p[p.length - 1]!)
-  return out
-}
-
 export interface Rio {
   id: string
   pts: { x: number; y: number }[]
 }
 
 /** Rivers wander from their sources down to the sea (pure: no canvas involved). */
-export function tracarRios({ W, H, at, noise }: Pick<PaintCtx, 'W' | 'H' | 'at' | 'noise'>): Rio[] {
+export function tracarRios({ W, H, at, noise }: Pick<PaintCtx, 'W' | 'H' | 'at' | 'noise'>, ignorar?: Set<string>): Rio[] {
   const dist = seaDistance(W, H, at)
   const rios: Rio[] = []
   B.rios.forEach((src, idx) => {
+    if (ignorar?.has(src.id)) return
     if (src.pontos) {
       // named river with explicit waypoints (e.g. the Avery): smooth them, then run on to the sea
       const way = src.pontos.map(([px, py]) => ({ x: px * W, y: py * H }))
@@ -363,10 +350,8 @@ export function tracarRios({ W, H, at, noise }: Pick<PaintCtx, 'W' | 'H' | 'at' 
   return rios
 }
 
-/** Draws the traced rivers, widening toward the mouth. */
-function drawRivers(p: PaintCtx) {
-  const { ctx } = p
-  const rivers = tracarRios(p).map((r) => r.pts)
+/** Draws river courses, widening toward the mouth. */
+function drawRiverSet(ctx: CanvasRenderingContext2D, rivers: { x: number; y: number }[][]) {
   ctx.lineCap = 'round'
   ctx.lineJoin = 'round'
   for (const pass of [0, 1]) {
@@ -385,14 +370,144 @@ function drawRivers(p: PaintCtx) {
   }
 }
 
-interface Glyph {
+/** Smooth closed path through the outline points (midpoint quadratics). */
+export function tracaSuave(ctx: CanvasRenderingContext2D, pts: [number, number][]) {
+  const n = pts.length
+  const mid = (a: [number, number], b: [number, number]): [number, number] => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]
+  const m0 = mid(pts[n - 1]!, pts[0]!)
+  ctx.beginPath()
+  ctx.moveTo(m0[0], m0[1])
+  for (let i = 0; i < n; i++) {
+    const m = mid(pts[i]!, pts[(i + 1) % n]!)
+    ctx.quadraticCurveTo(pts[i]![0], pts[i]![1], m[0], m[1])
+  }
+  ctx.closePath()
+}
+
+function centro(poly: [number, number][]): { cx: number; cy: number; r: number } {
+  const cx = poly.reduce((a, q) => a + q[0], 0) / poly.length
+  const cy = poly.reduce((a, q) => a + q[1], 0) / poly.length
+  const r = poly.reduce((a, q) => a + Math.hypot(q[0] - cx, q[1] - cy), 0) / poly.length
+  return { cx, cy, r }
+}
+
+function escalar(poly: [number, number][], f: number): [number, number][] {
+  const { cx, cy } = centro(poly)
+  return poly.map(([x, y]) => [cx + (x - cx) * f, cy + (y - cy) * f])
+}
+
+/** Deterministic jitter: lake art must not consume the shared random stream. */
+const jitter = (i: number, j: number) => {
+  const h = Math.imul(i * 73856093 ^ j * 19349663, 2654435761) >>> 0
+  return (h & 1023) / 1023
+}
+
+/** A lake: sandy shore, graded water, sepia wave strokes and the same double contour as the coast. */
+function drawLake(ctx: CanvasRenderingContext2D, poly: [number, number][]) {
+  const { cx, cy, r } = centro(poly)
+  tracaSuave(ctx, escalar(poly, 1.14))
+  ctx.fillStyle = 'rgba(216,197,154,0.5)'
+  ctx.fill()
+  tracaSuave(ctx, poly)
+  const g = ctx.createRadialGradient(cx, cy, r * 0.12, cx, cy, r * 1.05)
+  g.addColorStop(0, '#4F8AA2')
+  g.addColorStop(0.65, '#6FA2B5')
+  g.addColorStop(1, '#9CC3C9')
+  ctx.fillStyle = g
+  ctx.fill()
+  ctx.save()
+  tracaSuave(ctx, poly)
+  ctx.clip()
+  ctx.strokeStyle = 'rgba(64,56,45,0.3)'
+  ctx.lineWidth = 1.3
+  ctx.lineCap = 'round'
+  for (let y = cy - r; y < cy + r; y += 13) {
+    for (let x = cx - r; x < cx + r; x += 17) {
+      const jx = x + (jitter(x | 0, y | 0) - 0.5) * 9
+      const jy = y + (jitter(y | 0, x | 0) - 0.5) * 6
+      if (!dentroDoPoligono(jx, jy, escalar(poly, 0.8))) continue
+      ctx.beginPath()
+      ctx.moveTo(jx - 5, jy)
+      ctx.quadraticCurveTo(jx - 2.5, jy - 3, jx, jy)
+      ctx.quadraticCurveTo(jx + 2.5, jy + 3, jx + 5, jy)
+      ctx.stroke()
+    }
+  }
+  ctx.restore()
+  tracaSuave(ctx, poly)
+  ctx.strokeStyle = INK_HEX
+  ctx.lineWidth = 2.4
+  ctx.stroke()
+  tracaSuave(ctx, escalar(poly, 1.07))
+  ctx.strokeStyle = 'rgba(64,56,45,0.4)'
+  ctx.lineWidth = 1.2
+  ctx.stroke()
+}
+
+/** Sepia style: lakes and rivers in ink on the parchment wash, no colour. */
+export function desenharHidroClassico(ctx: CanvasRenderingContext2D, lagos: [number, number][][], rios: { x: number; y: number }[][]) {
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+  for (const pts of rios) {
+    for (const pass of [0, 1]) {
+      for (let i = 1; i < pts.length; i++) {
+        const t = i / pts.length
+        const wd = 1.6 + 3.6 * t * t
+        ctx.strokeStyle = pass === 0 ? INK_HEX : 'rgba(224,208,166,0.95)'
+        ctx.lineWidth = pass === 0 ? wd + 1.8 : wd
+        ctx.beginPath()
+        ctx.moveTo(pts[i - 1]!.x, pts[i - 1]!.y)
+        ctx.lineTo(pts[i]!.x, pts[i]!.y)
+        ctx.stroke()
+      }
+    }
+  }
+  for (const poly of lagos) {
+    const { cx, cy, r } = centro(poly)
+    tracaSuave(ctx, poly)
+    ctx.fillStyle = 'rgba(200,184,142,0.55)'
+    ctx.fill()
+    ctx.save()
+    tracaSuave(ctx, poly)
+    ctx.clip()
+    ctx.strokeStyle = 'rgba(64,56,45,0.35)'
+    ctx.lineWidth = 1.2
+    for (let y = cy - r; y < cy + r; y += 7) {
+      ctx.beginPath()
+      ctx.moveTo(cx - r, y)
+      ctx.lineTo(cx + r, y)
+      ctx.stroke()
+    }
+    ctx.restore()
+    tracaSuave(ctx, poly)
+    ctx.strokeStyle = INK_HEX
+    ctx.lineWidth = 2.4
+    ctx.stroke()
+    tracaSuave(ctx, escalar(poly, 1.07))
+    ctx.strokeStyle = 'rgba(64,56,45,0.4)'
+    ctx.lineWidth = 1.2
+    ctx.stroke()
+  }
+}
+
+export interface Glyph {
+  x: number
   y: number
+  tipo: 'montanha' | 'conifera' | 'arvore' | 'duna' | 'junco' | 'colina'
+  /** Half-extent used for the clearance test, px. */
+  tam: number
   draw: () => void
 }
 
-function drawGlyphs({ ctx, W, H, at, rnd, noise }: PaintCtx, field: Field) {
-  ctx.lineJoin = 'round'
-  ctx.lineCap = 'round'
+/**
+ * Decides where every glyph goes. It consumes the random stream exactly like before, and glyphs
+ * that would touch water are dropped only at the very end, so the rest of the map keeps its layout.
+ */
+export function planejarGlifos(
+  { ctx, W, H, at, rnd, noise }: Pick<PaintCtx, 'W' | 'H' | 'at' | 'rnd' | 'noise'> & { ctx?: CanvasRenderingContext2D },
+  field: Field,
+  obst?: Obstaculos,
+): Glyph[] {
   const ops: Glyph[] = []
   const step = 22
   for (let gy = 90; gy < H - 90; gy += step) {
@@ -410,27 +525,38 @@ function drawGlyphs({ ctx, W, H, at, rnd, noise }: PaintCtx, field: Field) {
       const range = noise((x / W) * 5 + 30, (y / W) * 5 + 30)
       const wood = noise((x / W) * 6 + 60, (y / W) * 6)
       const r = rnd()
+      const add = (tipo: Glyph['tipo'], tam: number, draw: () => void) => {
+        if (!obst?.perto(x, y, 6 + tam * 0.8)) ops.push({ x, y, tipo, tam, draw })
+      }
 
       if (g.montanha && range > (g.montanha >= 0.8 ? -0.3 : 0.2) && r < g.montanha * 0.7) {
         const s = 11 + rnd() * 10
-        ops.push({ y, draw: () => mountain(ctx, x, y, s, rock, snow) })
+        add('montanha', s, () => mountain(ctx!, x, y, s, rock, snow))
       } else if (g.conifera && rnd() < g.conifera * (wood > 0 ? 1 : 0.3)) {
         const s = 8 + rnd() * 4
-        ops.push({ y, draw: () => conifer(ctx, x, y, s, tree) })
+        add('conifera', s, () => conifer(ctx!, x, y, s, tree))
       } else if (g.arvore && rnd() < g.arvore * (wood > -0.1 ? 1 : 0.35)) {
         const s = 6 + rnd() * 4
-        ops.push({ y, draw: () => roundTree(ctx, x, y, s, tree) })
+        add('arvore', s, () => roundTree(ctx!, x, y, s, tree))
       } else if (g.duna && rnd() < g.duna) {
         const s = 6 + rnd() * 5
-        ops.push({ y, draw: () => dune(ctx, x, y, s, rock) })
+        add('duna', s, () => dune(ctx!, x, y, s, rock))
       } else if (g.junco && rnd() < g.junco) {
-        ops.push({ y, draw: () => reed(ctx, x, y) })
+        add('junco', 6, () => reed(ctx!, x, y))
       } else if (g.colina && rnd() < g.colina) {
         const s = 10 + rnd() * 6
-        ops.push({ y, draw: () => hill(ctx, x, y, s) })
+        add('colina', s, () => hill(ctx!, x, y, s))
       }
     }
   }
+  return ops
+}
+
+function drawGlyphs(p: PaintCtx, field: Field, obst?: Obstaculos) {
+  const { ctx } = p
+  ctx.lineJoin = 'round'
+  ctx.lineCap = 'round'
+  const ops = planejarGlifos(p, field, obst)
   // far-to-near so nearer glyphs overlap the ones behind them
   ops.sort((a, b) => a.y - b.y)
   for (const o of ops) o.draw()
