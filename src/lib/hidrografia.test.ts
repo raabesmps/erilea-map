@@ -36,16 +36,23 @@ describe('hidrografia: dados e regras de confiança', () => {
     for (const x of [...HIDROGRAFIA.lagos, ...HIDROGRAFIA.pendentes, ...HIDROGRAFIA.rios]) expect(x.nome, x.id).toBeNull()
   })
 
-  it('o nível padrão ("alta") desenha só os dois lagos de maior confiança', () => {
+  it('o nível padrão ("alta") desenha os dois lagos de alta confiança e o rio de Orynth (experimental)', () => {
     const a = ativos('alta')
     expect(a.lagos.map((l) => l.id)).toEqual(['lago-eyllwe-norte', 'lago-perranth'])
-    expect(a.rios).toEqual([])
+    expect(a.rios.map((r) => r.id)).toEqual(['rio-orynth'])
+  })
+
+  it('o nível "nenhuma" não desenha hidrografia (serve para as imagens de "antes")', () => {
+    const n = ativos('nenhuma')
+    expect(n.lagos).toEqual([])
+    expect(n.rios).toEqual([])
+    expect(n.substituidos.size).toBe(0)
   })
 
   it('o nível "media" acrescenta os de média confiança e substitui o rio gerado de Melisande', () => {
     const m = ativos('media')
     expect(m.lagos.map((l) => l.id)).toEqual(['lago-eyllwe-norte', 'lago-perranth', 'lago-anielle', 'lago-pantano-pequeno'])
-    expect(m.rios.map((r) => r.id)).toEqual(['rio-melisande-curso'])
+    expect(m.rios.map((r) => r.id)).toEqual(['rio-orynth', 'rio-melisande-curso'])
     expect([...m.substituidos]).toEqual(['melisande-1'])
   })
 
@@ -64,18 +71,34 @@ describe('hidrografia: dados e regras de confiança', () => {
     for (const n of todosOsNiveis) expect(ativos(n).lagos.map((x) => x.id)).not.toContain('lago-orynth')
   })
 
-  it('os quatro cursos adicionais são candidatos e jamais são desenhados', () => {
-    expect(HIDROGRAFIA.candidatos.map((c) => c.id).sort()).toEqual(['avery-sul', 'desfiladeiro-ferro', 'rio-orynth', 'saida-perranth', 'tronco-pantano'])
-    for (const c of HIDROGRAFIA.candidatos) expect(c.status).toBe('aguardando-decisao')
+  it('Avery-sul, tronco do Pântano, Desfiladeiro e saída de Perranth são candidatos, com a decisão da autora, e jamais são desenhados', () => {
+    expect(HIDROGRAFIA.candidatos.map((c) => c.id).sort()).toEqual(['avery-sul', 'desfiladeiro-ferro', 'saida-perranth', 'tronco-pantano'])
+    for (const c of HIDROGRAFIA.candidatos) {
+      expect(c.status).toBe('aguardando-decisao')
+      expect(c.decisao!.length, c.id).toBeGreaterThan(20)
+    }
+    expect(HIDROGRAFIA.candidatos.find((c) => c.id === 'avery-sul')!.decisao).toMatch(/NÃO implementar/)
+    expect(HIDROGRAFIA.candidatos.find((c) => c.id === 'desfiladeiro-ferro')!.decisao).toMatch(/NÃO implementar como rio/)
     for (const n of todosOsNiveis) {
       const ids = new Set(ativos(n).rios.map((r) => r.id))
       for (const c of HIDROGRAFIA.candidatos) expect(ids.has(c.id), c.id).toBe(false)
     }
   })
 
-  it('afluentes só aparecem se o rio de que dependem estiver ativo (o tronco ainda não foi autorizado)', () => {
-    const ids = ativos('media').rios.map((r) => r.id)
-    for (const r of HIDROGRAFIA.rios.filter((x) => x.depende_de)) expect(ids, r.id).not.toContain(r.id)
+  it('afluentes do Pântano estão pendentes e jamais são desenhados', () => {
+    const afluentes = HIDROGRAFIA.rios.filter((x) => x.id.startsWith('afluente-pantano'))
+    expect(afluentes.length).toBe(3)
+    for (const n of todosOsNiveis) {
+      const ids = ativos(n).rios.map((r) => r.id)
+      for (const r of afluentes) {
+        expect(r.pendente, r.id).toBe(true)
+        expect(ids, r.id).not.toContain(r.id)
+      }
+    }
+  })
+
+  it('rios pendentes nunca são desenhados', () => {
+    for (const n of todosOsNiveis) for (const r of ativos(n).rios) expect(r.pendente, r.id).not.toBe(true)
   })
 })
 
@@ -107,6 +130,20 @@ describe('hidrografia: lagos', () => {
         expect(distanciaAoPoligono(p.x * MAP_W, p.y * MAP_H, poly), `${p.id} x ${l.id}`).toBeGreaterThanOrEqual(8)
       }
     }
+  })
+
+  it('o lago do Eyllwe usa o contorno lido do impresso e a forma desenhada o acompanha de perto', () => {
+    const l = lagos.find((x) => x.id === 'lago-eyllwe-norte')!
+    expect(l.contorno!.length).toBeGreaterThanOrEqual(20)
+    const lido = l.contorno!.map(([x, y]) => ({ x: x * MAP_W, y: y * MAP_H }))
+    const closed = [...lido, lido[0]!]
+    for (const [x, y] of lagoPoligono(l)) expect(distanciaAoCurso(x, y, closed), 'ponto do lago longe do contorno lido').toBeLessThanOrEqual(6)
+    // not a symmetric ellipse: the top is broad and the bottom a rounded tip
+    const largura = (yMin: number, yMax: number) => {
+      const xs = lagoPoligono(l).filter(([, y]) => y >= yMin * MAP_H && y <= yMax * MAP_H).map(([x]) => x)
+      return Math.max(...xs) - Math.min(...xs)
+    }
+    expect(largura(0.664, 0.68)).toBeGreaterThan(largura(0.725, 0.74) * 1.4)
   })
 
   it('a forma é orgânica e determinística, no tamanho lido do impresso', () => {
@@ -180,16 +217,65 @@ describe('hidrografia: rios', () => {
     }
   })
 
-  it('nenhum rio passa por baixo do ícone de um lugar (≥ 14 px)', () => {
+  it('nenhum rio passa por baixo do ícone de um lugar (≥ 14 px), exceto a cidade onde ele nasce', () => {
     for (const r of rios) {
       const pts = curso(r)
-      for (const p of lugares) expect(distanciaAoCurso(p.x * MAP_W, p.y * MAP_H, pts), `${r.id} x ${p.id}`).toBeGreaterThanOrEqual(14)
+      for (const p of lugares) {
+        if (r.nasce_em === p.id) continue
+        expect(distanciaAoCurso(p.x * MAP_W, p.y * MAP_H, pts), `${r.id} x ${p.id}`).toBeGreaterThanOrEqual(14)
+      }
     }
+  })
+
+  it('só se aceita nascer num lugar que existe', () => {
+    for (const r of HIDROGRAFIA.rios.filter((x) => x.nasce_em)) expect(lugares.some((p) => p.id === r.nasce_em), r.id).toBe(true)
   })
 
   it('o rio gerado que um rio lido substitui sai do mapa', () => {
     expect(ativos('media').substituidos.has('melisande-1')).toBe(true)
     expect(ativos('alta').substituidos.has('melisande-1')).toBe(false)
+  })
+})
+
+describe('rio de Orynth (experimental): segue a evidência, sem acréscimos', () => {
+  const rio = HIDROGRAFIA.rios.find((r) => r.id === 'rio-orynth')!
+  const orynth = lugares.find((p) => p.id === 'orynth')!
+  const curso = rioPontos(rio, MAP_W, MAP_H, at)
+  const lido = rio.pontos.map(([x, y]) => ({ x: x * MAP_W, y: y * MAP_H }))
+
+  it('é experimental, nasce em Orynth e desemboca no mar', () => {
+    expect(rio.experimental).toBe(true)
+    expect(rio.nasce_em).toBe('orynth')
+    expect(rio.foz.tipo).toBe('mar')
+    expect(rio.nome).toBeNull()
+    expect(rio.confianca).toBe('alta')
+  })
+
+  it('a posição de Orynth não foi alterada e o rio começa nela', () => {
+    expect([orynth.x, orynth.y]).toEqual([0.747, 0.157])
+    const ini = curso[0]!
+    expect(Math.hypot(ini.x - orynth.x * MAP_W, ini.y - orynth.y * MAP_H)).toBeLessThan(12)
+  })
+
+  it('o curso desenhado nunca se afasta mais de 10 px da linha dos pontos lidos (nenhuma curva arbitrária)', () => {
+    for (const q of curso.slice(0, curso.length - 3)) expect(distanciaAoCurso(q.x, q.y, lido)).toBeLessThanOrEqual(10)
+  })
+
+  it('o rio fica em terra até a foz e a foz cai na costa aprovada', () => {
+    const fim = curso[curso.length - 1]!
+    expect(at(Math.round(fim.x), Math.round(fim.y))).toBeLessThanOrEqual(0)
+    const ult = lido[lido.length - 1]!
+    expect(distanciaCosta(elevacao, ult.x, ult.y, 300)).toBeLessThanOrEqual(25)
+  })
+
+  it('não há afluentes: nenhum outro curso se junta a ele, e a saída do lago de Perranth segue desativada', () => {
+    expect(HIDROGRAFIA.rios.filter((r) => r.foz.tipo === 'juncao' && (r.foz as { com: string }).com === 'rio-orynth')).toEqual([])
+    expect(ativos('media').rios.map((r) => r.id)).not.toContain('saida-perranth')
+  })
+
+  it('o rio não toca o lago de Perranth', () => {
+    const lago = lagoPoligono(HIDROGRAFIA.lagos.find((l) => l.id === 'lago-perranth')!)
+    for (const q of curso) expect(distanciaAoPoligono(q.x, q.y, lago)).toBeGreaterThanOrEqual(20)
   })
 })
 
