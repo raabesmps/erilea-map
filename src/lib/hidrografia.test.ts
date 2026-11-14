@@ -36,7 +36,7 @@ describe('hidrografia: dados e regras de confiança', () => {
     for (const x of [...HIDROGRAFIA.lagos, ...HIDROGRAFIA.pendentes, ...HIDROGRAFIA.rios]) expect(x.nome, x.id).toBeNull()
   })
 
-  it('o nível padrão ("alta") desenha os dois lagos de alta confiança e o rio de Orynth (experimental)', () => {
+  it('o nível padrão ("alta") desenha os dois lagos e o rio de Orynth aprovados', () => {
     const a = ativos('alta')
     expect(a.lagos.map((l) => l.id)).toEqual(['lago-eyllwe-norte', 'lago-perranth'])
     expect(a.rios.map((r) => r.id)).toEqual(['rio-orynth'])
@@ -146,6 +146,30 @@ describe('hidrografia: lagos', () => {
     expect(largura(0.664, 0.68)).toBeGreaterThan(largura(0.725, 0.74) * 1.4)
   })
 
+  it('o lago de Perranth usa o contorno lido do impresso, no mesmo tamanho, junto de Perranth, sem a saída do lago', () => {
+    const l = lagos.find((x) => x.id === 'lago-perranth')!
+    expect(l.contorno!.length).toBeGreaterThanOrEqual(16)
+    const lido = l.contorno!.map(([x, y]) => ({ x: x * MAP_W, y: y * MAP_H }))
+    const closed = [...lido, lido[0]!]
+    const poly = lagoPoligono(l)
+    for (const [x, y] of poly) expect(distanciaAoCurso(x, y, closed), 'ponto do lago longe do contorno lido').toBeLessThanOrEqual(6)
+    const xs = poly.map((q) => q[0])
+    const ys = poly.map((q) => q[1])
+    // size read from the print: ~0.030 x 0.030 of the map
+    expect(Math.max(...xs) - Math.min(...xs)).toBeGreaterThan(0.026 * MAP_W)
+    expect(Math.max(...xs) - Math.min(...xs)).toBeLessThan(0.034 * MAP_W)
+    expect(Math.max(...ys) - Math.min(...ys)).toBeGreaterThan(0.026 * MAP_H)
+    expect(Math.max(...ys) - Math.min(...ys)).toBeLessThan(0.036 * MAP_H)
+    // still right beside the Perranth pin, which stays outside the water
+    const pin = lugares.find((p) => p.id === 'perranth')!
+    const d = distanciaAoPoligono(pin.x * MAP_W, pin.y * MAP_H, poly)
+    expect(d).toBeGreaterThanOrEqual(8)
+    expect(d).toBeLessThanOrEqual(30)
+    expect([pin.x, pin.y]).toEqual([0.713, 0.245])
+    // the outlet stays disabled
+    expect(ativos('media').rios.map((r) => r.id)).not.toContain('saida-perranth')
+  })
+
   it('a forma é orgânica e determinística, no tamanho lido do impresso', () => {
     const l = lagos.find((x) => x.id === 'lago-eyllwe-norte')!
     const a = lagoPoligono(l)
@@ -237,14 +261,14 @@ describe('hidrografia: rios', () => {
   })
 })
 
-describe('rio de Orynth (experimental): segue a evidência, sem acréscimos', () => {
+describe('rio de Orynth (aprovado): segue a evidência, sem acréscimos', () => {
   const rio = HIDROGRAFIA.rios.find((r) => r.id === 'rio-orynth')!
   const orynth = lugares.find((p) => p.id === 'orynth')!
   const curso = rioPontos(rio, MAP_W, MAP_H, at)
   const lido = rio.pontos.map(([x, y]) => ({ x: x * MAP_W, y: y * MAP_H }))
 
-  it('é experimental, nasce em Orynth e desemboca no mar', () => {
-    expect(rio.experimental).toBe(true)
+  it('está aprovado, nasce em Orynth e desemboca no mar', () => {
+    expect(rio.experimental).not.toBe(true)
     expect(rio.nasce_em).toBe('orynth')
     expect(rio.foz.tipo).toBe('mar')
     expect(rio.nome).toBeNull()

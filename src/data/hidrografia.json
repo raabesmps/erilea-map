@@ -1,5 +1,5 @@
 {
-  "_nota": "Hidrografia lida do mapa impresso (digitalização de 736 px: toda posição tem incerteza de ±0,01). Coordenadas normalizadas (0..1). Lagos: centro + semi-eixos em px (largura de referência 2400) + rotação em rad. NENHUM elemento tem nome. 'confianca' decide o que é desenhado (nivel 'alta' por padrão; ?hidro=media mostra os de média). 'pendente' e 'candidatos' nunca são desenhados. O rio de Orynth está ativo de forma EXPERIMENTAL na branch hidrografia.",
+  "_nota": "Hidrografia lida do mapa impresso (digitalização de 736 px: toda posição tem incerteza de ±0,01). Coordenadas normalizadas (0..1). Lagos: centro + semi-eixos em px (largura de referência 2400) + rotação em rad. NENHUM elemento tem nome. 'confianca' decide o que é desenhado (nivel 'alta' por padrão; ?hidro=media mostra os de média). 'pendente' e 'candidatos' nunca são desenhados. Aprovados e ativos: lagos de Eyllwe e de Perranth (contorno lido) e rio de Orynth. Todo o resto permanece desativado e documentado.",
   "lagos": [
     {
       "id": "lago-eyllwe-norte",
@@ -14,7 +14,7 @@
       "rot": 1.05,
       "confianca": "alta",
       "nome": null,
-      "ref": "Contorno fechado em traço duplo ao norte de Eyllwe: largo em cima, lado direito quase reto e ponta arredondada embaixo à direita. O contorno foi lido do impresso com uma grade de coordenadas (±0,003). A elipse (semi_px/rot) é só a aproximação anterior. Uma estrada pontilhada passa ao norte dele.",
+      "ref": "Contorno fechado em traço duplo ao norte de Eyllwe: largo em cima, lado direito quase reto e ponta arredondada embaixo à direita. O contorno foi lido do impresso com uma grade de coordenadas (±0,003). A elipse (semi_px/rot) é só a aproximação anterior. Uma estrada pontilhada passa ao norte dele. APROVADO pela autora (26 vértices).",
       "contorno": [
         [
           0.7563,
@@ -135,7 +135,81 @@
       "rot": 0,
       "confianca": "alta",
       "nome": null,
-      "ref": "Contorno fechado junto ao ponto de Perranth. Da ponta leste sai uma linha fina (candidato 'saida-perranth'), que não é desenhada."
+      "ref": "Contorno fechado em traço duplo junto ao ponto de Perranth, quase circular, com o vértice direito onde a linha fina de saída encosta (a saída NÃO é desenhada). Contorno lido do impresso com grade de coordenadas (±0,003; o lado esquerdo, misturado ao hachurado das montanhas, tem ±0,005). A elipse (semi_px/rot) é só a aproximação anterior. APROVADO pela autora com contorno lido.",
+      "contorno": [
+        [
+          0.7098,
+          0.2158
+        ],
+        [
+          0.7141,
+          0.2123
+        ],
+        [
+          0.72,
+          0.2106
+        ],
+        [
+          0.726,
+          0.2108
+        ],
+        [
+          0.7311,
+          0.2135
+        ],
+        [
+          0.7349,
+          0.2181
+        ],
+        [
+          0.7374,
+          0.224
+        ],
+        [
+          0.7385,
+          0.2286
+        ],
+        [
+          0.7389,
+          0.2309
+        ],
+        [
+          0.737,
+          0.2341
+        ],
+        [
+          0.734,
+          0.2376
+        ],
+        [
+          0.7294,
+          0.2399
+        ],
+        [
+          0.7239,
+          0.2406
+        ],
+        [
+          0.7196,
+          0.2399
+        ],
+        [
+          0.7158,
+          0.2373
+        ],
+        [
+          0.7124,
+          0.2327
+        ],
+        [
+          0.7103,
+          0.2268
+        ],
+        [
+          0.7092,
+          0.221
+        ]
+      ]
     },
     {
       "id": "lago-anielle",
@@ -189,7 +263,6 @@
   "rios": [
     {
       "id": "rio-orynth",
-      "experimental": true,
       "pontos": [
         [
           0.7456,
@@ -231,7 +304,7 @@
       },
       "confianca": "alta",
       "nome": null,
-      "ref": "Linha dupla contínua que sai do ponto de Orynth e desce para sudeste até a costa leste (≈ 0,1 do mapa), no mesmo traço de rio do Avery. O curso segue os pontos lidos do impresso, sem curvas nem afluentes acrescentados. A saída do lago de Perranth, que se junta a ele perto da costa, NÃO é desenhada. Implementação experimental, aguardando aprovação."
+      "ref": "Linha dupla contínua que sai do ponto de Orynth e desce para sudeste até a costa leste (≈ 0,1 do mapa), no mesmo traço de rio do Avery. O curso segue os pontos lidos do impresso, sem curvas nem afluentes acrescentados. A saída do lago de Perranth, que se junta a ele perto da costa, NÃO é desenhada. APROVADO pela autora. Conferência da curva inicial: desvio médio de 2,0 px e máximo de 4,2 px em relação à linha central lida em grade, dentro da margem de precisão da digitalização (24 px); nenhuma alteração feita."
     },
     {
       "id": "rio-melisande-curso",
