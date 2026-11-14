@@ -43,8 +43,35 @@ export const BLOBS_V1: Blob[] = [
   { cx: 0.5, cy: 0.93, rx: 0.04, ry: 0.03, w: 0.9 },
 ]
 
-/** The candidate starts as a copy of v1 and is refitted in a later step. */
-export const BLOBS_V2: Blob[] = BLOBS_V1.map((b) => ({ ...b }))
+/**
+ * Candidate shape (preview with ?geo=2). Starts from v1, adds a filler for the inner bay that
+ * v1 invented (the printed map has land there) and is refitted by constraint search so every
+ * place and every control point (PONTOS_DE_CONTROLE) agrees with the coast (see geografia.test.ts). Land area stays within 1% of v1.
+ */
+export const BLOBS_V2: Blob[] = [
+  { cx: 0.6981, cy: 0.1405, rx: 0.1422, ry: 0.1368, w: 1 },
+  { cx: 0.712, cy: 0.3437, rx: 0.1465, ry: 0.1727, w: 1 },
+  { cx: 0.6531, cy: 0.6276, rx: 0.2129, ry: 0.1653, w: 1 },
+  { cx: 0.797, cy: 0.5644, rx: 0.0846, ry: 0.0505, w: 1 },
+  { cx: 0.712, cy: 0.7627, rx: 0.1348, ry: 0.1959, w: 1 },
+  { cx: 0.6537, cy: 0.8301, rx: 0.1074, ry: 0.0952, w: 1 },
+  { cx: 0.4783, cy: 0.4365, rx: 0.1088, ry: 0.1712, w: 1 },
+  { cx: 0.2815, cy: 0.1913, rx: 0.2327, ry: 0.2388, w: 1 },
+  { cx: 0.3965, cy: 0.3035, rx: 0.1087, ry: 0.0956, w: 1 },
+  { cx: 0.3653, cy: 0.5291, rx: 0.0817, ry: 0.0898, w: 1 },
+  { cx: 0.2489, cy: 0.7194, rx: 0.2023, ry: 0.195, w: 1 },
+  { cx: 0.242, cy: 0.9158, rx: 0.0493, ry: 0.0517, w: 0.95 },
+  { cx: 0.1479, cy: 0.4846, rx: 0.0188, ry: 0.04, w: 0.9 },
+  { cx: 0.1836, cy: 0.3948, rx: 0.0196, ry: 0.0258, w: 0.9 },
+  { cx: 0.9503, cy: 0.6332, rx: 0.0167, ry: 0.0249, w: 0.9 },
+  { cx: 0.9465, cy: 0.7281, rx: 0.012, ry: 0.0198, w: 0.9 },
+  { cx: 0.4956, cy: 0.9119, rx: 0.0382, ry: 0.0293, w: 0.9 },
+  { cx: 0.561, cy: 0.2722, rx: 0.0563, ry: 0.1186, w: 1 },
+  // small fillers that close enclosed water left by the fit (detected by encontrarLagos)
+  { cx: 0.526, cy: 0.246, rx: 0.034, ry: 0.05, w: 1 },
+  { cx: 0.583, cy: 0.437, rx: 0.038, ry: 0.05, w: 1 },
+  { cx: 0.438, cy: 0.619, rx: 0.028, ry: 0.034, w: 1 },
+]
 
 export const GEOGRAFIAS: Record<GeoId, Blob[]> = { v1: BLOBS_V1, v2: BLOBS_V2 }
 
@@ -118,6 +145,30 @@ export const COSTA_MAX_PX = 50
 /** An inland place must be at least this many px away from any shore. */
 export const TERRA_MIN_PX = 40
 
+/**
+ * Extra anchor points read from the printed map (labels that sit on land or in water),
+ * so the coast also agrees with the map where no place pin exists. Normalised coordinates.
+ */
+export const PONTOS_DE_CONTROLE = {
+  terra: [
+    [0.34, 0.29], // "Os Desertos do Oeste" label, west end
+    [0.4, 0.33],
+    [0.45, 0.37],
+    [0.49, 0.41], // ... east end
+    [0.57, 0.37], // "Montanhas Ruhnn" label path
+    [0.59, 0.33],
+    [0.63, 0.4], // "O Desfiladeiro de Ferro"
+    [0.555, 0.43],
+    [0.55, 0.38],
+  ],
+  mar: [
+    [0.113, 0.426], // "Erilea" title sits on the western sea
+    [0.2, 0.445],
+    [0.5, 0.07], // northern inlet between the north-west land and Terrasen
+    [0.47, 0.11],
+  ],
+} as const
+
 export interface Violacao {
   id: string
   motivo: string
@@ -127,7 +178,7 @@ export interface Violacao {
  * Checks the declared `geo` of every place against the generated terrain:
  * 'mar' is water, 'costa' is land hugging the shore, 'terra' is land inland.
  */
-export function validarLugares(places: Place[], elevacao: Elevacao, W = MAP_W, H = MAP_H): Violacao[] {
+export function validarLugares(places: Place[], elevacao: Elevacao, W = MAP_W, H = MAP_H, comControle = true): Violacao[] {
   const out: Violacao[] = []
   for (const p of places) {
     const x = p.x * W
@@ -145,5 +196,68 @@ export function validarLugares(places: Place[], elevacao: Elevacao, W = MAP_W, H
     if (p.geo === 'costa' && d > COSTA_MAX_PX) out.push({ id: p.id, motivo: `costeiro, mas a ${d}px da costa` })
     if (p.geo === 'terra' && d < TERRA_MIN_PX) out.push({ id: p.id, motivo: `interior, mas a ${d}px da costa` })
   }
+  if (!comControle) return out
+  for (const [nx, ny] of PONTOS_DE_CONTROLE.terra) {
+    const x = nx * W
+    const y = ny * H
+    if (elevacao(x, y) <= 0) out.push({ id: `controle-terra(${nx},${ny})`, motivo: 'ponto de terra firme caiu na água' })
+    else if (distanciaCosta(elevacao, x, y) < 25) out.push({ id: `controle-terra(${nx},${ny})`, motivo: 'ponto de terra firme colado na costa' })
+  }
+  for (const [nx, ny] of PONTOS_DE_CONTROLE.mar) {
+    if (elevacao(nx * W, ny * H) > 0) out.push({ id: `controle-mar(${nx},${ny})`, motivo: 'ponto de mar caiu em terra' })
+  }
   return out
+}
+
+export interface Lago {
+  /** Centre of the enclosed water, normalised. */
+  x: number
+  y: number
+  /** Area in grid cells (8px). */
+  celulas: number
+}
+
+/**
+ * Water that does not connect to the open sea (flood fill from the map border).
+ * The printed map's lakes are not modelled, so any enclosed water is an artefact.
+ */
+export function encontrarLagos(elevacao: Elevacao, W = MAP_W, H = MAP_H, passo = 8): Lago[] {
+  const gw = Math.ceil(W / passo)
+  const gh = Math.ceil(H / passo)
+  const agua = new Uint8Array(gw * gh)
+  for (let j = 0; j < gh; j++) for (let i = 0; i < gw; i++) agua[j * gw + i] = elevacao(i * passo, j * passo) <= 0 ? 1 : 0
+  const comp = new Int32Array(gw * gh).fill(-1)
+  const lagos: Lago[] = []
+  let id = 0
+  for (let s = 0; s < gw * gh; s++) {
+    if (!agua[s] || comp[s] !== -1) continue
+    const fila = [s]
+    comp[s] = id
+    let toca = false
+    let n = 0
+    let sx = 0
+    let sy = 0
+    for (let q = 0; q < fila.length; q++) {
+      const c = fila[q]!
+      const x = c % gw
+      const y = (c / gw) | 0
+      n++
+      sx += x
+      sy += y
+      if (x === 0 || y === 0 || x === gw - 1 || y === gh - 1) toca = true
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+        const nx = x + dx
+        const ny = y + dy
+        if (nx < 0 || ny < 0 || nx >= gw || ny >= gh) continue
+        const k = ny * gw + nx
+        if (agua[k] && comp[k] === -1) {
+          comp[k] = id
+          fila.push(k)
+        }
+      }
+    }
+    if (!toca) lagos.push({ x: ((sx / n) * passo) / W, y: ((sy / n) * passo) / H, celulas: n })
+    id++
+  }
+  return lagos
 }

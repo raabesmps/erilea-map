@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { COSTA_MAX_PX, criarGeografia, distanciaCosta, GEOGRAFIAS, MAP_H, MAP_W, mulberry32, TERRA_MIN_PX, validarLugares } from './geografia'
+import { COSTA_MAX_PX, criarGeografia, distanciaCosta, encontrarLagos, GEOGRAFIAS, MAP_H, MAP_W, mulberry32, TERRA_MIN_PX, validarLugares } from './geografia'
 import lugaresJson from '../data/lugares.json'
 import type { Place } from '../types'
 
@@ -35,21 +35,21 @@ describe('validarLugares', () => {
   const ilha = (x: number, y: number) => 300 - Math.hypot(x - MAP_W / 2, y - MAP_H / 2)
 
   it('mar na água passa; mar em terra falha', () => {
-    expect(validarLugares([lugar('mar', 0.1, 0.1)], ilha)).toEqual([])
-    expect(validarLugares([lugar('mar', 0.5, 0.5)], ilha)).toHaveLength(1)
+    expect(validarLugares([lugar('mar', 0.1, 0.1)], ilha, MAP_W, MAP_H, false)).toEqual([])
+    expect(validarLugares([lugar('mar', 0.5, 0.5)], ilha, MAP_W, MAP_H, false)).toHaveLength(1)
   })
 
   it('terra no centro passa; terra na água falha; terra na beira falha', () => {
-    expect(validarLugares([lugar('terra', 0.5, 0.5)], ilha)).toEqual([])
-    expect(validarLugares([lugar('terra', 0.1, 0.1)], ilha)[0]!.motivo).toBe('está na água')
+    expect(validarLugares([lugar('terra', 0.5, 0.5)], ilha, MAP_W, MAP_H, false)).toEqual([])
+    expect(validarLugares([lugar('terra', 0.1, 0.1)], ilha, MAP_W, MAP_H, false)[0]!.motivo).toBe('está na água')
     const beira = 0.5 + (300 - (TERRA_MIN_PX - 10)) / MAP_W
-    expect(validarLugares([lugar('terra', beira, 0.5)], ilha)[0]!.motivo).toMatch(/interior/)
+    expect(validarLugares([lugar('terra', beira, 0.5)], ilha, MAP_W, MAP_H, false)[0]!.motivo).toMatch(/interior/)
   })
 
   it('costa na beira passa; costa no centro falha', () => {
     const beira = 0.5 + (300 - (COSTA_MAX_PX - 15)) / MAP_W
-    expect(validarLugares([lugar('costa', beira, 0.5)], ilha)).toEqual([])
-    expect(validarLugares([lugar('costa', 0.5, 0.5)], ilha)[0]!.motivo).toMatch(/costeiro/)
+    expect(validarLugares([lugar('costa', beira, 0.5)], ilha, MAP_W, MAP_H, false)).toEqual([])
+    expect(validarLugares([lugar('costa', 0.5, 0.5)], ilha, MAP_W, MAP_H, false)[0]!.motivo).toMatch(/costeiro/)
   })
 
   it('distanciaCosta mede a distância até a água', () => {
@@ -75,7 +75,8 @@ describe('geografia v1 (forma aprovada): coerência lugares x costa', () => {
   ]
 
   it('v1 não piora: só viola o que já era conhecido', () => {
-    const ids = validarLugares(lugares, base.elevacao).map((v) => v.id)
+    // control points only apply to the candidate shape; v1 is judged on the places alone
+    const ids = validarLugares(lugares, base.elevacao).map((v) => v.id).filter((id) => !id.startsWith('controle'))
     for (const id of ids) expect(CONHECIDAS, `nova violação em ${id}`).toContain(id)
   })
 
@@ -86,5 +87,49 @@ describe('geografia v1 (forma aprovada): coerência lugares x costa', () => {
 
   it('as duas formas existem', () => {
     expect(Object.keys(GEOGRAFIAS)).toEqual(['v1', 'v2'])
+  })
+})
+
+describe('geografia v2 (candidata): coerência lugares x costa', () => {
+  const v2 = criarGeografia(mulberry32(11), MAP_W, MAP_H, 'v2')
+
+  it('nenhum lugar viola a costa', () => {
+    expect(validarLugares(lugares, v2.elevacao)).toEqual([])
+  })
+
+  it('a área de terra fica próxima da v1 (identidade visual preservada)', () => {
+    const v1 = criarGeografia(mulberry32(11), MAP_W, MAP_H, 'v1')
+    const fracao = (fn: (x: number, y: number) => number) => {
+      let n = 0
+      let t = 0
+      for (let j = 0; j < 56; j++) {
+        for (let i = 0; i < 80; i++) {
+          t++
+          if (fn(((i + 0.5) / 80) * MAP_W, ((j + 0.5) / 56) * MAP_H) > 0) n++
+        }
+      }
+      return n / t
+    }
+    expect(Math.abs(fracao(v2.elevacao) - fracao(v1.elevacao))).toBeLessThan(0.02)
+  })
+
+  it('a baía interna inventada na v1 virou terra (Desertos Congelados e Ruhnn em terra firme)', () => {
+    for (const id of ['desertos-congelados', 'ruhnn']) {
+      const p = lugares.find((l) => l.id === id)!
+      expect(v2.elevacao(p.x * MAP_W, p.y * MAP_H), id).toBeGreaterThan(0)
+      expect(distanciaCosta(v2.elevacao, p.x * MAP_W, p.y * MAP_H), id).toBeGreaterThanOrEqual(TERRA_MIN_PX)
+    }
+  })
+
+  it('o Forte da Fenda está na costa e a seta de Wendlyn no mar', () => {
+    const fenda = lugares.find((l) => l.id === 'rifthold')!
+    const w = lugares.find((l) => l.id === 'wendlyn')!
+    expect(v2.elevacao(fenda.x * MAP_W, fenda.y * MAP_H)).toBeGreaterThan(0)
+    expect(distanciaCosta(v2.elevacao, fenda.x * MAP_W, fenda.y * MAP_H)).toBeLessThanOrEqual(COSTA_MAX_PX)
+    expect(v2.elevacao(w.x * MAP_W, w.y * MAP_H)).toBeLessThanOrEqual(0)
+  })
+
+  it('não há água isolada: lagos não estão modelados, então seriam inventados', () => {
+    expect(encontrarLagos(v2.elevacao)).toEqual([])
   })
 })

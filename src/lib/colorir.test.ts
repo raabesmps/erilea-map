@@ -6,9 +6,12 @@ import { tracarRios } from './colorir'
 import type { Place } from '../types'
 
 const lugares = lugaresJson as Place[]
-const { elevacao, ruido } = criarGeografia(mulberry32(11))
-const at = (x: number, y: number) => elevacao(Math.min(MAP_W - 1, Math.max(0, x)), Math.min(MAP_H - 1, Math.max(0, y)))
-const rios = tracarRios({ W: MAP_W, H: MAP_H, at, noise: ruido })
+function riosDe(geo: 'v1' | 'v2') {
+  const { elevacao, ruido } = criarGeografia(mulberry32(11), MAP_W, MAP_H, geo)
+  const at = (x: number, y: number) => elevacao(Math.min(MAP_W - 1, Math.max(0, x)), Math.min(MAP_H - 1, Math.max(0, y)))
+  return { at, rios: tracarRios({ W: MAP_W, H: MAP_H, at, noise: ruido }) }
+}
+const { at, rios } = riosDe('v1')
 
 describe('rios', () => {
   it('só o Avery tem nome; nenhum outro curso recebe nome sem confirmação', () => {
@@ -42,5 +45,26 @@ describe('rios', () => {
       expect(ids, r.id).not.toContain(r.id)
       expect(r.motivo.length, r.id).toBeGreaterThan(10)
     }
+  })
+})
+
+describe('rios na costa candidata (v2)', () => {
+  const v2 = riosDe('v2')
+
+  it('todo rio nasce em terra e chega ao mar', () => {
+    expect(v2.rios.length).toBeGreaterThan(0)
+    for (const r of v2.rios) {
+      const first = r.pts[0]!
+      const last = r.pts[r.pts.length - 1]!
+      expect(v2.at(Math.round(first.x), Math.round(first.y)), `${r.id} nasce`).toBeGreaterThan(0)
+      expect(v2.at(Math.round(last.x), Math.round(last.y)), `${r.id} desemboca`).toBeLessThanOrEqual(0)
+    }
+  })
+
+  it('o Avery desemboca na costa do Forte da Fenda', () => {
+    const avery = v2.rios.find((r) => r.id === 'avery')!
+    const fenda = lugares.find((p) => p.id === 'rifthold')!
+    const foz = avery.pts[avery.pts.length - 1]!
+    expect(Math.hypot(foz.x - fenda.x * MAP_W, foz.y - fenda.y * MAP_H)).toBeLessThan(60)
   })
 })
