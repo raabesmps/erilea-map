@@ -23,6 +23,7 @@ export function useUrlState(router: Router) {
   store.geo = q.geo === '1' ? 'v1' : q.geo === '2' ? 'v2' : GEO_PADRAO
   store.hidro = q.hidro === 'media' ? 'media' : q.hidro === 'nenhuma' ? 'nenhuma' : 'alta'
   store.terrasen = q.terrasen === 'A' || q.terrasen === 'B' || q.terrasen === 'C' || q.terrasen === 'AB' ? q.terrasen : null
+  store.vetor = q.vetor !== '0'
 
   watch(
     () => store.lang,
@@ -42,6 +43,7 @@ export function useUrlState(router: Router) {
       if (store.geo !== GEO_PADRAO) query.geo = store.geo.slice(1)
       if (store.hidro !== 'alta') query.hidro = store.hidro
       if (store.terrasen) query.terrasen = store.terrasen
+      if (store.terrasen && !store.vetor) query.vetor = '0'
       router.replace({ query })
     },
     { immediate: true },

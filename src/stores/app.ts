@@ -26,6 +26,8 @@ export const useAppStore = defineStore('app', () => {
   const hidro = ref<NivelHidro>('alta')
   /** PROTOTYPE preview (?terrasen=A|B|C|AB). Off by default. */
   const terrasen = ref<VariacaoTerrasen | null>(null)
+  /** EXPERIMENTAL: with ?terrasen, draw Terrasen symbols as an SVG layer (?vetor=0 keeps them in the raster). */
+  const vetor = ref(true)
   /** Monotonic tokens so the map can react to one-shot requests. */
   const flyRequest = ref<{ id: string; n: number } | null>(null)
   const playRequest = ref<{ id: string; n: number } | null>(null)
@@ -71,5 +73,5 @@ export const useAppStore = defineStore('app', () => {
     playRequest.value = { id, n: (playRequest.value?.n ?? 0) + 1 }
   }
 
-  return { book, lang, placeId, style, setStyle, geo, hidro, terrasen, places, routes, currentPlace, flyRequest, playRequest, setBook, setLang, openPlace, flyTo, play }
+  return { book, lang, placeId, style, setStyle, geo, hidro, terrasen, vetor, places, routes, currentPlace, flyRequest, playRequest, setBook, setLang, openPlace, flyTo, play }
 })

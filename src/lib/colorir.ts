@@ -570,6 +570,7 @@ export function planoProto(p: Pick<PaintCtx, 'W' | 'H' | 'at' | 'noise'> & { pro
   const pesoT = criarPeso(field, zonas, ZONAS_TERRASEN)
   const pesoMont = criarPeso(field, zonas, (id) => id === ZONA_MONTANHAS)
   const plano = planejarTerrasen({ W: p.W, H: p.H, at: p.at, noise: p.noise, pesoT, pesoMont, obst, ajuste: p.proto?.ajuste })
+  p.proto?.aoPlanejar?.(plano)
   return { plano, pesoT }
 }
 
@@ -589,7 +590,8 @@ function drawGlyphs(p: PaintCtx, field: Field, obst: Obstaculos | undefined, zon
   if (proto && p.proto) {
     const estilo = p.proto.estilo
     itens = filtrarForaDeTerrasen(itens, proto.pesoT)
-    itens = [...itens, ...proto.plano.glifos.map((g) => ({ x: g.x, y: g.y, draw: () => desenharGlifoT(ctx, g, estilo, 'cor') }))]
+    // vector mode: these symbols live in the SVG layer, so the raster must not draw them twice
+    if (!p.proto.vetorial) itens = [...itens, ...proto.plano.glifos.map((g) => ({ x: g.x, y: g.y, draw: () => desenharGlifoT(ctx, g, estilo, 'cor') }))]
   }
   // far-to-near so nearer glyphs overlap the ones behind them
   itens.sort((a, b) => a.y - b.y)
