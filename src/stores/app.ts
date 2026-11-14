@@ -5,6 +5,7 @@ import lugares from '../data/lugares.json'
 import rotas from '../data/rotas.json'
 import type { Book, Lang, Place, Route } from '../types'
 import type { MapStyle } from '../lib/terreno'
+import type { GeoId } from '../lib/geografia'
 import { clampBook, visiblePlaces, visibleRoutes } from '../lib/spoiler'
 
 export const BOOKS = livros as Book[]
@@ -17,6 +18,8 @@ export const useAppStore = defineStore('app', () => {
   const lang = ref<Lang>('pt')
   const placeId = ref<string | null>(null)
   const style = ref<MapStyle>('colorido')
+  /** Preview of the candidate coastline (?geo=2). The approved shape stays the default. */
+  const geo = ref<GeoId>('v1')
   /** Monotonic tokens so the map can react to one-shot requests. */
   const flyRequest = ref<{ id: string; n: number } | null>(null)
   const playRequest = ref<{ id: string; n: number } | null>(null)
@@ -62,5 +65,5 @@ export const useAppStore = defineStore('app', () => {
     playRequest.value = { id, n: (playRequest.value?.n ?? 0) + 1 }
   }
 
-  return { book, lang, placeId, style, setStyle, places, routes, currentPlace, flyRequest, playRequest, setBook, setLang, openPlace, flyTo, play }
+  return { book, lang, placeId, style, setStyle, geo, places, routes, currentPlace, flyRequest, playRequest, setBook, setLang, openPlace, flyTo, play }
 })
