@@ -23,6 +23,11 @@ export class GravadorSvg {
   lineJoin = 'miter'
   lineCap = 'butt'
   elementos: string[] = []
+  /** Optional colour transform applied to every fill/stroke written (used for the sepia paper integration). */
+  private readonly cor: (css: string) => string
+  constructor(cor: (css: string) => string = (c) => c) {
+    this.cor = cor
+  }
   private d: string[] = []
   private m: M = [1, 0, 0, 1, 0, 0]
   private pilha: { m: M; fs: string; ss: string; lw: number }[] = []
@@ -70,11 +75,11 @@ export class GravadorSvg {
     this.d.push('Z')
   }
   fill() {
-    this.elementos.push(`<path d="${this.d.join('')}" fill="${this.fillStyle}" stroke="none"/>`)
+    this.elementos.push(`<path d="${this.d.join('')}" fill="${this.cor(this.fillStyle)}" stroke="none"/>`)
   }
   stroke() {
     this.elementos.push(
-      `<path d="${this.d.join('')}" fill="none" stroke="${this.strokeStyle}" stroke-width="${f(this.lineWidth)}" stroke-linejoin="${this.lineJoin}" stroke-linecap="${this.lineCap}"/>`,
+      `<path d="${this.d.join('')}" fill="none" stroke="${this.cor(this.strokeStyle)}" stroke-width="${f(this.lineWidth)}" stroke-linejoin="${this.lineJoin}" stroke-linecap="${this.lineCap}"/>`,
     )
   }
   clip(): never {

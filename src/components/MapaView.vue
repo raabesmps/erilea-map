@@ -49,7 +49,7 @@ function criarCapa(style: MapStyle): Capa {
     map.createPane('terrasenSimbolos').style.zIndex = '395'
   }
   const img = L.imageOverlay(url, bounds, { pane: 'terrasenImg' }).addTo(map)
-  const svgEl = construirSvgTerrasen(plano!, estilo, modo, MAP_W, MAP_H)
+  const svgEl = construirSvgTerrasen(plano!, estilo, modo, MAP_W, MAP_H, store.papel)
   svgEl.style.pointerEvents = 'none'
   const svg = L.svgOverlay(svgEl, bounds, { pane: 'terrasenSimbolos', interactive: false }).addTo(map)
   const capa = { img, svg }
