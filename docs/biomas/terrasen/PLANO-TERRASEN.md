@@ -334,3 +334,92 @@ Rodada 2 × rodada 3: [cor, visão geral](13-r3-cor-visao-geral.png) · [sépia,
 Raster × vetor (recorte ×3 no zoom máximo): [cor](15-r3-cor-raster-x-vetor.png) · [sépia](15-r3-sepia-raster-x-vetor.png).
 
 Testes: 135 passam (124 anteriores + 11 de acabamento e vetor) e o build passa. Intocados e verificados: costa (impressão digital 9e05e5c1), hidrografia, lugares, rotas, outros biomas, interface visível.
+
+---
+
+# Rodada 4 (integração visual do SVG ao pergaminho sépia, ainda sem merge)
+
+Pedido: preservar a nitidez vetorial, mas fazer montanhas e coníferas parecerem pertencer ao mesmo pergaminho envelhecido. Nada de Terrasen foi
+reformulado (cumeeiras, quantidades, florestas, paleta, lavagem 0,20, estilos A/B, geografia, rotas, marcadores e interface ficaram como aprovados).
+O estilo A colorido **não** foi tocado. **A recomendação abaixo não é a decisão: a escolha é sua.**
+
+## 16. Por que o vetor parecia "colado" (diagnóstico)
+
+O raster sépia recebe, depois dos símbolos, o escurecimento radial do envelhecimento (`drawAging`), é comprimido em JPEG e ampliado até 2,8×, o que suaviza
+tinta e halo. O SVG ficava por cima de tudo: sem o escurecimento das bordas (o papel ao redor fica mais escuro que os símbolos), com traço totalmente nítido e
+com o halo claro das coníferas bem visível (no raster ele some no borrão).
+
+## 17. Como a integração funciona (sem rasterizar os símbolos)
+
+Três ingredientes nativos de vetor, ligados por `?papel=` (só vale com `?terrasen=` e só no sépia):
+
+1. **Escurecimento das bordas, analítico.** A fórmula de `drawAging` é aplicada por símbolo, nas cores do próprio caminho (cada símbolo é pequeno diante do gradiente, então uma cor por símbolo basta). Custo zero em tempo de desenho.
+2. **Leve deslocamento para um tom quente** e **halo mais suave** (o halo claro do vetor é mais nítido que o do raster).
+3. **Absorção de tinta:** opacidade do elemento `<svg>` raiz (achata o conjunto, sem transparência entre formas sobrepostas) e uma **máscara CSS de grão de papel** (um tile PNG de 192 px, repetido; `mask-size: 5%` da largura do mapa, então o grão **escala com o zoom** como a textura do raster).
+
+Não há `filter` SVG (feTurbulence etc.): a máscara CSS é composta pela GPU e não reavalia o desenho a cada quadro. Contornos, faces e hachuras continuam sendo `<path>`.
+
+| Versão | `?papel=` | Opacidade | Tom quente | Halo | Grão (variação máx. de alfa) |
+|---|---|---|---|---|---|
+| **A** vetor atual | 0 (padrão) | 1 | 0 | 100% | 0 |
+| **B** sutil | 1 | 0,98 | 3% | 40% | 7% |
+| **C** um pouco mais perceptível | 2 | 0,95 | 7% | 25% | 16% |
+
+B e C aplicam o mesmo escurecimento de borda (é correção, não efeito). Uma primeira calibragem (opacidade 0,95 / 0,90 e grão 10% / 24%) deixou as faces das montanhas e a tinta
+visivelmente desbotadas; foi reduzida para os valores acima.
+
+## 18. Comparações (sépia)
+
+- [Visão geral A · B · C](16-papel-sepia-visao-geral.png)
+- [Zoom intermediário A · B · C](17-papel-sepia-zoom-intermediario.png)
+- [Zoom máximo, montanhas](18-papel-sepia-zoom-maximo-montanhas.png) e [zoom máximo, floresta densa](19-papel-sepia-zoom-maximo-floresta.png)
+- [Referência: raster × A × C](20-papel-sepia-ref-raster.png)
+
+Para ver ao vivo: `?livro=7&lang=pt&estilo=classico&terrasen=AB&papel=0|1|2`.
+
+**Leitura visual (a confirmar por você):**
+- **A:** nítido, mas as faces claras das montanhas ficam mais brilhantes que o papel ao redor e o halo claro das coníferas lembra um adesivo, principalmente no zoom intermediário.
+- **B:** as faces e a tinta ficam no mesmo tom do papel das bordas; contornos e hachuras intactos; a separação entre copas sobrepostas continua legível pelo contorno escuro. É a mais próxima do raster em tom, mantendo a nitidez.
+- **C:** a mais "gravada em papel velho": o grão aparece nas faces e a tinta é um pouco mais suave. Em visão geral, a hierarquia das florestas densas perde um pouco de contraste e a separação por halo quase desaparece.
+
+**Recomendação (não definitiva): B**, porque resolve o efeito de sobreposição sem custo de legibilidade. C é a escolha se você preferir o aspecto mais envelhecido e aceitar menos contraste nas massas florestais. A é a de maior contraste, com o aspecto "colado".
+
+## 19. Validação da camada vetorial (repetida nesta rodada)
+
+Chrome, 1280 × 760, app real (servidor de desenvolvimento).
+
+| Verificação | Resultado |
+|---|---|
+| Alinhamento SVG × imagem (visão geral, 6 zooms, após pan, em colorido; e no sépia com A/B/C) | desvio **0 px** em todos |
+| Animação de zoom (172 quadros, 3394 → 6788 px de largura) | desvio máx. 0 px; 0 quadros > 1 px |
+| Troca cor ↔ sépia (145 quadros, 4 trocas, com `papel=2`) | 0 quadros incoerentes; 0 sem nada visível; 1ª troca ≈ 2,2 s (renderiza o outro modo), seguintes só `visibility` |
+| Ordem das camadas | imagem 390 < símbolos 395 < rotas 400 < marcadores 600; a rota animada aparece acima dos símbolos |
+| **Duplicação (exata, no canvas)** | raster com × sem símbolos de Terrasen: **0 pixels diferentes fora das caixas dos símbolos** em colorido (47.767 dentro) e sépia (38.988 dentro); 151 símbolos planejados |
+| Zoom (botões), busca, cartão, clique no marcador de Orynth (dentro da camada de símbolos), arrastar, rota animada | todos funcionam: o elemento sob o marcador é o próprio marcador; o SVG tem `pointer-events: none` |
+| Desempenho em pan e zoom no sépia (~255 quadros por execução, 2 execuções) | média 16,66 a 16,92 ms em todas as variantes (raster, A, B, C); p95 17,5 a 18,9 ms (diferenças dentro do ruído) |
+| Erros no console | nenhum |
+
+Observação sobre o desempenho: houve quadros isolados mais longos (máx. 23 a 78 ms) em todas as variantes, inclusive no raster puro (23 e 48 ms), e a contagem de quadros acima de 20 ms variou de 1 a 11 sem ordem
+entre variantes. Não há regressão demonstrada, mas as máscaras CSS (B/C) tiveram os dois maiores picos isolados (74 a 78 ms); se isso se repetir em máquinas mais fracas, o ponto a observar é a criação da textura da máscara no primeiro uso.
+
+### Integridade do que foi aprovado
+
+| Item | Verificação | Resultado |
+|---|---|---|
+| `v1.0.0` | `git rev-parse v1.0.0` = `origin/v1.0.0` = `35aa28b`; é ancestral da branch | intacta |
+| Mapa padrão (sem `?terrasen`) | renderização completa (cor e sépia) comparada com a de um *worktree* da `v1.0.0` | **idêntica** (mesma impressão digital nos dois modos) |
+| Costa | teste de impressão digital (9e05e5c1) | passa |
+| Hidrografia, lugares, rotas, biomas, livros | `git diff v1.0.0` nesses dados e em `geografia.ts`/`hidrografia.ts` | **sem diferenças** |
+| Interface | `git diff v1.0.0` em `src/components` | só `MapaView.vue` (camada vetorial opcional, desligada sem `?terrasen`) |
+| Alcance das mudanças de cor | medição repetida: cor, 0 pixels além de 1,6 × o raio (máx. d = 1,45); sépia, máx. d = 1,18 | como na rodada 2 |
+| Testes e build | 140 testes (135 anteriores + 5 de integração) e build | passam |
+
+## 20. Limitações e custo de manutenção
+
+- **Duas fontes de verdade visual:** o desenho vive em canvas (raster, no `?vetor=0`) e é gravado para SVG pelo `GravadorSvg`. Isso garante que não divergem, mas o gravador só suporta um subconjunto do canvas (caminhos, curvas quadráticas, transformações; **não** `clip()`, gradientes, sombras nem `globalAlpha`). Quem editar os glifos precisa usar só esse subconjunto ou ampliar o gravador (um teste cobre A/B em cor e sépia).
+- **Integração depende de um modelo do envelhecimento.** `drawAging` foi reimplementado de forma analítica; se o envelhecimento do raster mudar, a fórmula em `papel-sepia.ts` precisa mudar junto (há um teste da vinheta, mas não amarrado ao raster).
+- **Sépia: SVG acima da textura.** O grão de papel real do raster (1 px, ruído por pixel) não passa por baixo dos símbolos; a máscara de grão é uma aproximação (tile repetido de 192 px).
+- **Máscara CSS:** exige navegador com `mask-image` (Chromium moderno, Safari com prefixo `-webkit-`, já incluído; Firefox moderno). Se não houver suporte, o símbolo aparece sem grão (degrada para A com o tom ajustado).
+- **Custo:** 151 símbolos, 2.020 `<path>`, 255 KB por modo no DOM; cada modo mantém imagem + SVG decodificados (2 imagens de ~1 MB + 2 SVGs). A primeira troca de modo continua renderizando o outro raster de forma síncrona (≈ 2,2 s).
+- **Replicação em outros biomas:** cada bioma novo precisa de seu próprio plano e de um par imagem + SVG, ou de uma camada única com bounds da região, para não multiplicar painéis; a questão não foi atacada aqui.
+- **Estilo C de montanha** continua não suportado no vetor (usa `clip()`).
