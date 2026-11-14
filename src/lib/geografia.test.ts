@@ -4,7 +4,7 @@ import lugaresJson from '../data/lugares.json'
 import type { Place } from '../types'
 
 const lugares = lugaresJson as Place[]
-const base = criarGeografia(mulberry32(11))
+const base = criarGeografia(mulberry32(11), MAP_W, MAP_H, 'v1')
 
 describe('terreno v1: a refatoração não mudou o mapa aprovado', () => {
   // Values captured from the renderer before elevation was extracted to geografia.ts.
@@ -22,7 +22,7 @@ describe('terreno v1: a refatoração não mudou o mapa aprovado', () => {
   })
 
   it('é determinística para a mesma semente', () => {
-    const outra = criarGeografia(mulberry32(11))
+    const outra = criarGeografia(mulberry32(11), MAP_W, MAP_H, 'v1')
     expect(outra.elevacao(1234, 567)).toBe(base.elevacao(1234, 567))
   })
 })

@@ -23,6 +23,9 @@ export interface Blob {
 /** 'v1' = approved base shape. 'v2' = coastal-constraint refit. 'v3' = v2 with a smoothed east coast and a trimmed north inlet. */
 export type GeoId = 'v1' | 'v2' | 'v3'
 
+/** The approved geography used by the app. Older shapes stay reachable for tests and previews (?geo=1, ?geo=2). */
+export const GEO_PADRAO: GeoId = 'v3'
+
 // Own interpretation of the geography. Place *positions* follow the book's map;
 // the coastline itself is generated, not traced (normalised coordinates).
 export const BLOBS_V1: Blob[] = [
@@ -136,7 +139,7 @@ export type Elevacao = (x: number, y: number) => number
  * Builds the elevation function (pixel coordinates). It consumes `rnd` exactly
  * like the original renderer did, so the generated map does not change.
  */
-export function criarGeografia(rnd: () => number, W = MAP_W, H = MAP_H, geo: GeoId = 'v1') {
+export function criarGeografia(rnd: () => number, W = MAP_W, H = MAP_H, geo: GeoId = GEO_PADRAO) {
   const blobs = GEOGRAFIAS[geo]
   const rugs = RUGOSIDADE[geo]
   const n1 = createNoise2D(rnd)

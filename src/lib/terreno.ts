@@ -1,5 +1,5 @@
 ﻿import { paintColorido } from './colorir'
-import { criarGeografia, mulberry32, MAP_H, MAP_W, type GeoId } from './geografia'
+import { criarGeografia, GEO_PADRAO, mulberry32, MAP_H, MAP_W, type GeoId } from './geografia'
 
 export type MapStyle = 'colorido' | 'classico'
 
@@ -17,7 +17,7 @@ const LAND_HI: [number, number, number] = [214, 190, 142]
 const SEA: [number, number, number] = [205, 192, 154]
 const SEA_DEEP: [number, number, number] = [188, 172, 132]
 
-export function renderTerrain(W = MAP_W, H = MAP_H, seed = 11, style: MapStyle = 'colorido', geo: GeoId = 'v1'): HTMLCanvasElement {
+export function renderTerrain(W = MAP_W, H = MAP_H, seed = 11, style: MapStyle = 'colorido', geo: GeoId = GEO_PADRAO): HTMLCanvasElement {
   const rnd = mulberry32(seed)
   const { elevacao, ruido: n2 } = criarGeografia(rnd, W, H, geo)
 
