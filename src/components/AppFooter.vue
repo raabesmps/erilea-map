@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import { DEMO } from '../lib/demo'
 const { t } = useI18n()
 </script>
 
@@ -8,6 +9,10 @@ const { t } = useI18n()
     <span>{{ t('footer') }}</span>
     <span class="sep"> · </span>
     <span>{{ t('interpretive') }}</span>
+    <template v-if="DEMO">
+      <span class="sep"> · </span>
+      <span class="demo">{{ t('demo') }}</span>
+    </template>
   </footer>
 </template>
 
@@ -26,12 +31,17 @@ const { t } = useI18n()
   line-height: 1.3;
   pointer-events: none;
 }
+.demo {
+  font-style: italic;
+  opacity: 0.85;
+}
 @media (max-width: 720px) {
-  .sep {
-    display: none;
-  }
   .foot span {
     display: block;
+  }
+  /* declared after the rule above (and more specific) so the separators really disappear on phones */
+  .foot .sep {
+    display: none;
   }
 }
 </style>

@@ -27,7 +27,8 @@ const en: typeof pt = {
     mar: 'Sea',
   },
   footer: 'Fan project, non-profit, not affiliated with the author or the publisher.',
-  interpretive: 'Fan-made interpretive map: positions and names are a personal reading.',
+  demo: 'Demo version: only Terrasen is refined so far.',
+  interpretive:'Fan-made interpretive map: positions and names are a personal reading.',
 }
 
 export default en

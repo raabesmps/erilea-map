@@ -3,6 +3,7 @@ import type { Router } from 'vue-router'
 import { useAppStore } from '../stores/app'
 import { i18n } from '../i18n'
 import { GEO_PADRAO } from './geografia'
+import { resolverTerrasen, TERRASEN_PADRAO } from './demo'
 
 /** Two-way sync between the URL query (?livro=&lang=&lugar=) and the store. */
 export function useUrlState(router: Router) {
@@ -22,7 +23,7 @@ export function useUrlState(router: Router) {
   if (typeof q.lugar === 'string') store.openPlace(q.lugar)
   store.geo = q.geo === '1' ? 'v1' : q.geo === '2' ? 'v2' : GEO_PADRAO
   store.hidro = q.hidro === 'media' ? 'media' : q.hidro === 'nenhuma' ? 'nenhuma' : 'alta'
-  store.terrasen = q.terrasen === 'A' || q.terrasen === 'B' || q.terrasen === 'C' || q.terrasen === 'AB' ? q.terrasen : null
+  store.terrasen = resolverTerrasen(q.terrasen)
   store.vetor = q.vetor !== '0'
   // approved finish: B (papel=1) is the default; ?papel=0 (A) and ?papel=2 (C) stay available for comparison
   store.papel = q.papel === '0' ? 0 : q.papel === '2' ? 2 : 1
@@ -44,7 +45,8 @@ export function useUrlState(router: Router) {
       if (estilo === 'classico') query.estilo = estilo
       if (store.geo !== GEO_PADRAO) query.geo = store.geo.slice(1)
       if (store.hidro !== 'alta') query.hidro = store.hidro
-      if (store.terrasen) query.terrasen = store.terrasen
+      // the URL only carries Terrasen when it differs from the build default (the demo needs no parameter)
+      if (store.terrasen !== TERRASEN_PADRAO) query.terrasen = store.terrasen ?? 'off'
       if (store.terrasen && !store.vetor) query.vetor = '0'
       if (store.terrasen && store.vetor && store.papel !== 1) query.papel = String(store.papel)
       router.replace({ query })

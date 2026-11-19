@@ -25,5 +25,6 @@ export default {
     mar: 'Mar',
   },
   footer: 'Projeto de fã, sem fins lucrativos, sem vínculo com a autora ou a editora.',
-  interpretive: 'Mapa interpretativo feito por fã: posições e nomes são uma leitura pessoal.',
+  demo: 'Versão de demonstração: só Terrasen está refinada.',
+  interpretive:'Mapa interpretativo feito por fã: posições e nomes são uma leitura pessoal.',
 }
