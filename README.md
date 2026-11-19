@@ -63,6 +63,8 @@ npm test         # regra de spoiler (Vitest)
 npm run build    # type-check + build de produção
 ```
 
+**Demo pública (branch `demo/terrasen`):** `npm run dev:demo` / `npm run build:demo` mostram Terrasen refinada sem parâmetros de URL (`?terrasen=off` volta ao mapa original). Veja [docs/DEPLOY-VERCEL.md](docs/DEPLOY-VERCEL.md).
+
 ## 🧱 Estrutura
 
 ```
