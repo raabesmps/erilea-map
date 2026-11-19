@@ -3,6 +3,7 @@
 # 🗺️ Mapa de Erilea · Map of Erilea
 
 **Um mapa interativo de fã, em pergaminho, que só mostra o que você já leu.**
+
 *A fan-made, spoiler-safe interactive parchment map.*
 
 ![Vue](https://img.shields.io/badge/Vue-3-42b883?logo=vuedotjs&logoColor=white)
