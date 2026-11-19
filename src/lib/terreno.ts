@@ -1,4 +1,5 @@
-﻿import { desenharHidroClassico, paintColorido, tracarRios } from './colorir'
+﻿import { desenharHidroClassico, paintColorido, protoClassico, tracarRios } from './colorir'
+import { desenharGlifoT, desenharWashes, type ProtoTerrasen } from './proto/terrasen'
 import { ativos, criarObstaculos, lagoPoligono, rioPontos, type NivelHidro, type Obstaculos } from './hidrografia'
 import { criarGeografia, GEO_PADRAO, mulberry32, MAP_H, MAP_W, type GeoId } from './geografia'
 
@@ -18,7 +19,7 @@ const LAND_HI: [number, number, number] = [214, 190, 142]
 const SEA: [number, number, number] = [205, 192, 154]
 const SEA_DEEP: [number, number, number] = [188, 172, 132]
 
-export function renderTerrain(W = MAP_W, H = MAP_H, seed = 11, style: MapStyle = 'colorido', geo: GeoId = GEO_PADRAO, nivel: NivelHidro = 'alta'): HTMLCanvasElement {
+export function renderTerrain(W = MAP_W, H = MAP_H, seed = 11, style: MapStyle = 'colorido', geo: GeoId = GEO_PADRAO, nivel: NivelHidro = 'alta', proto?: ProtoTerrasen): HTMLCanvasElement {
   const rnd = mulberry32(seed)
   const { elevacao, ruido: n2 } = criarGeografia(rnd, W, H, geo)
 
@@ -32,7 +33,7 @@ export function renderTerrain(W = MAP_W, H = MAP_H, seed = 11, style: MapStyle =
   const at = (x: number, y: number) => elev[Math.min(H - 1, Math.max(0, y)) * W + Math.min(W - 1, Math.max(0, x))]!
 
   if (style === 'colorido') {
-    paintColorido({ ctx, W, H, elev, at, rnd, noise: n2, hidro: ativos(nivel) })
+    paintColorido({ ctx, W, H, elev, at, rnd, noise: n2, hidro: ativos(nivel), proto })
     drawFrame(ctx, W, H)
     drawCompass(ctx, W * 0.95, H * 0.905, 54, true)
     return canvas
@@ -97,8 +98,12 @@ export function renderTerrain(W = MAP_W, H = MAP_H, seed = 11, style: MapStyle =
   const hidro = ativos(nivel)
   const lagos = hidro.lagos.map((l) => lagoPoligono(l, W, H))
   const rios = [...tracarRios({ W, H, at, noise: n2 }, hidro.substituidos).map((r) => r.pts), ...hidro.rios.map((r) => rioPontos(r, W, H, at))]
+  const obst = criarObstaculos(lagos, rios)
+  const pr = proto ? protoClassico({ W, H, at, noise: n2, proto }, obst) : undefined
+  if (pr) desenharWashes(ctx, pr.plano, 'sepia', proto?.ajuste)
   desenharHidroClassico(ctx, lagos, rios)
-  drawGlyphs(ctx, W, H, at, rnd, n2, criarObstaculos(lagos, rios))
+  drawGlyphs(ctx, W, H, at, rnd, n2, obst, pr ? (x, y) => pr.pesoT(x, y) > 0.12 : undefined)
+  if (pr && proto && !proto.vetorial) for (const g of pr.plano.glifos) desenharGlifoT(ctx, g, proto.estiloSepia ?? proto.estilo, 'sepia')
   drawAging(ctx, W, H)
   drawFrame(ctx, W, H)
   drawCompass(ctx, W * 0.95, H * 0.905, 54, false)
@@ -113,6 +118,7 @@ function drawGlyphs(
   rnd: () => number,
   noise: (x: number, y: number) => number,
   obst?: Obstaculos,
+  omitir?: (x: number, y: number) => boolean,
 ) {
   ctx.lineJoin = 'round'
   ctx.lineCap = 'round'
@@ -126,16 +132,17 @@ function drawGlyphs(
       // low-frequency noise groups the glyphs into mountain ranges and woods
       const range = noise((x / W) * 5 + 30, (y / W) * 5 + 30)
       const wood = noise((x / W) * 6 + 60, (y / W) * 6)
-      // same random draws as always; glyphs touching water are skipped only at draw time
+      // same random draws as always; glyphs touching water (or replaced by the prototype) are skipped only at draw time
+      const bloq = (m: number) => obst?.perto(x, y, m) || omitir?.(x, y)
       if (range > 0.28 && e > 0.18 && rnd() < 0.65) {
         const s = 12 + rnd() * 10
-        if (!obst?.perto(x, y, 6 + s * 0.8)) mountain(ctx, x, y, s)
+        if (!bloq(6 + s * 0.8)) mountain(ctx, x, y, s)
       } else if (wood > 0.12 && e > 0.1 && rnd() < 0.55) {
         const s = 6 + rnd() * 4
-        if (!obst?.perto(x, y, 6 + s * 0.8)) tree(ctx, x, y, s)
+        if (!bloq(6 + s * 0.8)) tree(ctx, x, y, s)
       } else if (rnd() < 0.025) {
         const s = 10 + rnd() * 6
-        if (!obst?.perto(x, y, 6 + s * 0.8)) hill(ctx, x, y, s)
+        if (!bloq(6 + s * 0.8)) hill(ctx, x, y, s)
       }
     }
   }

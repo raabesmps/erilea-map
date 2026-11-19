@@ -1,4 +1,5 @@
 import biomasData from '../data/biomas.json'
+import { aplicarPaleta, criarPeso, desenharGlifoT, desenharWashes, filtrarForaDeTerrasen, planejarTerrasen, ZONA_MONTANHAS, ZONAS_TERRASEN, type PlanoTerrasen, type ProtoTerrasen } from './proto/terrasen'
 import { ativos, catmullRom, criarObstaculos, dentroDoPoligono, lagoPoligono, rioPontos, type HidroAtiva, type Obstaculos } from './hidrografia'
 
 /**
@@ -55,6 +56,8 @@ export interface PaintCtx {
   noise: (x: number, y: number) => number
   /** Active lakes and rivers read from the printed map; defaults to the highest-confidence tier. */
   hidro?: HidroAtiva
+  /** PROTOTYPE (off by default): Terrasen visual proposal, see proto/terrasen.ts. */
+  proto?: ProtoTerrasen
 }
 
 const INK: RGB = [64, 56, 45] // #40382D from the guide
@@ -81,7 +84,7 @@ interface Field {
   best: Uint8Array
 }
 
-export function buildField(W: number, H: number, noise: (x: number, y: number) => number): Field {
+export function buildField(W: number, H: number, noise: (x: number, y: number) => number, zonasFonte: Zona[] = B.zonas): Field {
   const LW = Math.ceil(W / S)
   const LH = Math.ceil(H / S)
   const r = new Float32Array(LW * LH)
@@ -89,7 +92,7 @@ export function buildField(W: number, H: number, noise: (x: number, y: number) =
   const b = new Float32Array(LW * LH)
   const best = new Uint8Array(LW * LH).fill(255)
   const def = hex(B.padrao.cor)
-  const zonas = B.zonas.map((z) => ({ ...z, rgb: hex(z.cor) }))
+  const zonas = zonasFonte.map((z) => ({ ...z, rgb: hex(z.cor) }))
   for (let ly = 0; ly < LH; ly++) {
     for (let lx = 0; lx < LW; lx++) {
       const nx = ((lx + 0.5) * S) / W
@@ -146,7 +149,8 @@ function sampleField(f: Field, x: number, y: number): RGB {
 
 export function paintColorido(p: PaintCtx) {
   const { ctx, W, H, elev, at, rnd, noise } = p
-  const field = buildField(W, H, noise)
+  const zonasUsadas = p.proto ? aplicarPaleta(B.zonas) : B.zonas
+  const field = buildField(W, H, noise, zonasUsadas)
   const img = ctx.createImageData(W, H)
   const d = img.data
 
@@ -234,10 +238,13 @@ export function paintColorido(p: PaintCtx) {
   const hidro = p.hidro ?? ativos('alta')
   const lagos = hidro.lagos.map((l) => lagoPoligono(l, W, H))
   const rios = [...tracarRios(p, hidro.substituidos).map((r) => r.pts), ...hidro.rios.map((r) => rioPontos(r, W, H, at))]
+  const obst = criarObstaculos(lagos, rios)
+  const proto = p.proto ? planoProto(p, field, zonasUsadas, obst) : undefined
   drawWaves(p)
+  if (proto) desenharWashes(ctx, proto.plano, 'cor', p.proto?.ajuste)
   for (const poly of lagos) drawLake(ctx, poly)
   drawRiverSet(ctx, rios)
-  drawGlyphs(p, field, criarObstaculos(lagos, rios))
+  drawGlyphs(p, field, obst, zonasUsadas, proto)
 
   // aged-paper vignette, lighter than the sepia style so the colour stays readable
   const g = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.4, W / 2, H / 2, Math.max(W, H) * 0.72)
@@ -507,6 +514,7 @@ export function planejarGlifos(
   { ctx, W, H, at, rnd, noise }: Pick<PaintCtx, 'W' | 'H' | 'at' | 'rnd' | 'noise'> & { ctx?: CanvasRenderingContext2D },
   field: Field,
   obst?: Obstaculos,
+  zonas: Zona[] = B.zonas,
 ): Glyph[] {
   const ops: Glyph[] = []
   const step = 22
@@ -517,7 +525,7 @@ export function planejarGlifos(
       const e = at(Math.round(x), Math.round(y))
       if (e < 0.08) continue
       const bi = field.best[(((y / S) | 0) * field.LW) + ((x / S) | 0)]!
-      const zona = bi === 255 ? undefined : B.zonas[bi]
+      const zona = bi === 255 ? undefined : zonas[bi]
       const g = zona?.glifos ?? B.padrao.glifos
       const rock = hex(zona?.rocha ?? B.padrao.rocha)
       const tree = hex(zona?.arv ?? B.padrao.arv)
@@ -552,14 +560,42 @@ export function planejarGlifos(
   return ops
 }
 
-function drawGlyphs(p: PaintCtx, field: Field, obst?: Obstaculos) {
+/** Prototype plan for Terrasen plus the feathered Terrasen weight (used to drop the default glyphs there). */
+export interface ProtoPlano {
+  plano: PlanoTerrasen
+  pesoT: (x: number, y: number) => number
+}
+
+export function planoProto(p: Pick<PaintCtx, 'W' | 'H' | 'at' | 'noise'> & { proto?: ProtoTerrasen }, field: Field, zonas: Zona[], obst?: Obstaculos): ProtoPlano {
+  const pesoT = criarPeso(field, zonas, ZONAS_TERRASEN)
+  const pesoMont = criarPeso(field, zonas, (id) => id === ZONA_MONTANHAS)
+  const plano = planejarTerrasen({ W: p.W, H: p.H, at: p.at, noise: p.noise, pesoT, pesoMont, obst, ajuste: p.proto?.ajuste })
+  p.proto?.aoPlanejar?.(plano)
+  return { plano, pesoT }
+}
+
+/** Sepia path: same plan, weights come from the default zones. */
+export function protoClassico(p: Pick<PaintCtx, 'W' | 'H' | 'at' | 'noise'> & { proto?: ProtoTerrasen }, obst?: Obstaculos): ProtoPlano {
+  const zonas = aplicarPaleta(B.zonas)
+  const field = buildField(p.W, p.H, p.noise, zonas)
+  return planoProto(p, field, zonas, obst)
+}
+
+function drawGlyphs(p: PaintCtx, field: Field, obst: Obstaculos | undefined, zonas: Zona[], proto?: ProtoPlano) {
   const { ctx } = p
   ctx.lineJoin = 'round'
   ctx.lineCap = 'round'
-  const ops = planejarGlifos(p, field, obst)
+  type Item = { x: number; y: number; draw: () => void }
+  let itens: Item[] = planejarGlifos(p, field, obst, zonas)
+  if (proto && p.proto) {
+    const estilo = p.proto.estilo
+    itens = filtrarForaDeTerrasen(itens, proto.pesoT)
+    // vector mode: these symbols live in the SVG layer, so the raster must not draw them twice
+    if (!p.proto.vetorial) itens = [...itens, ...proto.plano.glifos.map((g) => ({ x: g.x, y: g.y, draw: () => desenharGlifoT(ctx, g, estilo, 'cor') }))]
+  }
   // far-to-near so nearer glyphs overlap the ones behind them
-  ops.sort((a, b) => a.y - b.y)
-  for (const o of ops) o.draw()
+  itens.sort((a, b) => a.y - b.y)
+  for (const o of itens) o.draw()
 }
 
 function mountain(ctx: CanvasRenderingContext2D, x: number, y: number, s: number, rock: RGB, snow: boolean) {

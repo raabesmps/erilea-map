@@ -5,6 +5,8 @@ import { useI18n } from 'vue-i18n'
 import { useAppStore } from '../stores/app'
 import { MAP_H, MAP_W, renderTerrain, type MapStyle } from '../lib/terreno'
 import { iconFor } from '../lib/icons'
+import { protoDe, type PlanoTerrasen } from '../lib/proto/terrasen'
+import { construirSvgTerrasen } from '../lib/proto/camada-vetorial'
 import rotasData from '../data/rotas.json'
 import type { Route } from '../types'
 
@@ -21,9 +23,51 @@ const painting = ref(false)
 const cache: Record<string, string> = {}
 
 function overlayUrl(style: MapStyle) {
-  const key = `${store.geo}-${style}-${store.hidro}`
-  cache[key] ??= renderTerrain(MAP_W, MAP_H, 11, style, store.geo, store.hidro).toDataURL('image/jpeg', 0.92)
+  const key = `${store.geo}-${style}-${store.hidro}-${store.terrasen ?? 'x'}`
+  const proto = store.terrasen ? protoDe(store.terrasen) : undefined
+  cache[key] ??= renderTerrain(MAP_W, MAP_H, 11, style, store.geo, store.hidro, proto).toDataURL('image/jpeg', 0.92)
   return cache[key]!
+}
+
+// ---- EXPERIMENTAL vector layer (only with ?terrasen=..., off with &vetor=0) ----
+// Each mode keeps its own raster + SVG pair. Both modes stay decoded; switching flips `visibility` of the
+// four elements in one frame, so raster and symbols never disagree. Custom panes keep them under the routes.
+type Capa = { img: L.ImageOverlay; svg: L.SVGOverlay }
+const capas: Partial<Record<MapStyle, Capa>> = {}
+const vetorial = () => !!store.terrasen && store.vetor
+
+function criarCapa(style: MapStyle): Capa {
+  const base = protoDe(store.terrasen!)
+  let plano: PlanoTerrasen | undefined
+  const proto = { ...base, vetorial: true, aoPlanejar: (p: PlanoTerrasen) => (plano = p) }
+  const url = renderTerrain(MAP_W, MAP_H, 11, style, store.geo, store.hidro, proto).toDataURL('image/jpeg', 0.92)
+  const modo = style === 'colorido' ? 'cor' : 'sepia'
+  const estilo = modo === 'cor' ? base.estilo : (base.estiloSepia ?? base.estilo)
+  const bounds = L.latLngBounds([0, 0], [MAP_H, MAP_W])
+  if (!map.getPane('terrasenImg')) {
+    map.createPane('terrasenImg').style.zIndex = '390'
+    map.createPane('terrasenSimbolos').style.zIndex = '395'
+  }
+  const img = L.imageOverlay(url, bounds, { pane: 'terrasenImg' }).addTo(map)
+  const svgEl = construirSvgTerrasen(plano!, estilo, modo, MAP_W, MAP_H, store.papel)
+  svgEl.style.pointerEvents = 'none'
+  const svg = L.svgOverlay(svgEl, bounds, { pane: 'terrasenSimbolos', interactive: false }).addTo(map)
+  const capa = { img, svg }
+  definirVisivel(capa, false)
+  capas[style] = capa
+  return capa
+}
+
+function definirVisivel(c: Capa, v: boolean) {
+  for (const o of [c.img, c.svg]) o.getElement()!.style.visibility = v ? 'visible' : 'hidden'
+}
+
+async function mostrarModo(style: MapStyle) {
+  const alvo = capas[style] ?? criarCapa(style)
+  const todas = Object.values(capas)
+  await Promise.all(todas.map((c) => (c.img.getElement() as HTMLImageElement).decode().catch(() => undefined)))
+  await new Promise((r) => requestAnimationFrame(r))
+  for (const c of todas) definirVisivel(c, c === alvo)
 }
 
 const toLL = (x: number, y: number) => L.latLng((1 - y) * MAP_H, x * MAP_W)
@@ -163,7 +207,7 @@ onMounted(() => {
   })
   const bounds = L.latLngBounds([0, 0], [MAP_H, MAP_W])
   map.setMaxBounds(bounds.pad(0.25))
-  overlay = L.imageOverlay(overlayUrl(store.style), bounds).addTo(map)
+  if (!vetorial()) overlay = L.imageOverlay(overlayUrl(store.style), bounds).addTo(map)
   L.control.zoom({ position: 'bottomright' }).addTo(map)
   pinLayer.addTo(map)
   routeLayer.addTo(map)
@@ -176,6 +220,7 @@ onMounted(() => {
   if (portrait) map.setView(bounds.getCenter(), zoom, { animate: false })
   else map.fitBounds(bounds, { paddingTopLeft: [0, 96], paddingBottomRight: [0, 28], animate: false })
   map.setMinZoom(map.getZoom() - 0.5)
+  if (vetorial()) void mostrarModo(store.style)
   map.on('click', () => store.openPlace(null))
   map.on('zoomend', declutter)
   drawPins()
@@ -194,8 +239,9 @@ watch(
   (st) => {
     painting.value = true
     // let the "painting" badge render before the (synchronous) repaint
-    setTimeout(() => {
-      overlay.setUrl(overlayUrl(st))
+    setTimeout(async () => {
+      if (vetorial()) await mostrarModo(st)
+      else overlay.setUrl(overlayUrl(st))
       painting.value = false
     }, 40)
   },

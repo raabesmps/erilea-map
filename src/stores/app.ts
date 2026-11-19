@@ -7,6 +7,7 @@ import type { Book, Lang, Place, Route } from '../types'
 import type { MapStyle } from '../lib/terreno'
 import { GEO_PADRAO, type GeoId } from '../lib/geografia'
 import type { NivelHidro } from '../lib/hidrografia'
+import type { VariacaoTerrasen } from '../lib/proto/terrasen'
 import { clampBook, visiblePlaces, visibleRoutes } from '../lib/spoiler'
 
 export const BOOKS = livros as Book[]
@@ -23,6 +24,12 @@ export const useAppStore = defineStore('app', () => {
   const geo = ref<GeoId>(GEO_PADRAO)
   /** Hydrography tier drawn: 'alta' (default) or 'media' (?hidro=media preview). */
   const hidro = ref<NivelHidro>('alta')
+  /** PROTOTYPE preview (?terrasen=A|B|C|AB). Off by default. */
+  const terrasen = ref<VariacaoTerrasen | null>(null)
+  /** EXPERIMENTAL: with ?terrasen, draw Terrasen symbols as an SVG layer (?vetor=0 keeps them in the raster). */
+  const vetor = ref(true)
+  /** EXPERIMENTAL: sepia paper integration of the vector symbols, 0 = none (A), 1 = subtle (B, approved default), 2 = a little more (C) (?papel=). */
+  const papel = ref<0 | 1 | 2>(1)
   /** Monotonic tokens so the map can react to one-shot requests. */
   const flyRequest = ref<{ id: string; n: number } | null>(null)
   const playRequest = ref<{ id: string; n: number } | null>(null)
@@ -68,5 +75,5 @@ export const useAppStore = defineStore('app', () => {
     playRequest.value = { id, n: (playRequest.value?.n ?? 0) + 1 }
   }
 
-  return { book, lang, placeId, style, setStyle, geo, hidro, places, routes, currentPlace, flyRequest, playRequest, setBook, setLang, openPlace, flyTo, play }
+  return { book, lang, placeId, style, setStyle, geo, hidro, terrasen, vetor, papel, places, routes, currentPlace, flyRequest, playRequest, setBook, setLang, openPlace, flyTo, play }
 })
