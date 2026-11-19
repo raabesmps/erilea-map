@@ -375,7 +375,7 @@ visivelmente desbotadas; foi reduzida para os valores acima.
 - [Zoom máximo, montanhas](18-papel-sepia-zoom-maximo-montanhas.png) e [zoom máximo, floresta densa](19-papel-sepia-zoom-maximo-floresta.png)
 - [Referência: raster × A × C](20-papel-sepia-ref-raster.png)
 
-Para ver ao vivo: `?livro=7&lang=pt&estilo=classico&terrasen=AB&papel=0|1|2`.
+Para ver ao vivo: `?livro=7&lang=pt&estilo=classico&terrasen=AB&papel=0|1|2` (**desde a seção 21, o padrão é `papel=1`, a versão B aprovada**).
 
 **Leitura visual (a confirmar por você):**
 - **A:** nítido, mas as faces claras das montanhas ficam mais brilhantes que o papel ao redor e o halo claro das coníferas lembra um adesivo, principalmente no zoom intermediário.
@@ -413,6 +413,38 @@ entre variantes. Não há regressão demonstrada, mas as máscaras CSS (B/C) tiv
 | Interface | `git diff v1.0.0` em `src/components` | só `MapaView.vue` (camada vetorial opcional, desligada sem `?terrasen`) |
 | Alcance das mudanças de cor | medição repetida: cor, 0 pixels além de 1,6 × o raio (máx. d = 1,45); sépia, máx. d = 1,18 | como na rodada 2 |
 | Testes e build | 140 testes (135 anteriores + 5 de integração) e build | passam |
+
+## 21. Decisão artística final e fechamento
+
+**Aprovado pela autora:** a versão **B (`papel=1`)** é o acabamento sépia definitivo de Terrasen. Direção artística fechada ao longo das rodadas: estilo A em cor e B no sépia,
+paleta fria, massas florestais e clareiras (lavagem 0,20), quatro cumeeiras, colinas sem neve, maciço de Orynth mais leve, halos de separação nas coníferas e
+integração sutil do SVG ao pergaminho.
+
+**Mudança desta etapa (somente o padrão):** no caminho experimental (`?terrasen=`), `papel` agora vale **1** quando o parâmetro não é informado. As opções
+**A (`?papel=0`) e C (`?papel=2`) continuam disponíveis** para comparação, sem custo (são só parâmetros). A URL só escreve `papel` quando difere de 1.
+Arquivos alterados: `src/stores/app.ts` e `src/lib/urlState.ts`. Nenhuma alteração estética ou geográfica.
+
+Verificado no navegador após a mudança:
+
+| Caso | Resultado |
+|---|---|
+| `?terrasen=AB&estilo=classico` (sem `papel`) | SVG sépia com opacidade 0,98 e máscara de grão (= B) |
+| `&papel=0` / `&papel=2` | A (sem opacidade nem máscara) / C (opacidade 0,95 e máscara) |
+| `?terrasen=AB` colorido | SVG de cor **sem** opacidade nem máscara (modo colorido intacto); após alternar para sépia, o SVG colorido segue intacto e oculto |
+| sem `?terrasen` | nenhuma camada vetorial; caminho original |
+| Erros no console | nenhum |
+
+Resultados de validação (rodadas 3 e 4, ainda válidos, pois esta etapa não toca em desenho, geografia nem renderização): alinhamento SVG × imagem 0 px em zoom, pan e animação;
+0 quadros incoerentes na troca cor ↔ sépia; 0 pixels diferentes fora das caixas dos símbolos (sem duplicação); `v1.0.0` intacta e mapa padrão idêntico ao dela.
+
+### Pendências futuras (registradas, não bloqueiam o merge)
+
+1. **Fórmula do envelhecimento duplicada.** `papel-sepia.ts` reimplementa `drawAging` (vinheta radial) de forma analítica. Se o envelhecimento do raster mudar, a fórmula precisa mudar junto.
+   Idealmente, extrair os parâmetros do gradiente para uma constante compartilhada e testar a equivalência.
+2. **Compatibilidade de `mask-image`.** A máscara de grão usa `mask-image` (com prefixo `-webkit-`). Em navegador sem suporte o símbolo aparece sem grão (degrada para A com o tom ajustado). Falta testar em Safari e Firefox reais.
+3. **Latência da primeira troca de modo.** A primeira troca cor ↔ sépia renderiza o outro raster de forma síncrona (≈ 2,2 s, atrás do aviso "pintando"). Opções: renderizar o outro modo ocioso em segundo plano
+   (`requestIdleCallback`/Worker com `OffscreenCanvas`) depois do primeiro desenho.
+4. Estilo C de montanha não é suportado no vetor (`clip()`); replicação em outros biomas exige decidir entre um par imagem + SVG por bioma e uma camada única.
 
 ## 20. Limitações e custo de manutenção
 
