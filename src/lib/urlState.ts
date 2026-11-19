@@ -24,7 +24,8 @@ export function useUrlState(router: Router) {
   store.hidro = q.hidro === 'media' ? 'media' : q.hidro === 'nenhuma' ? 'nenhuma' : 'alta'
   store.terrasen = q.terrasen === 'A' || q.terrasen === 'B' || q.terrasen === 'C' || q.terrasen === 'AB' ? q.terrasen : null
   store.vetor = q.vetor !== '0'
-  store.papel = q.papel === '1' ? 1 : q.papel === '2' ? 2 : 0
+  // approved finish: B (papel=1) is the default; ?papel=0 (A) and ?papel=2 (C) stay available for comparison
+  store.papel = q.papel === '0' ? 0 : q.papel === '2' ? 2 : 1
 
   watch(
     () => store.lang,
@@ -45,7 +46,7 @@ export function useUrlState(router: Router) {
       if (store.hidro !== 'alta') query.hidro = store.hidro
       if (store.terrasen) query.terrasen = store.terrasen
       if (store.terrasen && !store.vetor) query.vetor = '0'
-      if (store.terrasen && store.vetor && store.papel) query.papel = String(store.papel)
+      if (store.terrasen && store.vetor && store.papel !== 1) query.papel = String(store.papel)
       router.replace({ query })
     },
     { immediate: true },
