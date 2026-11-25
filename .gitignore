@@ -31,3 +31,6 @@ tests/navegador/golden/
 tests/navegador/resultados/
 test-results/
 playwright-report/
+
+# temporary worktree of the reference commit used by golden:referencia
+tests/navegador/.referencia/

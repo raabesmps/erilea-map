@@ -40,6 +40,28 @@ function planoDe(seed: number) {
 
 const casos = mestre.casos as Record<string, { plano?: { n: number; hash: string } }>
 
+describe('integridade dos valores mestre (referência e34b710)', () => {
+  const referencia = mestre.referencia as { commit: string; casos: Record<string, string> }
+  const atuais = mestre.casos as Record<string, { sha256: string }>
+  const atualizacoes = mestre.atualizacoes as unknown as { motivo: string; casosAlterados: string[]; sha256Anteriores: Record<string, string | null> }[]
+
+  it('a referência é o commit aprovado e tem os 18 casos', () => {
+    expect(referencia.commit).toBe('e34b710fd729b6f0f1979dffaaa13990d971e401')
+    expect(Object.keys(referencia.casos)).toHaveLength(18)
+    expect(Object.keys(atuais).sort()).toEqual(Object.keys(referencia.casos).sort())
+  })
+
+  it('um valor mestre só difere da referência se uma atualização deliberada o registrou, com motivo e o valor anterior', () => {
+    for (const [chave, sha] of Object.entries(referencia.casos)) {
+      if (atuais[chave]!.sha256 === sha) continue
+      const u = atualizacoes.filter((a) => a.casosAlterados.includes(chave))
+      expect(u.length, `${chave} difere da referência sem registro em "atualizacoes" (use npm run mestre:atualizar -- --motivo "...")`).toBeGreaterThan(0)
+      for (const a of u) expect(a.motivo.trim().length, `${chave}: motivo vazio`).toBeGreaterThanOrEqual(10)
+      expect(u[0]!.sha256Anteriores[chave], `${chave}: a primeira atualização deve guardar o valor da referência`).toBe(sha)
+    }
+  })
+})
+
 describe('valores mestre do plano de Terrasen', () => {
   it('semente 11 (referência aprovada): 151 símbolos e o hash registrado', () => {
     expect(planoDe(11)).toEqual(casos['11|colorido|raster']!.plano)

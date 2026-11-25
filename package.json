@@ -9,8 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:navegador": "playwright test -c tests/navegador/playwright.config.ts",
-    "golden:gerar": "node tests/navegador/executar.mjs golden",
-    "mestre:gerar": "node tests/navegador/executar.mjs mestre"
+    "golden:referencia": "node tests/navegador/executar.mjs golden-referencia",
+    "mestre:atualizar": "node tests/navegador/executar.mjs mestre"
   },
   "dependencies": {
     "leaflet": "^1.9.4",

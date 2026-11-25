@@ -10,6 +10,8 @@
 import { expect, test, type Page } from '@playwright/test'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { gunzipSync, gzipSync } from 'node:zlib'
+import { createHash } from 'node:crypto'
+import { execSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { join } from 'node:path'
 import { compararPixels, pngDiferencas } from './pixels'
@@ -21,6 +23,11 @@ const MESTRE = join(AQUI, 'mestre.json')
 const GOLDEN = join(AQUI, 'golden')
 const GERAR_MESTRE = process.env.GERAR_MESTRE === '1'
 const GERAR_GOLDEN = process.env.GERAR_GOLDEN === '1'
+/** Set ONLY by `npm run golden:referencia`, which serves the code of the reference commit from a temporary git worktree. */
+const COMMIT_REFERENCIA = process.env.COMMIT_REFERENCIA ?? ''
+/** Required by `npm run mestre:atualizar -- --motivo "..."`: why the approved master values are being replaced. */
+const MOTIVO = process.env.MOTIVO ?? ''
+const sha256Buf = (b: Uint8Array) => createHash('sha256').update(b).digest('hex')
 
 type Estilo = 'colorido' | 'classico'
 type Terrasen = 'nenhum' | 'raster' | 'vetorial'
@@ -98,10 +105,26 @@ test.beforeAll(async ({ browser }) => {
   page = await browser.newPage()
   await page.goto('/tests/navegador/pagina.html')
 })
+const goldenGravados: Record<string, string> = {}
+
 test.afterAll(async () => {
   if (GERAR_MESTRE) {
-    const mestre = { _nota: 'Valores mestre do mapa. Gerado por `npm run mestre:gerar`; só regenerar quando uma mudança visual tiver sido APROVADA.', baseCommit: 'e34b710', casos: novos }
+    // Deliberate update: the reference section stays untouched and every change is logged with a reason, the code commit and the old values.
+    const atual = JSON.parse(readFileSync(MESTRE, 'utf8'))
+    const alterados = Object.keys(novos).filter((k) => novos[k]!.sha256 !== atual.casos[k]?.sha256)
+    const git = (c: string) => execSync(c, { cwd: join(AQUI, '..', '..') }).toString().trim()
+    const registro = {
+      em: new Date().toISOString(),
+      commit: git('git rev-parse HEAD') + (git('git status --porcelain') ? '+alteracoes-nao-commitadas' : ''),
+      motivo: MOTIVO,
+      casosAlterados: alterados,
+      sha256Anteriores: Object.fromEntries(alterados.map((k) => [k, atual.casos[k]?.sha256 ?? null])),
+    }
+    const mestre = { ...atual, atualizacoes: [...(atual.atualizacoes ?? []), registro], casos: { ...atual.casos, ...novos } }
     writeFileSync(MESTRE, JSON.stringify(mestre, null, 1) + '\n')
+  }
+  if (GERAR_GOLDEN && COMMIT_REFERENCIA && Object.keys(goldenGravados).length) {
+    writeFileSync(join(GOLDEN, 'ORIGEM.json'), JSON.stringify({ commitDeReferencia: COMMIT_REFERENCIA, geradoEm: new Date().toISOString(), sha256: goldenGravados }, null, 1) + '\n')
   }
   await page?.close()
 })
@@ -123,24 +146,31 @@ test('o comparador de pixels encontra uma diferença de 1 pixel e localiza a reg
 for (const c of casos) {
   test(`mestre ${chave(c)}`, async () => {
     const m = await renderizar(page, c, GERAR_GOLDEN)
-    if (GERAR_GOLDEN && m.buffer) {
+    const mestre = JSON.parse(readFileSync(MESTRE, 'utf8')).casos as Record<string, Medida>
+    if (GERAR_GOLDEN) {
+      // A golden is a copy of an APPROVED render, never of whatever the working tree produces today.
+      expect(COMMIT_REFERENCIA, 'goldens só são gravados por `npm run golden:referencia` (código do commit de referência)').toBeTruthy()
+      expect(m.sha256, `o código servido (${COMMIT_REFERENCIA.slice(0, 7)}) não reproduz o valor mestre de ${chave(c)}: golden NÃO gravado`).toBe(mestre[chave(c)]?.sha256)
       mkdirSync(GOLDEN, { recursive: true })
-      writeFileSync(arquivoGolden(c), gzipSync(Buffer.from(m.buffer, 'base64'), { level: 6 }))
+      writeFileSync(arquivoGolden(c), gzipSync(Buffer.from(m.buffer!, 'base64'), { level: 6 }))
+      goldenGravados[chave(c)] = m.sha256
     }
     const { buffer: _b, ...medida } = m
     void _b
     if (GERAR_MESTRE) {
+      expect(MOTIVO.trim().length, 'informe o motivo: npm run mestre:atualizar -- --motivo "..."').toBeGreaterThan(9)
       novos[chave(c)] = medida
       return
     }
-    const mestre = JSON.parse(readFileSync(MESTRE, 'utf8')).casos as Record<string, Medida>
     const esperado = mestre[chave(c)]
     expect(esperado, `sem valor mestre para ${chave(c)}; rode npm run mestre:gerar`).toBeTruthy()
     if (medida.sha256 !== esperado!.sha256) {
-      let relatorio = 'sem golden local para comparar pixel a pixel (rode npm run golden:gerar no commit de referência)'
+      let relatorio = 'sem golden local para comparar pixel a pixel (rode npm run golden:referencia)'
       if (existsSync(arquivoGolden(c))) {
         const atual = Buffer.from((await renderizar(page, c, true)).buffer!, 'base64')
         const ref = gunzipSync(readFileSync(arquivoGolden(c)))
+        // integrity: the golden must still be the approved render (its SHA-256 equals the master value)
+        expect(sha256Buf(ref), `o golden de ${chave(c)} não corresponde ao valor mestre (arquivo velho ou corrompido): rode npm run golden:referencia`).toBe(esperado!.sha256)
         const r = compararPixels(new Uint8Array(ref), new Uint8Array(atual), W, H)
         mkdirSync(join(AQUI, 'resultados'), { recursive: true })
         writeFileSync(join(AQUI, 'resultados', `diff_${chave(c).replace(/\|/g, '_')}.png`), pngDiferencas(new Uint8Array(ref), new Uint8Array(atual), W, H))
