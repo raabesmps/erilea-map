@@ -1,13 +1,14 @@
 /**
  * EXPERIMENTAL: integrates the vector symbols with the aged sepia parchment WITHOUT rasterising them.
  * Three vector-native ingredients, all keeping the outlines, faces and hatching as real paths:
- *  1. the same edge vignette the raster gets (drawAging), applied analytically to each glyph's colours;
+ *  1. the same edge vignette the raster gets (envelhecimento.ts), applied analytically to each glyph's colours;
  *  2. a slight warm shift of the colours and a softer halo (the vector halo is crisper than the blurred raster one);
  *  3. an ink-absorption effect: root opacity plus a tiled paper-grain alpha mask (CSS mask, GPU-composited,
  *     scales with the map because its size is a percentage of the element).
  * Level 0 = none (the round-3 look). 1 = subtle. 2 = a little more noticeable, still discreet.
  */
 import { mulberry32 } from '../geografia'
+import { HALO_SEPIA, TOM_QUENTE, vinhetaEm } from '../envelhecimento'
 
 export type NivelPapel = 0 | 1 | 2
 
@@ -39,21 +40,10 @@ export function lerCor(css: string): RGBA | null {
   return null
 }
 
-/** The vignette of drawAging (terreno.ts) at a point: colour and alpha of the gradient. */
-export function vinheta(x: number, y: number, W: number, H: number): { rgb: [number, number, number]; a: number } {
-  const r0 = Math.min(W, H) * 0.35
-  const r1 = Math.max(W, H) * 0.72
-  const t = Math.min(1, Math.max(0, (Math.hypot(x - W / 2, y - H / 2) - r0) / (r1 - r0)))
-  return { rgb: [120 + (90 - 120) * t, 80 + (52 - 80) * t, 30 + (18 - 30) * t], a: 0.55 * t }
-}
-
-const QUENTE: [number, number, number] = [150, 112, 64]
-const HALO_SEPIA: [number, number, number] = [238, 226, 190]
-
 /** Colour transform for the glyph at (x, y): vignette, warm shift, softer halo. */
 export function transformarCor(nivel: 1 | 2, x: number, y: number, W: number, H: number): (css: string) => string {
   const P = PARAMS_PAPEL[nivel]
-  const v = vinheta(x, y, W, H)
+  const v = vinhetaEm(x, y, W, H, 'sepia')
   return (css) => {
     const c = lerCor(css)
     if (!c) return css
@@ -61,7 +51,7 @@ export function transformarCor(nivel: 1 | 2, x: number, y: number, W: number, H:
     const rgb: [number, number, number] = [c[0], c[1], c[2]]
     for (let i = 0; i < 3; i++) {
       let k = rgb[i]!
-      k = k * (1 - P.quente) + QUENTE[i]! * P.quente
+      k = k * (1 - P.quente) + TOM_QUENTE[i]! * P.quente
       k = k * (1 - v.a) + v.rgb[i]! * v.a
       rgb[i] = Math.round(k)
     }

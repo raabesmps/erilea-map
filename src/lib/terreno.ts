@@ -2,6 +2,7 @@
 import { desenharGlifoT, desenharWashes, type ProtoTerrasen } from './proto/terrasen'
 import { ativos, criarObstaculos, lagoPoligono, rioPontos, type NivelHidro, type Obstaculos } from './hidrografia'
 import { criarGeografia, GEO_PADRAO, mulberry32, MAP_H, MAP_W, type GeoId } from './geografia'
+import { desenharVinheta, GRAO_PIXEL } from './envelhecimento'
 
 export type MapStyle = 'colorido' | 'classico'
 
@@ -49,7 +50,7 @@ export function renderTerrain(W = MAP_W, H = MAP_H, seed = 11, style: MapStyle =
       let r: number
       let g: number
       let b: number
-      const grain = (rnd() - 0.5) * 9
+      const grain = (rnd() - 0.5) * GRAO_PIXEL.sepia
       if (e > 0) {
         // land: paper with slope shading, darker toward the highlands
         const t = Math.min(1, Math.max(0, (e - 0.1) / 0.6))
@@ -104,7 +105,7 @@ export function renderTerrain(W = MAP_W, H = MAP_H, seed = 11, style: MapStyle =
   desenharHidroClassico(ctx, lagos, rios)
   drawGlyphs(ctx, W, H, at, rnd, n2, obst, pr ? (x, y) => pr.pesoT(x, y) > 0.12 : undefined)
   if (pr && proto && !proto.vetorial) for (const g of pr.plano.glifos) desenharGlifoT(ctx, g, proto.estiloSepia ?? proto.estilo, 'sepia')
-  drawAging(ctx, W, H)
+  desenharVinheta(ctx, W, H, 'sepia')
   drawFrame(ctx, W, H)
   drawCompass(ctx, W * 0.95, H * 0.905, 54, false)
   return canvas
@@ -192,14 +193,6 @@ function tree(ctx: CanvasRenderingContext2D, x: number, y: number, s: number) {
   ctx.moveTo(x, y + s * 0.2)
   ctx.lineTo(x, y + s * 0.9)
   ctx.stroke()
-}
-
-function drawAging(ctx: CanvasRenderingContext2D, W: number, H: number) {
-  const g = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.72)
-  g.addColorStop(0, 'rgba(120,80,30,0)')
-  g.addColorStop(1, 'rgba(90,52,18,0.55)')
-  ctx.fillStyle = g
-  ctx.fillRect(0, 0, W, H)
 }
 
 function drawFrame(ctx: CanvasRenderingContext2D, W: number, H: number) {

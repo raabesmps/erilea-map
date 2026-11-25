@@ -1,4 +1,5 @@
 import biomasData from '../data/biomas.json'
+import { desenharVinheta, GRAO_PIXEL } from './envelhecimento'
 import { aplicarPaleta, criarPeso, desenharGlifoT, desenharWashes, filtrarForaDeTerrasen, planejarTerrasen, ZONA_MONTANHAS, ZONAS_TERRASEN, type PlanoTerrasen, type ProtoTerrasen } from './proto/terrasen'
 import { ativos, catmullRom, criarObstaculos, dentroDoPoligono, lagoPoligono, rioPontos, type HidroAtiva, type Obstaculos } from './hidrografia'
 
@@ -170,7 +171,7 @@ export function paintColorido(p: PaintCtx) {
     for (let x = 0; x < W; x++) {
       const e = elev[y * W + x]!
       const i = (y * W + x) * 4
-      const grain = (rnd() - 0.5) * 8
+      const grain = (rnd() - 0.5) * GRAO_PIXEL.cor
       let r: number
       let g: number
       let b: number
@@ -247,11 +248,7 @@ export function paintColorido(p: PaintCtx) {
   drawGlyphs(p, field, obst, zonasUsadas, proto)
 
   // aged-paper vignette, lighter than the sepia style so the colour stays readable
-  const g = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.4, W / 2, H / 2, Math.max(W, H) * 0.72)
-  g.addColorStop(0, 'rgba(120,80,30,0)')
-  g.addColorStop(1, 'rgba(90,52,18,0.38)')
-  ctx.fillStyle = g
-  ctx.fillRect(0, 0, W, H)
+  desenharVinheta(ctx, W, H, 'cor')
 }
 
 /** Small sepia wave strokes spread over the water. */

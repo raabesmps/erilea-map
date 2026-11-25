@@ -1,5 +1,5 @@
 {
- "_nota": "Valores mestre do mapa. Gerado por `npm run mestre:gerar`; só regenerar quando uma mudança visual tiver sido APROVADA.",
+ "_nota": "Valores mestre do mapa. Atualizado só por `npm run mestre:atualizar -- --motivo \"...\"` e só depois de uma mudança visual APROVADA; cada atualização fica em `atualizacoes`.",
  "referencia": {
   "commit": "e34b710fd729b6f0f1979dffaaa13990d971e401",
   "descricao": "Merge bioma-terrasen em v1.0.0: o estado aprovado de Terrasen. Os SHA-256 abaixo NUNCA são reescritos; `casos` pode mudar só com uma entrada em `atualizacoes`.",

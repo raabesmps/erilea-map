@@ -1,6 +1,6 @@
 # Consolidação técnica antes do segundo bioma (Adarlan)
 
-**Status:** a consolidação foi **aprovada com ressalvas** (revisão de 2026-11-25) e a **etapa 0a está concluída e aguardando a sua aprovação** (seção 8). As etapas 0b em diante **não começaram**. A branch `bioma-adarlan` parte da `v1.0.0` (commit `e34b710`).
+**Status:** a consolidação foi **aprovada com ressalvas** (revisão de 2026-11-25). **Etapa 0a aprovada; etapa 0b concluída e aguardando revisão** (seção 9). As etapas 0c em diante **não começaram**. A branch `bioma-adarlan` parte da `v1.0.0` (commit `e34b710`).
 O objetivo é decidir, **antes** de desenhar Adarlan, como o que foi construído para Terrasen vira uma base para vários biomas **sem mudar um pixel de Terrasen**.
 
 Legenda: **[MEDIDO]** número obtido nesta análise · **[CÓDIGO]** lido no código · **[PROPOSTA]** decisão a revisar.
@@ -144,7 +144,7 @@ Geografia, costa, hidrografia, lugares, rotas, outras zonas, interface, o result
 
 Achado: **os símbolos vetoriais do colorido não recebem a vinheta do colorido** (o raster aplica por cima dos símbolos; o SVG fica acima). A diferença é pequena onde Terrasen está (≈ 5,6% de mistura em Orynth [MEDIDO por cálculo: distância 827 px; `t = 0,147`; `alfa = 0,056`]), mas cresce para as bordas (até 38% no canto). Para Adarlan, a borda leste (`x ≈ 0,86`) chega a ≈ 7%.
 
-### 2.2 Proposta [PROPOSTA]
+### 2.2 Proposta [PROPOSTA; executada na etapa 0b, ver seção 9]
 
 `src/lib/envelhecimento.ts`, **única fonte**:
 
@@ -283,7 +283,9 @@ Leitura:
 - **Outras sementes:** em `validarLugares` com os pontos de controle e as cordas da v3, **só a semente 11 passa** (0 violações; as sementes 1 a 400 foram testadas, e a melhor das outras, a 184, tem 5 violações). Portanto **não existe outra semente "válida"** no sentido da geografia aprovada. As sementes **184, 21 e 37** (as de menos violações) entram como **sementes de estresse**: não afirmam um mapa válido, só detectam código que dependa em segredo da semente 11. O teste de Vitest registra essa conclusão.
 - O hash do plano de Terrasen **é igual no Vitest e no navegador** em todas as sementes (verificação cruzada).
 - Hashes de **plano e de SVG** são texto determinístico (igualdade estrita). O **SHA-256 do buffer** depende do navegador/GPU: a igualdade vale na mesma máquina e no mesmo Chrome (duas execuções seguidas deram o mesmo valor). Em outro ambiente, usar o comparador de pixels com tolerância.
-- **Comparador de pixels** (`tests/navegador/pixels.ts`): quando o SHA-256 muda, compara o buffer com o *golden* local (`tests/navegador/golden/`, ignorado pelo git, ≈ 117 MB, regenerável com `npm run golden:gerar`) e relata: nº de pixels diferentes, percentual, maior diferença, caixa delimitadora e as regiões (células de 160 px) com mais diferenças, além de uma imagem de diferenças em `tests/navegador/resultados/`.
+- **Comparador de pixels** (`tests/navegador/pixels.ts`): quando o SHA-256 muda, compara o buffer com o *golden* local (`tests/navegador/golden/`, ignorado pelo git, ≈ 117 MB) e relata: nº de pixels diferentes, percentual, maior diferença, caixa delimitadora e as regiões (células de 160 px) com mais diferenças, além de uma imagem de diferenças em `tests/navegador/resultados/`.
+- **Os goldens são sempre recuperáveis da referência original `e34b710`** e **nunca** saem do código em desenvolvimento: `npm run golden:referencia` cria um *git worktree* temporário do commit de referência, serve aquele código e só grava um golden se o render reproduzir o SHA-256 mestre. Gravar golden à mão (`GERAR_GOLDEN=1` sem o runner) falha. O teste também rejeita um golden cujo SHA-256 não seja o valor mestre. Procedimento completo em [`tests/navegador/README.md`](../../tests/navegador/README.md).
+- **Atualização deliberada dos valores mestre:** `npm run mestre:atualizar -- --motivo "..."` (recusa sem motivo). A seção `referencia` de `mestre.json` (os SHA-256 originais de `e34b710`) **nunca é reescrita**; cada atualização entra em `atualizacoes` com data, commit do código, casos alterados, SHA-256 anteriores e o motivo. Um teste de Vitest **falha** se `casos` diferir de `referencia` sem uma entrada registrada.
 - **Prova de que o portão funciona:** trocar `#527A70` por `#527A71` (1/255 de diferença) na paleta de Terrasen fez o teste falhar com "72.239 pixels diferentes (1,79%), maior diferença 1/255, caixa [1285, 19, 2047, 457]". A alteração foi revertida.
 
 ### 5.2 Camadas propostas
@@ -303,7 +305,7 @@ Leitura:
 
 **Estado (etapa 0a):** R1 e R3 já existem (`src/lib/proto/mestre.test.ts` e `tests/navegador/mestre.pw.ts`, com o comparador de pixels). R5 e parte de R6/R7 existem desde Terrasen. R2, R4, R8, R9 e R10 serão criadas nas etapas 0b a 0d e na de Adarlan.
 
-Infraestrutura (**implementada na 0a**): `@playwright/test` como `devDependency`, `tests/navegador/` (config, página vazia, comparador de pixels, `mestre.pw.ts`), scripts `npm run test:navegador`, `npm run golden:gerar` e `npm run mestre:gerar`; usa o Google Chrome instalado (`channel: 'chrome'`), sem baixar navegador. As camadas R1 (plano), R2, R5, R6, R7 rodam em Vitest puro, sem navegador.
+Infraestrutura (**implementada na 0a**): `@playwright/test` como `devDependency`, `tests/navegador/` (config, página vazia, comparador de pixels, `mestre.pw.ts`), scripts `npm run test:navegador`, `npm run golden:referencia` e `npm run mestre:atualizar -- --motivo "..."`; usa o Google Chrome instalado (`channel: 'chrome'`), sem baixar navegador. As camadas R1 (plano), R2, R5, R6, R7 rodam em Vitest puro, sem navegador.
 
 ---
 
@@ -315,8 +317,8 @@ Cada etapa é **pequena, em commits separados**, e só passa por um **portão**:
 
 | Etapa | Conteúdo | Portão específico | Estado |
 |---|---|---|---|
-| **0a** | testes mestre e infraestrutura de navegador (Playwright), comparador de pixels, outras sementes | os valores mestre foram gerados do código atual e conferem com os documentos anteriores | **concluída, aguarda aprovação** |
-| 0b | `envelhecimento.ts`: centralizar a vinheta, **preservando os parâmetros de cada modo**; teste de equivalência raster × vetor (R9) | mestre idêntico; sem vinheta nos símbolos vetoriais coloridos | não iniciada |
+| **0a** | testes mestre e infraestrutura de navegador (Playwright), comparador de pixels, outras sementes; goldens recuperáveis da referência | os valores mestre foram gerados do código de `e34b710` e conferem com os documentos anteriores | **aprovada** |
+| 0b | `envelhecimento.ts`: centralizar a vinheta, **preservando os parâmetros de cada modo**; teste de equivalência raster × vetor (R9) | mestre idêntico; sem vinheta nos símbolos vetoriais coloridos | **concluída, aguarda revisão** (seção 9) |
 | 0c | módulo `biomas/` com Terrasen como cliente (só o que Adarlan usa), registro, ordem fixa | mestre idêntico; R2 (independência de ordem) | não iniciada |
 | 0d | `MapaView` para vários biomas (`data-bioma` por símbolo, ordem global por `y`), orçamento provisório (R10), investigação dos picos de zoom (3.5) | mestre idêntico; R8 (vetor × raster) | não iniciada |
 
@@ -351,4 +353,46 @@ Depois da consolidação: Adarlan (protótipo desligado por padrão), conforme o
 - **Descoberta que muda o pedido:** nenhuma outra semente de 1 a 400 tem geografia válida. As "outras sementes" são, portanto, de **estresse** (ver 5.1).
 - O portão foi **provado**: uma mudança de 1/255 na paleta é detectada e localizada.
 
-**Limitações:** o SHA-256 do buffer só vale no mesmo ambiente de navegador; o golden local não é versionado (≈ 117 MB) e precisa ser gerado em cada máquina com `npm run golden:gerar` antes de refatorar.
+**Limitações:** o SHA-256 do buffer só vale no mesmo ambiente de navegador; o golden local não é versionado (≈ 117 MB) e precisa ser gerado em cada máquina com `npm run golden:referencia` antes de refatorar.
+
+## 9. Resultado da etapa 0b (centralização do envelhecimento)
+
+**Código** (commit específico da 0b): `src/lib/envelhecimento.ts` (novo), `colorir.ts`, `terreno.ts` e `proto/papel-sepia.ts` passam a usá-lo.
+
+| O que foi centralizado | Valor preservado | Antes | Agora |
+|---|---|---|---|
+| Vinheta do sépia | raio `0,35 · lado curto` a `0,72 · lado longo`; de `(120,80,30,0)` a `(90,52,18,0,55)` | `terreno.ts` (`drawAging`) + cópia analítica em `papel-sepia.ts` | `VINHETA.sepia`, `desenharVinheta(…,'sepia')`, `vinhetaEm(…,'sepia')` |
+| Vinheta do colorido | `0,40` a `0,72`; mesmas cores; alfa `0,38` | `colorir.ts` (literais) | `VINHETA.cor`, `desenharVinheta(…,'cor')` |
+| Amplitude do grão por pixel | sépia `9`, colorido `8` | literais em `terreno.ts` e `colorir.ts` | `GRAO_PIXEL` (a expressão `(rnd() - 0.5) * k` é a mesma) |
+| Tom quente e cor do halo do vetor sépia | `(150,112,64)` e `(238,226,190)` | constantes privadas em `papel-sepia.ts` | `TOM_QUENTE`, `HALO_SEPIA` |
+
+**Não foi tocado (conforme o pedido):** a textura e a intensidade do grão, a máscara de grão e os níveis `PARAMS_PAPEL` do vetor, a ordem de composição (a vinheta continua sendo o último passo de cada pintor, antes da moldura no sépia), e **nenhuma vinheta foi aplicada aos símbolos vetoriais coloridos**. O desenho do canvas monta o gradiente com as mesmas expressões (`Math.min(W,H) * r0`, `Math.max(W,H) * r1`) e as mesmas cadeias de cor (`rgba(120,80,30,0)`, `rgba(90,52,18,0.55)` / `0.38`).
+
+**Validação:**
+
+| Verificação | Resultado |
+|---|---|
+| Valores mestre, **sem regenerar**: SHA-256 integral dos 18 casos (semente 11 e sementes de estresse), hash do plano, hash do SVG, hash amostral | **todos idênticos à referência** (22 testes de navegador passam, 1,7 min) |
+| Teste de Vitest | 154 testes passam (148 + 6 novos); `npm run build` passa |
+| `mestre.json` | `casos` e `referencia` **inalterados** (nenhuma regeneração, nenhuma entrada em `atualizacoes`); só o texto da `_nota` foi corrigido para o nome novo do comando |
+| Parâmetros | teste que fixa os números atuais de cada modo, do grão, do tom quente e do halo |
+| `vinhetaEm` (sépia) × a função antiga copiada literalmente | **idênticas bit a bit** em 1.700 pontos |
+| Portão protege o módulo novo | trocar `alfa: 0.38` por `0.39` em `VINHETA.cor` fez o teste falhar (1.269.748 pixels diferentes, 31,49%, diferença máxima 2/255); revertido |
+
+**Equivalência analítica × canvas** (`tests/navegador/envelhecimento.pw.ts`; canvas 2400 × 1680 preenchido com 4 cores-base, vinheta pintada, 1.120 pontos por caso, 8 casos):
+
+| Modo | Diferença máxima | Média | Pontos com diferença arredondada 0 / 1 / 2 / ≥ 3 |
+|---|---|---|---|
+| Sépia | 1,18 a 1,54 (de 255) | 0,42 a 0,53 | 546 a 640 / 480 a 612 / 0 a 3 / 0 |
+| Colorido | 1,27 a 1,45 | 0,41 a 0,49 | (nenhum ponto com diferença ≥ 3) |
+
+Interpretação das diferenças:
+- **São arredondamento de 8 bits**, não erro de fórmula: a diferença máxima é ≤ 1,54/255, a média ≈ 0,5, e no máximo 3 de 1.120 pontos chegam a 2 (com a base `232,214,170`).
+- **O canvas interpola as cores sem pré-multiplicar.** Com o modelo pré-multiplicado as diferenças passam de 3,2 a 5,2 (média 1,1 a 2,1); portanto o modelo da função analítica é o certo. Isso estava implícito antes; agora está medido.
+- Dentro do raio interno o canvas **não altera nenhum pixel** (exato).
+- O limite do teste foi fixado em **2/255** a partir dessa medição.
+- Efeito prático nos símbolos vetoriais do sépia: ≤ 1,5/255 em relação ao que o raster daria, invisível; o SVG não mudou (hash idêntico).
+
+**Interrupção (regra 9):** não foi necessária; nenhum valor mestre mudou.
+
+**Também nesta etapa (ressalva da revisão 0a):** os goldens agora são recuperáveis a partir de `e34b710` e as atualizações dos valores mestre são deliberadas e registradas (ver 5.1). Foi provado: os 18 goldens foram **apagados e regenerados** a partir de um *worktree* de `e34b710`; as tentativas de gravar golden do código atual e de atualizar o mestre sem motivo foram **recusadas**.

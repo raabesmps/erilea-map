@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { MAP_H, MAP_W } from '../geografia'
 import { GravadorSvg } from './gravador-svg'
-import { alfaGrao, lerCor, PARAMS_PAPEL, transformarCor, vinheta } from './papel-sepia'
+import { alfaGrao, lerCor, PARAMS_PAPEL, transformarCor } from './papel-sepia'
+import { vinhetaEm } from '../envelhecimento'
 
 describe('integração dos símbolos ao pergaminho sépia (experimental)', () => {
   it('lê hex e rgba', () => {
@@ -10,8 +11,8 @@ describe('integração dos símbolos ao pergaminho sépia (experimental)', () =>
     expect(lerCor('nope')).toBeNull()
   })
   it('a vinheta analítica é a de drawAging: 0 no centro, cresce até 0,55', () => {
-    expect(vinheta(MAP_W / 2, MAP_H / 2, MAP_W, MAP_H).a).toBe(0)
-    const canto = vinheta(0, 0, MAP_W, MAP_H)
+    expect(vinhetaEm(MAP_W / 2, MAP_H / 2, MAP_W, MAP_H, 'sepia').a).toBe(0)
+    const canto = vinhetaEm(0, 0, MAP_W, MAP_H, 'sepia')
     expect(canto.a).toBeGreaterThan(0.4)
     expect(canto.a).toBeLessThanOrEqual(0.55)
   })

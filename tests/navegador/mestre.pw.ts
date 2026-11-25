@@ -163,7 +163,7 @@ for (const c of casos) {
       return
     }
     const esperado = mestre[chave(c)]
-    expect(esperado, `sem valor mestre para ${chave(c)}; rode npm run mestre:gerar`).toBeTruthy()
+    expect(esperado, `sem valor mestre para ${chave(c)}; rode npm run mestre:atualizar -- --motivo "..."`).toBeTruthy()
     if (medida.sha256 !== esperado!.sha256) {
       let relatorio = 'sem golden local para comparar pixel a pixel (rode npm run golden:referencia)'
       if (existsSync(arquivoGolden(c))) {
