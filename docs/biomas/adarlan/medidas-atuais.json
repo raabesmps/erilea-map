@@ -1,0 +1,767 @@
+{
+ "regiao": {
+  "areaPx2": 136896,
+  "areaPctDoMapaTerra": null,
+  "bboxNorm": {
+   "x0": 0.7,
+   "x1": 0.86,
+   "y0": 0.23,
+   "y1": 0.56
+  }
+ },
+ "cor": {
+  "atual": {
+   "n": 66,
+   "porTipo": {
+    "arvore": 42,
+    "colina": 24
+   },
+   "densidadePor10mil": 4.82,
+   "ClarkEvans": 1.32,
+   "VMR": 1.16,
+   "CVtamanho": {
+    "arvore": 0.16,
+    "colina": 0.15
+   },
+   "maiorVazioPx": 71,
+   "maiorVazioEm": [
+    1692,
+    696
+   ],
+   "quaseColineares": 0.06,
+   "vizinhoMaisProximoPx": 30.2
+  }
+ },
+ "sepia": {
+  "atual": {
+   "n": 72,
+   "porTipo": {
+    "arvore": 45,
+    "colina": 2,
+    "montanha": 25
+   },
+   "densidadePor10mil": 5.26,
+   "ClarkEvans": 1.15,
+   "VMR": 1.34,
+   "CVtamanho": {
+    "arvore": 0.15,
+    "colina": 0.03,
+    "montanha": 0.16
+   },
+   "maiorVazioPx": 83,
+   "maiorVazioEm": [
+    1944,
+    528
+   ],
+   "quaseColineares": 0.102,
+   "vizinhoMaisProximoPx": 25.1
+  }
+ },
+ "mediaCorRegiao": {
+  "semTerrasen": {
+   "rgb": [
+    134,
+    141,
+    86
+   ],
+   "desvio": [
+    17.6,
+    14.4,
+    9.4
+   ],
+   "n": 15199
+  },
+  "comTerrasenLigada": {
+   "rgb": [
+    134,
+    141,
+    86
+   ],
+   "desvio": [
+    17.6,
+    14.4,
+    9.4
+   ],
+   "n": 15199
+  }
+ },
+ "deltaE": {
+  "r01-gelo-noroeste": {
+   "adarlan": 40.1,
+   "campos": 35.5
+  },
+  "r01-selva-morla": {
+   "adarlan": 36.9,
+   "campos": 45.6
+  },
+  "r02-desertos-oeste": {
+   "adarlan": 25.5,
+   "campos": 13.7
+  },
+  "r03-terrasen": {
+   "adarlan": 24.9,
+   "campos": 33.8
+  },
+  "r03-pinhal-denso": {
+   "adarlan": 41.2,
+   "campos": 49.3
+  },
+  "r03-montanhas-norte": {
+   "adarlan": 23.7,
+   "campos": 26.4
+  },
+  "r04-cordilheira-ruhnn": {
+   "adarlan": 23.7,
+   "campos": 26.4
+  },
+  "r04-floresta-central": {
+   "adarlan": 28,
+   "campos": 35
+  },
+  "r04-canino-branco": {
+   "adarlan": 25.1,
+   "campos": 25.2
+  },
+  "r06-selva-bogdano": {
+   "adarlan": 36.9,
+   "campos": 45.6
+  },
+  "r07-terra-desertica": {
+   "adarlan": 26.9,
+   "campos": 15.3
+  },
+  "r07-deserto-vermelho": {
+   "adarlan": 43.4,
+   "campos": 36.4
+  },
+  "r07-montanhas-sudoeste": {
+   "adarlan": 43,
+   "campos": 35.4
+  },
+  "r08-melisande": {
+   "adarlan": 5.4,
+   "campos": 12.1
+  },
+  "r09-eyllwe": {
+   "adarlan": 7.1,
+   "campos": 17.2
+  },
+  "r09-eyllwe-ouro": {
+   "adarlan": 18.5,
+   "campos": 6.6
+  },
+  "r09-pantano-pedra": {
+   "adarlan": 13.4,
+   "campos": 22.3
+  },
+  "(terrasen, paleta nova #527A70)": {
+   "adarlan": 31.2,
+   "campos": 37.4
+  },
+  "(padrão do mapa)": {
+   "adarlan": 9.4,
+   "campos": 6.6
+  },
+  "adarlan x campos": 11.9
+ },
+ "contrastes": {
+  "arvore_sobre_chao": 1.78,
+  "rocha_sobre_chao": 1.02
+ },
+ "faixas": [
+  {
+   "y": 0.1,
+   "areaTerra": 20000,
+   "simbolosAtual": 20,
+   "densAtual": 10,
+   "simbolosComTerrasen": 14,
+   "densComTerrasen": 7,
+   "tipos": {
+    "undefined": 14
+   },
+   "corAtual": [
+    70,
+    93,
+    66
+   ],
+   "corComTerrasen": [
+    82,
+    103,
+    90
+   ],
+   "pesoTerrasen": 1,
+   "pesoAdarlan": 0
+  },
+  {
+   "y": 0.13,
+   "areaTerra": 22368,
+   "simbolosAtual": 19,
+   "densAtual": 8.5,
+   "simbolosComTerrasen": 23,
+   "densComTerrasen": 10.3,
+   "tipos": {
+    "undefined": 23
+   },
+   "corAtual": [
+    70,
+    93,
+    67
+   ],
+   "corComTerrasen": [
+    71,
+    95,
+    79
+   ],
+   "pesoTerrasen": 1,
+   "pesoAdarlan": 0,
+   "dEparaFaixaAnterior": 4.3
+  },
+  {
+   "y": 0.16,
+   "areaTerra": 22480,
+   "simbolosAtual": 17,
+   "densAtual": 7.6,
+   "simbolosComTerrasen": 16,
+   "densComTerrasen": 7.1,
+   "tipos": {
+    "undefined": 16
+   },
+   "corAtual": [
+    77,
+    101,
+    73
+   ],
+   "corComTerrasen": [
+    76,
+    103,
+    85
+   ],
+   "pesoTerrasen": 0.97,
+   "pesoAdarlan": 0,
+   "dEparaFaixaAnterior": 3.4
+  },
+  {
+   "y": 0.19,
+   "areaTerra": 18464,
+   "simbolosAtual": 11,
+   "densAtual": 6,
+   "simbolosComTerrasen": 9,
+   "densComTerrasen": 4.9,
+   "tipos": {
+    "undefined": 9
+   },
+   "corAtual": [
+    93,
+    115,
+    86
+   ],
+   "corComTerrasen": [
+    90,
+    115,
+    94
+   ],
+   "pesoTerrasen": 0.71,
+   "pesoAdarlan": 0.03,
+   "dEparaFaixaAnterior": 5.2
+  },
+  {
+   "y": 0.22,
+   "areaTerra": 18368,
+   "simbolosAtual": 5,
+   "densAtual": 2.7,
+   "simbolosComTerrasen": 9,
+   "densComTerrasen": 4.9,
+   "tipos": {
+    "undefined": 6,
+    "arvore": 1,
+    "colina": 2
+   },
+   "corAtual": [
+    112,
+    128,
+    92
+   ],
+   "corComTerrasen": [
+    109,
+    127,
+    96
+   ],
+   "pesoTerrasen": 0.17,
+   "pesoAdarlan": 0.2,
+   "dEparaFaixaAnterior": 8
+  },
+  {
+   "y": 0.25,
+   "areaTerra": 18608,
+   "simbolosAtual": 13,
+   "densAtual": 7,
+   "simbolosComTerrasen": 13,
+   "densComTerrasen": 7,
+   "tipos": {
+    "arvore": 11,
+    "montanha": 1,
+    "colina": 1
+   },
+   "corAtual": [
+    117,
+    128,
+    83
+   ],
+   "corComTerrasen": [
+    117,
+    128,
+    84
+   ],
+   "pesoTerrasen": 0,
+   "pesoAdarlan": 0.47,
+   "dEparaFaixaAnterior": 7.9
+  },
+  {
+   "y": 0.28,
+   "areaTerra": 19072,
+   "simbolosAtual": 14,
+   "densAtual": 7.3,
+   "simbolosComTerrasen": 14,
+   "densComTerrasen": 7.3,
+   "tipos": {
+    "arvore": 13,
+    "colina": 1
+   },
+   "corAtual": [
+    117,
+    127,
+    81
+   ],
+   "corComTerrasen": [
+    117,
+    127,
+    81
+   ],
+   "pesoTerrasen": 0,
+   "pesoAdarlan": 0.66,
+   "dEparaFaixaAnterior": 1.3
+  },
+  {
+   "y": 0.31,
+   "areaTerra": 18576,
+   "simbolosAtual": 17,
+   "densAtual": 9.2,
+   "simbolosComTerrasen": 17,
+   "densComTerrasen": 9.2,
+   "tipos": {
+    "arvore": 11,
+    "colina": 6
+   },
+   "corAtual": [
+    116,
+    126,
+    80
+   ],
+   "corComTerrasen": [
+    116,
+    126,
+    80
+   ],
+   "pesoTerrasen": 0,
+   "pesoAdarlan": 0.74,
+   "dEparaFaixaAnterior": 0.4
+  },
+  {
+   "y": 0.34,
+   "areaTerra": 19888,
+   "simbolosAtual": 8,
+   "densAtual": 4,
+   "simbolosComTerrasen": 8,
+   "densComTerrasen": 4,
+   "tipos": {
+    "arvore": 5,
+    "colina": 3
+   },
+   "corAtual": [
+    124,
+    133,
+    82
+   ],
+   "corComTerrasen": [
+    124,
+    133,
+    82
+   ],
+   "pesoTerrasen": 0,
+   "pesoAdarlan": 0.79,
+   "dEparaFaixaAnterior": 3.8
+  },
+  {
+   "y": 0.37,
+   "areaTerra": 19232,
+   "simbolosAtual": 13,
+   "densAtual": 6.8,
+   "simbolosComTerrasen": 13,
+   "densComTerrasen": 6.8,
+   "tipos": {
+    "colina": 3,
+    "arvore": 10
+   },
+   "corAtual": [
+    125,
+    133,
+    83
+   ],
+   "corComTerrasen": [
+    125,
+    133,
+    83
+   ],
+   "pesoTerrasen": 0,
+   "pesoAdarlan": 0.78,
+   "dEparaFaixaAnterior": 0.7
+  },
+  {
+   "y": 0.4,
+   "areaTerra": 19664,
+   "simbolosAtual": 15,
+   "densAtual": 7.6,
+   "simbolosComTerrasen": 15,
+   "densComTerrasen": 7.6,
+   "tipos": {
+    "arvore": 13,
+    "colina": 2
+   },
+   "corAtual": [
+    126,
+    134,
+    84
+   ],
+   "corComTerrasen": [
+    126,
+    134,
+    84
+   ],
+   "pesoTerrasen": 0,
+   "pesoAdarlan": 0.76,
+   "dEparaFaixaAnterior": 0.4
+  },
+  {
+   "y": 0.43,
+   "areaTerra": 14912,
+   "simbolosAtual": 7,
+   "densAtual": 4.7,
+   "simbolosComTerrasen": 7,
+   "densComTerrasen": 4.7,
+   "tipos": {
+    "arvore": 5,
+    "colina": 2
+   },
+   "corAtual": [
+    125,
+    135,
+    88
+   ],
+   "corComTerrasen": [
+    125,
+    135,
+    88
+   ],
+   "pesoTerrasen": 0,
+   "pesoAdarlan": 0.72,
+   "dEparaFaixaAnterior": 1.9
+  },
+  {
+   "y": 0.46,
+   "areaTerra": 16048,
+   "simbolosAtual": 13,
+   "densAtual": 8.1,
+   "simbolosComTerrasen": 13,
+   "densComTerrasen": 8.1,
+   "tipos": {
+    "arvore": 12,
+    "colina": 1
+   },
+   "corAtual": [
+    117,
+    128,
+    84
+   ],
+   "corComTerrasen": [
+    117,
+    128,
+    84
+   ],
+   "pesoTerrasen": 0,
+   "pesoAdarlan": 0.71,
+   "dEparaFaixaAnterior": 3.1
+  },
+  {
+   "y": 0.49,
+   "areaTerra": 21344,
+   "simbolosAtual": 15,
+   "densAtual": 7,
+   "simbolosComTerrasen": 15,
+   "densComTerrasen": 7,
+   "tipos": {
+    "arvore": 14,
+    "colina": 1
+   },
+   "corAtual": [
+    128,
+    136,
+    85
+   ],
+   "corComTerrasen": [
+    128,
+    136,
+    85
+   ],
+   "pesoTerrasen": 0,
+   "pesoAdarlan": 0.78,
+   "dEparaFaixaAnterior": 5
+  },
+  {
+   "y": 0.52,
+   "areaTerra": 23104,
+   "simbolosAtual": 10,
+   "densAtual": 4.3,
+   "simbolosComTerrasen": 10,
+   "densComTerrasen": 4.3,
+   "tipos": {
+    "arvore": 7,
+    "colina": 3
+   },
+   "corAtual": [
+    127,
+    135,
+    84
+   ],
+   "corComTerrasen": [
+    127,
+    135,
+    84
+   ],
+   "pesoTerrasen": 0,
+   "pesoAdarlan": 0.71,
+   "dEparaFaixaAnterior": 0.4
+  },
+  {
+   "y": 0.55,
+   "areaTerra": 25312,
+   "simbolosAtual": 5,
+   "densAtual": 2,
+   "simbolosComTerrasen": 5,
+   "densComTerrasen": 2,
+   "tipos": {
+    "colina": 1,
+    "arvore": 4
+   },
+   "corAtual": [
+    135,
+    142,
+    89
+   ],
+   "corComTerrasen": [
+    135,
+    142,
+    89
+   ],
+   "pesoTerrasen": 0,
+   "pesoAdarlan": 0.26,
+   "dEparaFaixaAnterior": 2.9
+  }
+ ],
+ "pinsNaRegiao": [
+  {
+   "id": "rifthold",
+   "tipo": "cidade",
+   "x": 0.776,
+   "y": 0.47,
+   "noA": true,
+   "pesoA": 1,
+   "pesoOakwald": 0,
+   "pesoTerrasen": 0
+  },
+  {
+   "id": "endovier",
+   "tipo": "mina",
+   "x": 0.665,
+   "y": 0.295,
+   "noA": false,
+   "pesoA": 0,
+   "pesoOakwald": 0.48,
+   "pesoTerrasen": 0
+  },
+  {
+   "id": "adarlan",
+   "tipo": "regiao",
+   "x": 0.756,
+   "y": 0.364,
+   "noA": true,
+   "pesoA": 1,
+   "pesoOakwald": 0,
+   "pesoTerrasen": 0
+  },
+  {
+   "id": "meah",
+   "tipo": "cidade",
+   "x": 0.809,
+   "y": 0.317,
+   "noA": false,
+   "pesoA": 1,
+   "pesoOakwald": 0,
+   "pesoTerrasen": 0
+  },
+  {
+   "id": "oakwald",
+   "tipo": "floresta",
+   "x": 0.686,
+   "y": 0.373,
+   "noA": false,
+   "pesoA": 0.2,
+   "pesoOakwald": 0.8,
+   "pesoTerrasen": 0
+  },
+  {
+   "id": "canino-branco",
+   "tipo": "montanha",
+   "x": 0.577,
+   "y": 0.517,
+   "noA": false,
+   "pesoA": 0,
+   "pesoOakwald": 0,
+   "pesoTerrasen": 0
+  },
+  {
+   "id": "ruhnn",
+   "tipo": "montanha",
+   "x": 0.6,
+   "y": 0.32,
+   "noA": false,
+   "pesoA": 0,
+   "pesoOakwald": 0,
+   "pesoTerrasen": 0
+  },
+  {
+   "id": "wendlyn",
+   "tipo": "saida",
+   "x": 0.952,
+   "y": 0.47,
+   "noA": false,
+   "pesoA": 0,
+   "pesoOakwald": 0,
+   "pesoTerrasen": 0
+  },
+  {
+   "id": "perranth",
+   "tipo": "cidade",
+   "x": 0.713,
+   "y": 0.245,
+   "noA": false,
+   "pesoA": 0,
+   "pesoOakwald": 0.09,
+   "pesoTerrasen": 0.04
+  },
+  {
+   "id": "enseada-sino",
+   "tipo": "porto",
+   "x": 0.853,
+   "y": 0.603,
+   "noA": false,
+   "pesoA": 0,
+   "pesoOakwald": 0,
+   "pesoTerrasen": 0
+  },
+  {
+   "id": "anielle",
+   "tipo": "fortaleza",
+   "x": 0.65,
+   "y": 0.473,
+   "noA": false,
+   "pesoA": 0,
+   "pesoOakwald": 0.74,
+   "pesoTerrasen": 0
+  },
+  {
+   "id": "morath",
+   "tipo": "fortaleza",
+   "x": 0.688,
+   "y": 0.561,
+   "noA": false,
+   "pesoA": 0.04,
+   "pesoOakwald": 0.09,
+   "pesoTerrasen": 0
+  },
+  {
+   "id": "desertos-congelados",
+   "tipo": "regiao",
+   "x": 0.586,
+   "y": 0.235,
+   "noA": false,
+   "pesoA": 0,
+   "pesoOakwald": 0,
+   "pesoTerrasen": 0
+  },
+  {
+   "id": "grande-oceano",
+   "tipo": "mar",
+   "x": 0.925,
+   "y": 0.31,
+   "noA": false,
+   "pesoA": 0,
+   "pesoOakwald": 0,
+   "pesoTerrasen": 0
+  }
+ ],
+ "rotas": [
+  {
+   "id": "endovier-forte-da-fenda",
+   "total": 403,
+   "dentro": 278
+  },
+  {
+   "id": "fenda-wendlyn",
+   "total": 869,
+   "dentro": 187
+  },
+  {
+   "id": "anielle-orynth",
+   "total": 648,
+   "dentro": 0
+  }
+ ],
+ "rios": [
+  {
+   "id": "avery",
+   "total": 288,
+   "dentro": 197
+  },
+  {
+   "id": "melisande-1",
+   "total": 402,
+   "dentro": 0
+  },
+  {
+   "id": "rio-orynth",
+   "total": 239,
+   "dentro": 0
+  }
+ ],
+ "lagos": [
+  {
+   "id": "lago-eyllwe-norte",
+   "centro": [
+    1862,
+    1169
+   ],
+   "pesoAdarlan": 0,
+   "pesoTerrasen": 0
+  },
+  {
+   "id": "lago-perranth",
+   "centro": [
+    1739,
+    379
+   ],
+   "pesoAdarlan": 0,
+   "pesoTerrasen": 0.33
+  }
+ ],
+ "_nota": "Medidas do estado ATUAL (v1.0.0 e34b710) para Adarlan. Região = terra (elevação > 0,08) com peso de r05-* > 0,5. Cor: planejador por zona (colorir.ts). Sépia: planejador por ruído (terreno.ts)."
+}

@@ -1,0 +1,102 @@
+{
+ "_nota": "Valores mestre de Terrasen e do mapa padrão (v1.0.0 em e34b710). Chrome, 2400x1680, semente 11, geo v3, hidro alta, estilos A (cor) e B (sépia), papel=1. Hash de plano e de SVG: texto determinístico (igualdade estrita). Hash de pixels: amostra de 1 a cada 7 bytes do ImageData (FNV-1a 32 bits); só comparar com igualdade na mesma máquina.",
+ "commit": "e34b710",
+ "data": "2026-11-25",
+ "mapaPadrao": {
+  "colorido": "a52c1545",
+  "classico": "9377232a"
+ },
+ "terrasen_colorido": {
+  "glifos": 151,
+  "hashPlano": "8a7cb845",
+  "hashRasterComSimbolos": "7ee8a352",
+  "hashRasterModoVetorial": "97b94061",
+  "hashSvgPapel1": "77624929"
+ },
+ "terrasen_classico": {
+  "glifos": 151,
+  "hashPlano": "8a7cb845",
+  "hashRasterComSimbolos": "2928f70e",
+  "hashRasterModoVetorial": "92b1c104",
+  "hashSvgPapel1": "16ab64e4"
+ },
+ "escalaSvgSintetica": {
+  "baseline1x": {
+   "glifos": 151,
+   "pan": {
+    "quadros": 108,
+    "mediaMs": 16.67,
+    "p95Ms": 16.9,
+    "maxMs": 17.1,
+    "acima20ms": 0
+   },
+   "zoom": {
+    "quadros": 54,
+    "p95Ms": 22.9,
+    "maxMs": 226.5,
+    "acima20ms": 3
+   },
+   "nosDom": 4393
+  },
+  "x4": {
+   "glifos": 604,
+   "paths": 8080,
+   "kb": 1017,
+   "buildMs": 57,
+   "heapMB": 14,
+   "pan": {
+    "quadros": 108,
+    "mediaMs": 16.82,
+    "p95Ms": 17,
+    "maxMs": 43.4,
+    "acima20ms": 1
+   },
+   "zoom": {
+    "quadros": 66,
+    "p95Ms": 29.9,
+    "maxMs": 107.7,
+    "acima20ms": 5
+   }
+  },
+  "x8": {
+   "glifos": 1208,
+   "paths": 16160,
+   "kb": 2039,
+   "buildMs": 43,
+   "heapMB": 9,
+   "pan": {
+    "quadros": 109,
+    "mediaMs": 16.67,
+    "p95Ms": 17.5,
+    "maxMs": 18.1,
+    "acima20ms": 0
+   },
+   "zoom": {
+    "quadros": 68,
+    "p95Ms": 18,
+    "maxMs": 102.6,
+    "acima20ms": 3
+   }
+  },
+  "x12": {
+   "glifos": 1812,
+   "paths": 24240,
+   "kb": 3051,
+   "buildMs": 85,
+   "heapMB": 19,
+   "pan": {
+    "quadros": 108,
+    "mediaMs": 16.67,
+    "p95Ms": 17.2,
+    "maxMs": 18.1,
+    "acima20ms": 0
+   },
+   "zoom": {
+    "quadros": 55,
+    "p95Ms": 28.5,
+    "maxMs": 253.2,
+    "acima20ms": 5
+   }
+  }
+ }
+}
