@@ -22,7 +22,7 @@ Direção inicial aprovada para orientar o trabalho, **sem substituir a avaliaç
 | Rifthold | mantém **apenas o marcador** |
 | Carvalhal | aceitar **temporariamente** a diferença de linguagem visual |
 | Estilos | **A em cor e B em sépia** como direção inicial |
-| Paleta | testar **três paletas** (seção 4), com ΔE e contraste recalculados antes da comparação visual |
+| Paleta | **A selecionada provisoriamente** (chão `#95994A`, campos `#A5936B`, copa `#244E2D`); **B e C permanecem documentadas como alternativas** (seção 4.1). A aprovação definitiva vem **depois da comparação visual no mapa renderizado**; nenhuma delas está implementada |
 | Transição com Terrasen | **não pode remover, deslocar ou redesenhar** símbolos aprovados; Adarlan complementa a vegetação **somente dentro da faixa autorizada** |
 | Metas quantitativas | são **critérios auxiliares**, não substitutos da avaliação artística |
 
