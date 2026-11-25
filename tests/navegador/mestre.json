@@ -1,0 +1,128 @@
+{
+ "_nota": "Valores mestre do mapa. Gerado por `npm run mestre:gerar`; só regenerar quando uma mudança visual tiver sido APROVADA.",
+ "baseCommit": "e34b710",
+ "casos": {
+  "11|colorido|nenhum": {
+   "sha256": "d7081820f381a2de469ed63cb922da6dfd3f3efd7abe0e017c167c5c6d9aa3a4",
+   "amostra": "a52c1545"
+  },
+  "11|colorido|raster": {
+   "sha256": "678ec74d97eef557bb6b691a62d5e691ad6a43b0f8d41047876fcadee7a964aa",
+   "amostra": "7ee8a352",
+   "plano": {
+    "n": 151,
+    "hash": "8a7cb845"
+   },
+   "svg": "77624929"
+  },
+  "11|colorido|vetorial": {
+   "sha256": "237560b8c47ae8f332bf92a1845a6d4619eb9a39d91ec4b4e8485ae708ab2bbc",
+   "amostra": "97b94061",
+   "plano": {
+    "n": 151,
+    "hash": "8a7cb845"
+   },
+   "svg": "77624929"
+  },
+  "11|classico|nenhum": {
+   "sha256": "bdf4cda9e138f12f255e3d5952a2658606469340b365d4fc16f66b5ec9ceac67",
+   "amostra": "9377232a"
+  },
+  "11|classico|raster": {
+   "sha256": "4bdfd16f6a1863c18b057e7a52b8bc095fb28ab98d21e31f8dd99fdbc1f1d7f9",
+   "amostra": "2928f70e",
+   "plano": {
+    "n": 151,
+    "hash": "8a7cb845"
+   },
+   "svg": "16ab64e4"
+  },
+  "11|classico|vetorial": {
+   "sha256": "4916ca52084bd0dc84a86c79c1428323aeb1aeb199a4eb395d30794c2519077b",
+   "amostra": "92b1c104",
+   "plano": {
+    "n": 151,
+    "hash": "8a7cb845"
+   },
+   "svg": "16ab64e4"
+  },
+  "184|colorido|nenhum": {
+   "sha256": "ee596f5362841b4259a3558ae04b630c350a7d560fc5b945d775e6a8d973a1a6",
+   "amostra": "a94e991"
+  },
+  "184|colorido|raster": {
+   "sha256": "b70411bc3e017acd4b115fba75488931996d0571fd64b8435475bcd7477dfb99",
+   "amostra": "8ecc34f3",
+   "plano": {
+    "n": 153,
+    "hash": "c5ff2649"
+   },
+   "svg": "5db22f71"
+  },
+  "184|classico|nenhum": {
+   "sha256": "70dd5f1e418e0f70493a452361038c4ceaa3c766e353a2d00831b2abb4225948",
+   "amostra": "9a4afc8d"
+  },
+  "184|classico|raster": {
+   "sha256": "9d2a6431fb138527bfc80444c88fc7e983c14fd93ae935949f93d2d1097588ae",
+   "amostra": "9c4140dc",
+   "plano": {
+    "n": 153,
+    "hash": "c5ff2649"
+   },
+   "svg": "bdf7bb9c"
+  },
+  "21|colorido|nenhum": {
+   "sha256": "36997057ca84edbf0b3e91c040309ffa71bc5d29123e5c8c7be8ef97ee2bdb6f",
+   "amostra": "2be2c6a7"
+  },
+  "21|colorido|raster": {
+   "sha256": "6b4cd77b12bd068fa1b1063c838af9977bf4b4f6d5f3a173bfaf91cf5272e658",
+   "amostra": "de72d19e",
+   "plano": {
+    "n": 139,
+    "hash": "7600fc02"
+   },
+   "svg": "aa7bf6ce"
+  },
+  "21|classico|nenhum": {
+   "sha256": "63f80cd932fdf78c0302dee138c856079d3f4cdb494ed03334a507c5c5763518",
+   "amostra": "3c1e34ed"
+  },
+  "21|classico|raster": {
+   "sha256": "9bdf7d4687c76bde65601f8851ad8fa77081bcac031a03cf269364034755b6ad",
+   "amostra": "2bebbd6d",
+   "plano": {
+    "n": 139,
+    "hash": "7600fc02"
+   },
+   "svg": "428779f"
+  },
+  "37|colorido|nenhum": {
+   "sha256": "b93b5c8337a6d94f67ecba3331ff862c8e4d034b2df2a1b374919dc549db7810",
+   "amostra": "2fb17098"
+  },
+  "37|colorido|raster": {
+   "sha256": "d0286a956fada2c9dfd0c26b4f53b8725d00f05424bf338396aca79bd6b96eee",
+   "amostra": "1b7e8f5c",
+   "plano": {
+    "n": 155,
+    "hash": "b60b5273"
+   },
+   "svg": "69dfa50c"
+  },
+  "37|classico|nenhum": {
+   "sha256": "e1b955bc20fe951e75eb23e9be4f84cd7708723e3dc884119b2d9b4354a94b73",
+   "amostra": "7c3038bd"
+  },
+  "37|classico|raster": {
+   "sha256": "532222b463c6351b3df429e3c306186d5babac21f44b0d299156e03d92b6ae55",
+   "amostra": "4cbec137",
+   "plano": {
+    "n": 155,
+    "hash": "b60b5273"
+   },
+   "svg": "1a357b5c"
+  }
+ }
+}

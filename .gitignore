@@ -25,3 +25,9 @@ dist-ssr
 
 # local reference sheets that contain the printed map (never published)
 referencia-local/
+
+# browser regression suite: local pixel goldens and reports (regenerable)
+tests/navegador/golden/
+tests/navegador/resultados/
+test-results/
+playwright-report/
