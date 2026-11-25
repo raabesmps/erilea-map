@@ -1,12 +1,32 @@
 # Adarlan, segundo bioma: diagnóstico, plano técnico e proposta visual
 
-**Status:** diagnóstico e **proposta**. Nada disto foi implementado e nada foi mesclado. A branch `bioma-adarlan` parte da `v1.0.0` (`e34b710`) e só contém documentação.
+**Status:** diagnóstico e **proposta**, com a **direção preliminar** da revisão de 2026-11-25 incorporada (seção abaixo). Nada disto foi implementado e nada foi mesclado. A branch `bioma-adarlan` parte da `v1.0.0` (`e34b710`) e só contém documentação.
 A consolidação técnica que precisa vir **antes** (planejador genérico, envelhecimento, overlays, testes) está em [CONSOLIDACAO-TECNICA.md](../CONSOLIDACAO-TECNICA.md).
 
 **Referências usadas:** o mapa impresso (apenas os recortes que já estão em `referencia-local/`, que não é publicado), os dados do projeto e **a minha memória dos livros, que precisa da sua conferência**.
 **Dependência:** a leitura completa de Adarlan no mapa impresso (onde estão bosques, rios e limites) exige o recorte do impresso. A imagem que você enviou no início ficou só na conversa; para classificar com segurança, **reenvie o impresso** ou salve-o em `referencia-local/`.
 
 Legenda: **[MAPA]** visto no impresso · **[CÂNONE]** dos livros (a conferir) · **[ARTE]** interpretação artística · **[MEDIDO]** número obtido nesta análise (estado atual, `v1.0.0`).
+
+## Direção preliminar (revisão de 2026-11-25)
+
+Direção inicial aprovada para orientar o trabalho, **sem substituir a avaliação visual**:
+
+| Tema | Direção |
+|---|---|
+| Pegada | manter a pegada artística atual; **sem expandir zonas** (Perranth, Endovier, Meah e Anielle ficam fora por ora) |
+| Vegetação | **folhosas** como vegetação predominante |
+| Composição | bosques concentrados e **campos abertos intencionais** |
+| Campos agrícolas | **testar** mosaicos orgânicos e discretos **no raster**; sebes ficam para uma rodada posterior |
+| Colinas | suaves, em ondulação, **condicionadas à conferência do relevo** |
+| Rifthold | mantém **apenas o marcador** |
+| Carvalhal | aceitar **temporariamente** a diferença de linguagem visual |
+| Estilos | **A em cor e B em sépia** como direção inicial |
+| Paleta | testar **três paletas** (seção 4), com ΔE e contraste recalculados antes da comparação visual |
+| Transição com Terrasen | **não pode remover, deslocar ou redesenhar** símbolos aprovados; Adarlan complementa a vegetação **somente dentro da faixa autorizada** |
+| Metas quantitativas | são **critérios auxiliares**, não substitutos da avaliação artística |
+
+**Ainda não validado (não tratar como fato):** (1) a **ausência de montanhas** em Adarlan; (2) a **localização política das cidades** (se Perranth, Endovier, Meah e Anielle pertencem a Adarlan); (3) a **presença de campos agrícolas**. Dependem da conferência do mapa impresso e dos itens canônicos.
 
 ## 0. Resultado em uma tabela
 
@@ -128,6 +148,24 @@ Ver a [folha de paleta](3-adarlan-paleta-proposta.png). Mesma regra de Terrasen:
 | Copa (árvore) | `#42694B` | **`#244E2D`** | ΔE do guia 11,9; contraste com o chão novo **3,15** (era 2,12 no guia, 1,78 no mapa) |
 | Copa, face iluminada | n/a | a derivar (≈ `#30693C`) | contraste 2,16 com o chão: serve como luz, não como contorno |
 
+### 4.1 As três paletas candidatas (revisão)
+
+[Folha comparativa](4-adarlan-tres-paletas.png). Chão / campos / copa:
+
+| | Chão | Campos | Copa | ΔE do guia (chão / campos) | Contraste copa × chão / × campos | Menor ΔE do chão contra vizinhos | Menor ΔE dos campos contra vizinhos | Chão × campos |
+|---|---|---|---|---|---|---|---|---|
+| Atual (guia) | `#8F9C62` | `#B4AB74` | `#42694B` | 0 / 0 | 2,12 / 2,69 | **5,4** (Melisande) | **6,6** (Eyllwe-ouro, padrão) | 11,9 |
+| **A** | `#95994A` | `#A5936B` | `#244E2D` | 11,8 / 11,4 | 3,15 / 3,17 | **15,4** (Eyllwe) | **13,4** (padrão) | 21,7 |
+| **B** | `#919951` | `#A8A06C` | `#244E2D` | 7,9 / 4,3 | 3,12 / 3,59 | **11,7** (Eyllwe) | **7,2** (padrão) | 13,0 |
+| **C** | `#9D9C51` | `#B3A477` | `#244E2D` | 11,0 / 5,9 | 3,32 / 3,86 | **14,8** (Melisande) | **7,8** (Eyllwe-ouro) | 17,1 |
+
+Leitura dos números (a decisão é visual):
+- **Só a A atende ΔE ≥ 12 contra todos os vizinhos**, no chão e nos campos.
+- **B** fica mais perto do guia (ΔE 7,9 e 4,3), mas o chão fica no limite (Eyllwe 11,7; Melisande 12,2) e os **campos ficam quase indistinguíveis do "padrão do mapa" (7,2), de Eyllwe-ouro (9,8) e de Melisande (11,3)**.
+- **C** tem o melhor chão depois da A (menor ΔE 14,8) e o maior contraste da copa (3,32 / 3,86), mas os campos ficam fracos contra Eyllwe-ouro (7,8) e o padrão (8,9).
+- A copa `#244E2D` é igual nas três: ΔE do guia 11,9 (no limite da regra de 12) e contraste ≥ 3,1 com o chão.
+- Contraste mais alto também escurece a copa em relação ao resto do mapa; só a comparação visual diz se isso agrada.
+
 **Ressalvas honestas.** (1) O ΔE76 é uma métrica simples; a decisão é visual e é sua. (2) `#A5936B` é um marrom-oliva: pode ficar "terroso" demais ao lado do dourado de Eyllwe; vale testar `#A8A06C`-`#A5936B` em tela. (3) Mudar a cor de Adarlan **altera pixels** fora dos símbolos (limite artístico, medido como em Terrasen, alcance ≤ 1,6 do raio da zona), nunca a geografia.
 
 ## 5. Variações de símbolos
@@ -179,7 +217,9 @@ Estimativa (não medida, pois não há protótipo): 110 a 140 símbolos × ≈ 1
 | Sépia coerente com o colorido | corrigido: o sépia passa a consultar o peso de Adarlan (0 montanhas) |
 | Limites artísticos × geográficos | as zonas `r05-*` e o novo `adarlan-arte.json` são **artísticos**; mudá-los não toca na geografia |
 
-## 9. Decisões em aberto (preciso de você)
+## 9. Decisões: situação após a revisão (2026-11-25)
+
+Resolvidas na direção preliminar: 1 (escopo: manter a pegada), 2 (folhosas), 3 (testar mosaicos no raster, sem sebes), 4 (colinas suaves, condicionadas ao relevo), 5 (só o marcador), 6 (aceitar o salto de linguagem), 7 (A em cor, B em sépia; três paletas). **Ainda abertas:** 8 (mapa impresso) e 9 (cânone). Texto original abaixo, para referência.
 
 1. **Escopo.** (a) Só a pegada atual (planície central e costa de Rifthold), ou (b) estender as zonas artísticas para que **Perranth, Endovier, Meah e Anielle** caiam em Adarlan (altera `biomas.json`, que é artístico, não geográfico). Recomendo **(a) agora** e (b) como segunda etapa, porque Perranth e Endovier são ecótonos com Terrasen e o Carvalhal.
 2. **Espécie.** Folhosas (carvalhos) em Adarlan, com conífera só no ecótono de Terrasen. Confirma?

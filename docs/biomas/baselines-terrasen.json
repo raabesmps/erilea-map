@@ -98,5 +98,6 @@
     "acima20ms": 5
    }
   }
- }
+ },
+ "_fonte_unica_atual": "A partir da etapa 0a, os valores mestre vivem em tests/navegador/mestre.json (SHA-256 integral do buffer, hash amostral, plano e SVG; semente 11 e sementes de estresse 184, 21 e 37). Este arquivo guarda os valores da primeira medição (amostrais) e a medição sintética de escala do SVG."
 }

@@ -1,9 +1,22 @@
 # Consolidação técnica antes do segundo bioma (Adarlan)
 
-**Status:** análise e **proposta**. Nada aqui foi implementado. A branch `bioma-adarlan` parte da `v1.0.0` (commit `e34b710`) e só traz documentação.
+**Status:** a consolidação foi **aprovada com ressalvas** (revisão de 2026-11-25) e a **etapa 0a está concluída e aguardando a sua aprovação** (seção 8). As etapas 0b em diante **não começaram**. A branch `bioma-adarlan` parte da `v1.0.0` (commit `e34b710`).
 O objetivo é decidir, **antes** de desenhar Adarlan, como o que foi construído para Terrasen vira uma base para vários biomas **sem mudar um pixel de Terrasen**.
 
 Legenda: **[MEDIDO]** número obtido nesta análise · **[CÓDIGO]** lido no código · **[PROPOSTA]** decisão a revisar.
+
+## Decisões da revisão (2026-11-25) e como foram incorporadas
+
+| # | Decisão | Onde |
+|---|---|---|
+| 1 | Planejador genérico com Terrasen como primeiro cliente, ordem determinística, sem aleatório compartilhado. **Evitar abstrações sem necessidade concreta** | seção 1.2: só se extrai o que Adarlan usa agora |
+| 2 | Centralizar o envelhecimento **preservando exatamente os parâmetros de cada modo**; **não** aplicar a vinheta aos símbolos vetoriais coloridos nesta etapa | seção 2.2 |
+| 3 | Um SVG por modo, provisório; **cada símbolo** leva `data-bioma`, e a ordem de pintura é global por `y` (símbolos de biomas diferentes se intercalam) | seção 3.4 |
+| 4 | Dez camadas de regressão e infraestrutura própria de Playwright; corrigido o "cinco camadas" do resumo | seções 0 e 5 |
+| 5 | Hashes **integrais** dos buffers, comparação pixel a pixel, hashes determinísticos de plano e SVG preservados, outras sementes (a semente 11 continua a referência) | seção 5 e etapa 0a |
+| 6 | **`bordaSul` fica** até a estratégia de transição ser decidida; nenhuma mudança visual em Terrasen | seção 1.3 |
+| 7 | Orçamento de 30 mil caminhos e 4 MB **provisório**; investigar os picos de zoom **sem assumir a causa** (zoom frio/quente, os dois modos, celular quando houver camada real) | seções 3.4 e 3.5 |
+| 8 | Etapas pequenas, commits separados, **portão** de regressão entre elas; **se um valor mestre mudar, interromper e apresentar o diagnóstico** | seção 6 |
 
 ## 0. Resumo
 
@@ -11,9 +24,9 @@ Legenda: **[MEDIDO]** número obtido nesta análise · **[CÓDIGO]** lido no có
 |---|---|---|---|---|---|
 | 1 | Planejador | Terrasen está em um arquivo de 759 linhas com ids de zona, limites de varredura (`0,5 W … 0,92 W`, `0 … 0,32 H`), dados de arte e desenhos fixos no código | módulo genérico `biomas/` com Terrasen como primeiro cliente; passos reutilizáveis (cumeeiras, núcleos, clareiras, bosques) e dados em JSON | médio, mitigado por testes "mestre" (golden) antes de mexer | 2 a 3 sessões |
 | 2 | Envelhecimento | **três** definições da vinheta (sépia no raster, cor no raster, sépia no vetor) | um arquivo `envelhecimento.ts` com os parâmetros e funções; raster e vetor usam os mesmos | baixo | 0,5 sessão |
-| 3 | Overlays SVG | um SVG por modo, com todos os símbolos refinados, aguenta o mapa inteiro nos números medidos | **um SVG por modo** com grupos `<g data-bioma>` e ordem de pintura global; orçamento de caminhos como teste | baixo a médio (celular não medido) | 1 sessão |
+| 3 | Overlays SVG | um SVG por modo, com todos os símbolos refinados, aguenta o mapa inteiro nos números medidos | **um SVG por modo**; cada símbolo leva `data-bioma` e a ordem de pintura é global por `y`; orçamento de caminhos provisório | baixo a médio (celular não medido) | 1 sessão |
 | 5 | Reuso | cerca de 70% de Terrasen é reaproveitável sem mudança de lógica | tabela da seção 4 | baixo | n/a |
-| 6 | Regressão | só a costa, a hidrografia e as métricas de Terrasen são testadas hoje; não há prova automática de que **Terrasen não muda** quando outro bioma entra | 5 camadas de teste, com os **valores mestre de Terrasen já registrados** (seção 5) | baixo | 1 a 2 sessões |
+| 6 | Regressão | só a costa, a hidrografia e as métricas de Terrasen eram testadas; não havia prova automática de que **Terrasen não muda** | **10 camadas** de teste; os valores mestre (SHA-256 integral, plano, SVG) e o comparador de pixels **já existem (etapa 0a)** | baixo | 1 a 2 sessões |
 
 **Regra de ouro proposta:** nenhuma etapa de consolidação é aceita se os valores mestre (hashes do plano, do SVG e do mapa padrão) mudarem. Consolidar é **refatorar**, não redesenhar.
 
@@ -38,11 +51,25 @@ Legenda: **[MEDIDO]** número obtido nesta análise · **[CÓDIGO]** lido no có
 | Testes | `terrasen.test.ts`, `acabamento.test.ts` | acoplados a `ARTE` |
 
 Achados extras:
-- `PALETA_TERRASEN.bordaSul` (`#66875F`), descrita no plano como a transição com Adarlan, **está definida e nunca é usada**. A transição Terrasen → Adarlan nunca foi implementada; só existe a mistura natural de cores (seção 6 do plano de Adarlan).
+- `PALETA_TERRASEN.bordaSul` (`#66875F`), descrita no plano como a transição com Adarlan, **está definida e nunca é usada**. A transição Terrasen → Adarlan nunca foi implementada; só existe a mistura natural de cores (seção 6 do plano de Adarlan). **Decisão: a constante fica.**
 - O planejador de Terrasen **não consome o gerador aleatório compartilhado** (usa hash próprio). Isso é a propriedade que permite somar biomas sem deslocar os outros. Deve ser regra para todos os biomas.
 - No sépia, o planejador padrão (`terreno.ts`) é **independente das zonas** (ruído de cordilheira e de bosque em todo o mapa), enquanto o colorido (`colorir.ts`) é guiado pelas zonas. Os dois modos já discordam fora de Terrasen: em Adarlan, o sépia desenha **25 montanhas** e o colorido **nenhuma** [MEDIDO].
 
 ### 1.2 Arquitetura proposta [PROPOSTA]
+
+**Princípio (revisão):** só se extrai o que Adarlan **precisa agora**. O que for específico de Terrasen e ainda sem segundo cliente (cumeeiras, clareiras, massas) **fica em `terrasen/`** até Adarlan pedir algo parecido. Assim o módulo cresce por necessidade, não por especulação.
+
+| Peça | Extrair agora? | Necessidade concreta |
+|---|---|---|
+| Aceitador (grade de ocupação + `tentar`) | **sim** | Adarlan precisa de terra, peso, ícones, rótulos, água, rotas e espaçamento, e precisa enxergar os símbolos de Terrasen |
+| Registro de glifos (tipo, estilo, modo) | **sim** | Adarlan tem tipos novos (folhosa, colina em ondulação, junco) |
+| `BiomaRefinado` + registro com ordem fixa | **sim** | dois biomas já são dois clientes |
+| Dardos de ruído azul + núcleo | **sim, como função de baixo nível** | bosques de Adarlan usam a mesma amostragem |
+| Cumeeiras | **não** (fica em `terrasen/`) | Adarlan não tem montanhas |
+| Clareiras, bosques, massas | **não por enquanto** | só se Adarlan pedir comportamento igual |
+
+A árvore abaixo mostra o **destino possível**, não o que será criado de uma vez:
+
 
 ```
 src/lib/biomas/
@@ -86,14 +113,14 @@ Regras de composição:
 
 Estado e URL (compatível): `store.terrasen` vira `store.biomas: Set<string>` com o estilo por bioma. `?terrasen=AB` continua valendo (atalho para `biomas=terrasen`), e a demo liga `terrasen` por padrão como hoje; novos parâmetros: `?biomas=terrasen,adarlan`, `?adarlan=AB`.
 
-### 1.3 Sequência de extração (cada etapa só passa se os valores mestre não mudarem)
+### 1.3 Sequência de extração (cada etapa só passa se os valores mestre não mudarem; ver também a seção 6)
 
 1. **Congelar os valores mestre** (seção 5): testes novos, **antes** de qualquer refatoração.
 2. Mover os desenhos (`conifera`, `montanha`) para `glifos/` sem alterar o código.
 3. Extrair `aceitador.ts` (grade e `tentar`) e fazer `planejarTerrasen` usá-lo.
 4. Extrair os passos (`cumeeiras`, `nucleos`, `clareiras`, `bosques`, `massas`) um por vez.
 5. Introduzir `BiomaRefinado` + `registro.ts`; Terrasen vira o primeiro cliente; trocar os ganchos de `colorir.ts`, `terreno.ts`, `MapaView.vue` e `store`.
-6. Remover o código morto (`bordaSul`, tipos antigos).
+6. **`bordaSul` permanece** (decisão da revisão) até a estratégia definitiva de transição Terrasen → Adarlan. Só se removem tipos que ficarem sem uso.
 
 Custo de execução: o planejamento de Terrasen leva dezenas de milissegundos [MEDIDO: os testes completos, planejador incluído, rodam em ~1,5 s]; vários biomas não mudam a ordem de grandeza.
 
@@ -134,7 +161,7 @@ export const TOM_QUENTE, GRAO...                           // constantes do pape
 - `terreno.ts` e `colorir.ts` chamam `desenharVinheta`; `papel-sepia.ts` chama `vinhetaEm`. Sem literais repetidos.
 - **Teste de equivalência (navegador):** desenhar `desenharVinheta` sobre um canvas branco e comparar com `vinhetaEm` em ≥ 200 pontos (diferença ≤ 1/255). Isso amarra raster e vetor, que hoje só têm um teste "analítico" isolado.
 - **Neutralidade:** substituir os literais pelas constantes deve produzir o **mesmo mapa** (hash do mapa padrão e de Terrasen, seção 5).
-- **Mudança opcional, que precisa de aprovação:** aplicar `VINHETA.cor` também aos símbolos vetoriais do colorido. Altera levemente (≤ 6% em Terrasen) o que você aprovou; por isso **não entra** na consolidação.
+- **Decisão da revisão:** os parâmetros atuais de **cada modo** são preservados exatamente (`sepia` e `cor` ficam como estão) e a vinheta **não** é aplicada aos símbolos vetoriais coloridos nesta etapa. Aplicá-la alteraria levemente (≤ 6% em Terrasen) o que foi aprovado e só poderá ser proposto depois, com comparação visual.
 
 ---
 
@@ -148,7 +175,7 @@ Por modo (cor, sépia): um `L.imageOverlay` (raster sem os símbolos de Terrasen
 
 | Opção | Descrição | Prós | Contras |
 |---|---|---|---|
-| **A** | **um SVG por modo** com os símbolos de **todos** os biomas refinados, grupos `<g data-bioma>`, ordem de pintura global por `y` | ordem correta nas bordas entre biomas; mesma máscara e mesmo grão (sem emenda); número de camadas constante (2 por modo) | o SVG cresce com o mapa |
+| **A** | **um SVG por modo** com os símbolos de **todos** os biomas refinados; cada símbolo leva `data-bioma`; ordem de pintura global por `y` (símbolos de biomas diferentes se intercalam) | ordem correta nas bordas entre biomas; mesma máscara e mesmo grão (sem emenda); número de camadas constante (2 por modo) | o SVG cresce com o mapa |
 | B | um SVG por bioma por modo, com limites apertados | SVGs pequenos | emendas de grão (a máscara é em % do elemento), ordem de pintura entre biomas ambígua, mais elementos para alternar |
 | C | camada de blocos (`GridLayer`) que re-rasteriza o SVG por bloco | escala para qualquer tamanho | perde a nitidez **durante** a animação de zoom; muito mais código |
 
@@ -169,17 +196,28 @@ Leitura honesta:
 - O mapa inteiro, se todos os símbolos virassem vetor, teria da ordem de 1.500 a 2.000 símbolos **[ESTIMATIVA, a medir]** (grade de 22 px, ~25% de ocupação), dentro da faixa medida.
 - **Limites desta medição:** só Chrome desktop; símbolos sintéticos replicados (sem a variedade de formas de Adarlan); **celular não medido**; memória de rasterização do navegador não medida.
 
-### 3.4 Recomendação [PROPOSTA]
+### 3.4 Recomendação [PROPOSTA, provisória]
 
-**Opção A.** Um SVG por modo, com `<g data-bioma="terrasen">`, `<g data-bioma="adarlan">` etc.:
-- ordem de pintura global (os planos de todos os biomas são concatenados e ordenados por `y`);
+**Opção A.** Um SVG por modo. **Cada símbolo** é um `<g data-i data-bioma="terrasen">` (ou `adarlan`, etc.), em vez de grupos por bioma:
+- ordem de pintura **global por `y`**: os planos de todos os biomas são concatenados e ordenados juntos, e **símbolos de biomas diferentes se intercalam** (um grupo por bioma impediria isso: o grupo inteiro seria pintado antes ou depois do outro). O atributo `data-bioma` serve para diagnóstico, para testes (contar por bioma) e para ligar ou desligar biomas;
 - máscara de grão e vinheta idênticas em toda a camada (sem emendas);
 - `MapaView.vue`: `criarCapa(style)` passa a receber a lista de biomas ativos; o resto (painéis, pré-carga, troca por `visibility`) não muda;
 - o raster, no modo vetorial, deixa de desenhar os símbolos de **todos** os biomas refinados (generalização do `vetorial` atual).
 
-**Orçamento verificável (teste):** ≤ 30 mil caminhos e ≤ 4 MB de SVG por modo; se for ultrapassado, reavaliar a opção B ou C. **Condição para a decisão ficar firme:** medir a camada real (Terrasen + Adarlan) em celular (emulação com limitação de CPU e um aparelho real).
+**Orçamento verificável (teste), PROVISÓRIO:** ≤ 30 mil caminhos e ≤ 4 MB de SVG por modo; se for ultrapassado, reavaliar a opção B ou C. O número vem da medição sintética acima, não de um limite do navegador. **Condição para a decisão ficar firme:** medir a camada real (Terrasen + Adarlan) em celular (emulação com limitação de CPU e um aparelho real).
 
-### 3.5 Pontos de atenção
+### 3.5 Investigação dos picos de zoom (método, a executar na etapa 0d)
+
+Os quadros longos do zoom (100 a 250 ms) **não têm causa conhecida**. "Primeira rasterização" é só uma hipótese. Método para não assumi-la:
+1. Medir **zoom frio** (primeira animação depois de montar a camada) e **zoom quente** (repetido, sem recarregar), cada um com ≥ 5 repetições, e reportar a distribuição, não só o máximo.
+2. Medir **nos dois modos** (colorido e sépia) e com a camada **ligada, oculta e ausente**, para separar o custo do SVG do custo do Leaflet e do raster.
+3. Atribuir o tempo com **traço do Chrome** (script, estilo/layout, rasterização, composição, decodificação de imagem) e identificar a tarefa que estoura em cada quadro longo.
+4. Variar uma causa suspeita de cada vez: tamanho do SVG (151, 604, 1.208 símbolos), `will-change`, `mask-image` ligado e desligado, `opacity`, tamanho do raster.
+5. **Celular:** emulação com limitação de CPU (4× e 6×) e, quando houver a camada real, um aparelho de verdade.
+
+Resultado esperado: uma tabela de causa por quadro longo, antes de qualquer decisão definitiva sobre as opções A, B ou C.
+
+### 3.6 Pontos de atenção
 
 - **Primeira troca de modo (≈ 2,2 s)** continua sendo o gargalo percebido; com mais biomas o planejamento soma pouco, mas o raster do outro modo ainda é síncrono. Proposta futura: renderizar o outro modo em ociosidade.
 - **Dois planejadores no sépia** (um por zona para os biomas refinados, outro por ruído para o resto): ao refinar Adarlan, o sépia precisa **consultar o peso de Adarlan** (como já faz com Terrasen) para parar de desenhar montanhas ali.
@@ -213,19 +251,40 @@ Resumo: a **maquinaria** (planejar, aceitar, gravar em SVG, integrar ao papel, m
 
 ## 5. Testes de regressão (item 6)
 
-### 5.1 Valores mestre de Terrasen, registrados **agora** [MEDIDO, v1.0.0 em `e34b710`]
+### 5.1 Valores mestre (registrados **e automatizados**, etapa 0a) [MEDIDO, código em `e34b710`]
 
-Arquivo: [`baselines-terrasen.json`](baselines-terrasen.json). Resumo (Chrome, 2400 × 1680, semente 11, geo v3, hidro alta):
+Fonte única: [`tests/navegador/mestre.json`](../../tests/navegador/mestre.json) (o teste Vitest `src/lib/proto/mestre.test.ts` lê o mesmo arquivo). Chrome headless, 2400 × 1680, geo v3, hidro alta, estilos A (cor) e B (sépia), `papel=1`.
+Para cada caso: **SHA-256 do buffer RGBA inteiro** (2400 × 1680 × 4 bytes), o hash amostral antigo (1 a cada 7 bytes, mantido para continuidade com os documentos anteriores), o hash do plano e o hash do texto do SVG.
 
-| Item | colorido | sépia |
-|---|---|---|
-| Mapa padrão (sem biomas), impressão digital | `a52c1545` | `9377232a` |
-| Terrasen `AB`, símbolos planejados | 151, hash do plano `8a7cb845` | 151, `8a7cb845` (o mesmo plano) |
-| Terrasen `AB`, raster com símbolos | `7ee8a352` | `2928f70e` |
-| Terrasen `AB`, raster em modo vetorial (sem símbolos) | `97b94061` | `92b1c104` |
-| SVG de Terrasen (`papel=1`), hash do texto | `77624929` | `16ab64e4` |
+| Semente | Estilo | Terrasen | SHA-256 (início) | Amostral | Símbolos / hash do plano | Hash do SVG |
+|---|---|---|---|---|---|---|
+| 11 | colorido | nenhum | `d7081820f381a2de…` | `a52c1545` |  |  |
+| 11 | colorido | raster | `678ec74d97eef557…` | `7ee8a352` | 151 / `8a7cb845` | `77624929` |
+| 11 | colorido | vetorial | `237560b8c47ae8f3…` | `97b94061` | 151 / `8a7cb845` | `77624929` |
+| 11 | classico | nenhum | `bdf4cda9e138f12f…` | `9377232a` |  |  |
+| 11 | classico | raster | `4bdfd16f6a1863c1…` | `2928f70e` | 151 / `8a7cb845` | `16ab64e4` |
+| 11 | classico | vetorial | `4916ca52084bd0dc…` | `92b1c104` | 151 / `8a7cb845` | `16ab64e4` |
+| 184 | colorido | nenhum | `ee596f5362841b42…` | `a94e991` |  |  |
+| 184 | colorido | raster | `b70411bc3e017acd…` | `8ecc34f3` | 153 / `c5ff2649` | `5db22f71` |
+| 184 | classico | nenhum | `70dd5f1e418e0f70…` | `9a4afc8d` |  |  |
+| 184 | classico | raster | `9d2a6431fb138527…` | `9c4140dc` | 153 / `c5ff2649` | `bdf7bb9c` |
+| 21 | colorido | nenhum | `36997057ca84edbf…` | `2be2c6a7` |  |  |
+| 21 | colorido | raster | `6b4cd77b12bd068f…` | `de72d19e` | 139 / `7600fc02` | `aa7bf6ce` |
+| 21 | classico | nenhum | `63f80cd932fdf78c…` | `3c1e34ed` |  |  |
+| 21 | classico | raster | `9bdf7d4687c76bde…` | `2bebbd6d` | 139 / `7600fc02` | `428779f` |
+| 37 | colorido | nenhum | `b93b5c8337a6d94f…` | `2fb17098` |  |  |
+| 37 | colorido | raster | `d0286a956fada2c9…` | `1b7e8f5c` | 155 / `b60b5273` | `69dfa50c` |
+| 37 | classico | nenhum | `e1b955bc20fe951e…` | `7c3038bd` |  |  |
+| 37 | classico | raster | `532222b463c6351b…` | `4cbec137` | 155 / `b60b5273` | `1a357b5c` |
 
-Observações: o hash do mapa padrão coincide com o da `v1.0.0` pré-Terrasen (verificado na rodada 4). Hashes de **plano e de SVG** são texto determinístico (igualdade estrita). Hashes de **pixels** dependem do navegador/GPU: usar igualdade estrita só na mesma máquina e um teste com tolerância (≤ 1/255 por canal, ≤ 0,01% dos pixels) em outras.
+Leitura:
+- **Semente 11 é a referência aprovada.** Os valores dela coincidem com os que já estavam nos documentos anteriores (`a52c1545`, `9377232a`, `8a7cb845`, `77624929`, `16ab64e4` etc.).
+- **"Terrasen = nenhum"** é o mapa padrão; **"raster"** tem os símbolos desenhados no raster; **"vetorial"** é o raster sem os símbolos de Terrasen (a camada SVG os desenha).
+- **Outras sementes:** em `validarLugares` com os pontos de controle e as cordas da v3, **só a semente 11 passa** (0 violações; as sementes 1 a 400 foram testadas, e a melhor das outras, a 184, tem 5 violações). Portanto **não existe outra semente "válida"** no sentido da geografia aprovada. As sementes **184, 21 e 37** (as de menos violações) entram como **sementes de estresse**: não afirmam um mapa válido, só detectam código que dependa em segredo da semente 11. O teste de Vitest registra essa conclusão.
+- O hash do plano de Terrasen **é igual no Vitest e no navegador** em todas as sementes (verificação cruzada).
+- Hashes de **plano e de SVG** são texto determinístico (igualdade estrita). O **SHA-256 do buffer** depende do navegador/GPU: a igualdade vale na mesma máquina e no mesmo Chrome (duas execuções seguidas deram o mesmo valor). Em outro ambiente, usar o comparador de pixels com tolerância.
+- **Comparador de pixels** (`tests/navegador/pixels.ts`): quando o SHA-256 muda, compara o buffer com o *golden* local (`tests/navegador/golden/`, ignorado pelo git, ≈ 117 MB, regenerável com `npm run golden:gerar`) e relata: nº de pixels diferentes, percentual, maior diferença, caixa delimitadora e as regiões (células de 160 px) com mais diferenças, além de uma imagem de diferenças em `tests/navegador/resultados/`.
+- **Prova de que o portão funciona:** trocar `#527A70` por `#527A71` (1/255 de diferença) na paleta de Terrasen fez o teste falhar com "72.239 pixels diferentes (1,79%), maior diferença 1/255, caixa [1285, 19, 2047, 457]". A alteração foi revertida.
 
 ### 5.2 Camadas propostas
 
@@ -242,23 +301,26 @@ Observações: o hash do mapa padrão coincide com o da `v1.0.0` pré-Terrasen (
 | **R9 · Envelhecimento** | raster e vetor iguais (seção 2) | equivalência `desenharVinheta` × `vinhetaEm` | sempre (navegador) |
 | **R10 · Orçamento** | tempo de renderização ≤ +10%; caminhos ≤ 30 mil/modo; SVG ≤ 4 MB/modo; carga inicial | medição repetida (2 execuções) com a mesma ferramenta de hoje | por mudança de bioma |
 
-Infraestrutura necessária: hoje o repositório **não** tem Playwright como dependência (os scripts usam a cópia do projeto `mes-certo`). Proposta: um diretório `tests/navegador/` com `@playwright/test` como `devDependency` e um script `npm run test:navegador`. As camadas R1, R2, R5, R6, R7 rodam em Vitest puro, sem navegador.
+**Estado (etapa 0a):** R1 e R3 já existem (`src/lib/proto/mestre.test.ts` e `tests/navegador/mestre.pw.ts`, com o comparador de pixels). R5 e parte de R6/R7 existem desde Terrasen. R2, R4, R8, R9 e R10 serão criadas nas etapas 0b a 0d e na de Adarlan.
+
+Infraestrutura (**implementada na 0a**): `@playwright/test` como `devDependency`, `tests/navegador/` (config, página vazia, comparador de pixels, `mestre.pw.ts`), scripts `npm run test:navegador`, `npm run golden:gerar` e `npm run mestre:gerar`; usa o Google Chrome instalado (`channel: 'chrome'`), sem baixar navegador. As camadas R1 (plano), R2, R5, R6, R7 rodam em Vitest puro, sem navegador.
 
 ---
 
-## 6. Ordem de execução proposta
+## 6. Etapas, commits e portões
 
-1. **Consolidação (sem mudar resultado):**
-   - 0a. Testes mestre R1/R3 e infraestrutura de navegador (R8, R9).
-   - 0b. `envelhecimento.ts` (seção 2).
-   - 0c. Módulo `biomas/` com Terrasen como cliente (seção 1).
-   - 0d. `MapaView` para vários biomas (seção 3), com orçamento (R10).
-   - **Portão:** todos os valores mestre iguais; `git diff` mostra mudança só nos arquivos esperados.
-2. **Adarlan, protótipo desligado por padrão** (`?adarlan=`), conforme o [plano de Adarlan](adarlan/PLANO-ADARLAN.md).
-3. Comparações, refinamento visual, aprovação e merge, como em Terrasen.
-4. Atualizar a demo (`demo/terrasen`) com Adarlan quando aprovada.
+**Regra de interrupção (revisão):** se **qualquer** valor mestre mudar sem que a etapa tenha previsto uma mudança aprovada, a execução **para**, nada é commitado como "pronto" e eu apresento o diagnóstico (o relatório pixel a pixel, o commit, a causa provável) antes de continuar.
 
-Nada disto começa sem a sua revisão e aprovação.
+Cada etapa é **pequena, em commits separados**, e só passa por um **portão**: `npm test` + `npm run build` + `npm run test:navegador` (valores mestre) + `git diff` limitado aos arquivos esperados. Entre as etapas eu **paro e apresento o resultado**.
+
+| Etapa | Conteúdo | Portão específico | Estado |
+|---|---|---|---|
+| **0a** | testes mestre e infraestrutura de navegador (Playwright), comparador de pixels, outras sementes | os valores mestre foram gerados do código atual e conferem com os documentos anteriores | **concluída, aguarda aprovação** |
+| 0b | `envelhecimento.ts`: centralizar a vinheta, **preservando os parâmetros de cada modo**; teste de equivalência raster × vetor (R9) | mestre idêntico; sem vinheta nos símbolos vetoriais coloridos | não iniciada |
+| 0c | módulo `biomas/` com Terrasen como cliente (só o que Adarlan usa), registro, ordem fixa | mestre idêntico; R2 (independência de ordem) | não iniciada |
+| 0d | `MapaView` para vários biomas (`data-bioma` por símbolo, ordem global por `y`), orçamento provisório (R10), investigação dos picos de zoom (3.5) | mestre idêntico; R8 (vetor × raster) | não iniciada |
+
+Depois da consolidação: Adarlan (protótipo desligado por padrão), conforme o [plano de Adarlan](adarlan/PLANO-ADARLAN.md), comparações, aprovação e merge. A demo só é atualizada depois. Nada disto começa sem aprovação.
 
 ## 7. Riscos
 
@@ -270,3 +332,23 @@ Nada disto começa sem a sua revisão e aprovação.
 | Adarlan pede símbolos que o gravador SVG não suporta | usar só o subconjunto aceito; teste que percorre todos os símbolos (já existe para Terrasen) |
 | A transição Terrasen → Adarlan fica com "faixa rala" ou salto de espécie | faixa declarada nos dados, com dono, largura e orçamento de ΔE (ver o plano de Adarlan) |
 | Sépia continua desenhando montanhas em Adarlan | o sépia passa a consultar o peso de Adarlan (como faz com Terrasen) |
+
+## 8. Resultado da etapa 0a
+
+**O que foi feito** (nenhum arquivo de `src/` foi alterado, exceto o teste novo; nenhuma mudança visual):
+
+| Item | Arquivo |
+|---|---|
+| Infraestrutura de navegador | `tests/navegador/playwright.config.ts`, `pagina.html`, `executar.mjs`, `README.md`; `@playwright/test` em `devDependencies`; scripts em `package.json`; entradas no `.gitignore` |
+| Comparador de pixels (+ PNG de diferenças sem dependências) | `tests/navegador/pixels.ts` |
+| Valores mestre (SHA-256 integral, amostral, plano, SVG) para a semente 11 e 3 sementes de estresse | `tests/navegador/mestre.json`, `tests/navegador/mestre.pw.ts` |
+| Teste mestre sem navegador (plano, 4 sementes) | `src/lib/proto/mestre.test.ts` |
+
+**Resultados:**
+- `npm test`: **146 testes passam** (140 + 6 novos). `npm run build`: passa.
+- `npm run test:navegador`: **21 testes passam** (cerca de 1,5 min): 18 renderizações mestre, comparador, determinismo e igualdade de plano entre colorido e sépia, em 4 sementes.
+- Os valores da semente 11 **coincidem** com os registrados antes; os do plano coincidem entre Vitest e navegador.
+- **Descoberta que muda o pedido:** nenhuma outra semente de 1 a 400 tem geografia válida. As "outras sementes" são, portanto, de **estresse** (ver 5.1).
+- O portão foi **provado**: uma mudança de 1/255 na paleta é detectada e localizada.
+
+**Limitações:** o SHA-256 do buffer só vale no mesmo ambiente de navegador; o golden local não é versionado (≈ 117 MB) e precisa ser gerado em cada máquina com `npm run golden:gerar` antes de refatorar.
