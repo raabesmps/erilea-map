@@ -66,8 +66,9 @@ describe('integridade dos valores mestre (referência e34b710)', () => {
 
 describe('valores mestre do plano de Terrasen', () => {
   it('semente 11 (referência aprovada): 151 símbolos e o hash registrado', () => {
-    expect(planoDe(11)).toEqual(casos['11|colorido|raster']!.plano)
-    expect(planoDe(11)).toEqual({ n: 151, hash: '8a7cb845' })
+    const p11 = planoDe(11)
+    expect(p11).toEqual(casos['11|colorido|raster']!.plano)
+    expect(p11).toEqual({ n: 151, hash: '8a7cb845' })
   })
 
   it('a semente 11 é a única com geografia válida; as de estresse não são mapas aprovados', () => {
