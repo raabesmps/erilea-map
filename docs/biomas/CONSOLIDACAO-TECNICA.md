@@ -1,6 +1,6 @@
 # Consolidação técnica antes do segundo bioma (Adarlan)
 
-**Status:** a consolidação foi **aprovada com ressalvas** (revisão de 2026-11-25). **Etapas 0a e 0b aprovadas.** A etapa 0c (extração mínima do planejador) está **concluída e aguardando revisão** (seção 10). A 0d em diante **não começou**. A branch `bioma-adarlan` parte da `v1.0.0` (commit `e34b710`).
+**Status:** a consolidação foi **aprovada com ressalvas** (revisão de 2026-11-25). **Etapas 0a, 0b e 0c aprovadas** (a 0c com ressalva de processo). A **0c.5** (correção do processo de validação e publicação, seção 10.7) é pré-requisito da **0d**, que foi autorizada só depois dela. A branch `bioma-adarlan` parte da `v1.0.0` (commit `e34b710`).
 O objetivo é decidir, **antes** de desenhar Adarlan, como o que foi construído para Terrasen vira uma base para vários biomas **sem mudar um pixel de Terrasen**.
 
 Legenda: **[MEDIDO]** número obtido nesta análise · **[CÓDIGO]** lido no código · **[PROPOSTA]** decisão a revisar.
@@ -283,7 +283,7 @@ Leitura:
 - **"Terrasen = nenhum"** é o mapa padrão; **"raster"** tem os símbolos desenhados no raster; **"vetorial"** é o raster sem os símbolos de Terrasen (a camada SVG os desenha).
 - **Outras sementes:** em `validarLugares` com os pontos de controle e as cordas da v3, **só a semente 11 passa** (0 violações; as sementes 1 a 400 foram testadas, e a melhor das outras, a 184, tem 5 violações). Portanto **não existe outra semente "válida"** no sentido da geografia aprovada. As sementes **184, 21 e 37** (as de menos violações) entram como **sementes de estresse**: não afirmam um mapa válido, só detectam código que dependa em segredo da semente 11. O teste de Vitest registra essa conclusão.
 - O hash do plano de Terrasen **é igual no Vitest e no navegador** em todas as sementes (verificação cruzada).
-- Hashes de **plano e de SVG** são texto determinístico (igualdade estrita). O **SHA-256 do buffer** depende do navegador/GPU: a igualdade vale na mesma máquina e no mesmo Chrome (duas execuções seguidas deram o mesmo valor). Em outro ambiente, usar o comparador de pixels com tolerância.
+- Hashes de **plano e de SVG** são texto determinístico (igualdade estrita). O **SHA-256 do buffer** depende do navegador/GPU: a igualdade vale na mesma máquina e no mesmo Chrome (duas execuções seguidas deram o mesmo valor). **Tolerância entre ambientes serve somente para DIAGNÓSTICO** (localizar e medir uma diferença com o comparador de pixels); **nunca** é critério de aprovação nem motivo para alterar um valor mestre: o mestre só muda por atualização deliberada, registrada e aprovada (`npm run mestre:atualizar -- --motivo "..."`).
 - **Comparador de pixels** (`tests/navegador/pixels.ts`): quando o SHA-256 muda, compara o buffer com o *golden* local (`tests/navegador/golden/`, ignorado pelo git, ≈ 117 MB) e relata: nº de pixels diferentes, percentual, maior diferença, caixa delimitadora e as regiões (células de 160 px) com mais diferenças, além de uma imagem de diferenças em `tests/navegador/resultados/`.
 - **Os goldens são sempre recuperáveis da referência original `e34b710`** e **nunca** saem do código em desenvolvimento: `npm run golden:referencia` cria um *git worktree* temporário do commit de referência, serve aquele código e só grava um golden se o render reproduzir o SHA-256 mestre. Gravar golden à mão (`GERAR_GOLDEN=1` sem o runner) falha. O teste também rejeita um golden cujo SHA-256 não seja o valor mestre. Procedimento completo em [`tests/navegador/README.md`](../../tests/navegador/README.md).
 - **Outros ambientes (o SHA-256 dos pixels depende do ambiente de renderização).** Os valores mestre de pixels foram gravados em **Windows 11 (10.0.26300), Google Chrome 157.0.8103.80, headless, renderização por software do Playwright**. Mudar de máquina, de versão do Chrome, de sistema ou de GPU pode alterar bytes do canvas **sem que o código tenha mudado**. Regras, nada flexibilizado automaticamente:
@@ -336,7 +336,7 @@ Depois da consolidação: Adarlan (protótipo desligado por padrão), conforme o
 | Risco | Mitigação |
 |---|---|
 | Refatoração muda Terrasen sem perceber | valores mestre antes; portão por etapa; commits pequenos |
-| Hash de pixels varia entre máquinas | igualdade estrita só em plano/SVG; tolerância nos pixels |
+| Hash de pixels varia entre máquinas | plano e SVG: igualdade estrita em qualquer ambiente; pixels: igualdade estrita **no ambiente de gravação**; em outro ambiente o teste falha e a tolerância serve **só para diagnóstico**, nunca para aprovar nem para alterar valores mestre |
 | SVG cresce além do que o celular aguenta | orçamento como teste; medição em celular antes de decidir a opção A definitiva |
 | Adarlan pede símbolos que o gravador SVG não suporta | usar só o subconjunto aceito; teste que percorre todos os símbolos (já existe para Terrasen) |
 | A transição Terrasen → Adarlan fica com "faixa rala" ou salto de espécie | faixa declarada nos dados, com dono, largura e orçamento de ΔE (ver o plano de Adarlan) |
@@ -497,4 +497,42 @@ Também: testes do registro de glifos (tipo desconhecido é erro; outra função
 | `mestre.json` | inalterado (`atualizacoes`: 0 entradas) |
 | Interrupções | nenhuma |
 
+**Ocorrência no portão final da 0c (registrada, causa desconhecida).** O portão final da 0c foi rodado como uma **única linha de comandos** encadeada (testes unitários, build, testes de navegador, `git status` e `git push`), com a saída filtrada por `Select-String`, e **o push aconteceu mesmo com uma falha**. Cronologia:
+
+1. **Falha de causa desconhecida:** nessa linha, a suíte de navegador terminou com `1 failed, 5 passed (27,2 s)`. O filtro de saída mostrou só as linhas de resumo; a mensagem do teste que falhou **não foi vista nem guardada**. Nenhuma linha `O MAPA MUDOU` apareceu (essa mensagem era parte do filtro), o que indica que **não foi uma divergência de valor mestre**, mas isso é indício, não prova.
+2. **Push indevido:** como os comandos estavam encadeados sem testar os códigos de saída, `git push origin bioma-adarlan` rodou na mesma sequência. Os commits enviados eram os mesmos que haviam passado em cada portão individual das subetapas (0c.1 a 0c.4), e nenhum código quebrado foi publicado, mas o processo **permitiu** publicar com uma falha. Isso é um defeito do processo, e o reconheço.
+3. **Suspensão do computador:** uma nova execução, em segundo plano, durou **1,9 h** (o relógio saltou de dia) e terminou com `1 failed, 3 passed`; o erro foi `Test timeout of 300000ms exceeded` em `mestre 11|colorido|raster`. A duração indica que o computador **entrou em suspensão** durante a execução.
+4. **Três execuções posteriores bem-sucedidas** da suíte completa no commit `adf8abc`: `22 passed` (2,5 min), `22 passed` (2,5 min) e `22 passed` (2,1 min). Os valores mestre (SHA-256 dos pixels, plano e SVG) ficaram idênticos à referência em todas.
+5. **Causa da falha do item 1: não confirmada.** Uma hipótese era um servidor de desenvolvimento órfão da verificação rápida feita pouco antes (`reuseExistingServer: true` pode reaproveitar um servidor remanescente), mas **é só uma hipótese**: não há log nem reprodução que a sustente, e **não deve ser tratada como a causa**. Outras (concorrência de recursos, o Chrome pessoal em uso, a suspensão) também não foram excluídas.
+
+A correção do **processo** (não da causa) está em 10.7.
+
 Observações: (1) o `pesoMont` que o planejador de Terrasen recebe continua sendo calculado (e continua sem uso), para não mudar a assinatura nem nada do que foi aprovado; (2) `registro.ts` importa `TERRASEN` e o tipo `ProtoTerrasen`: é a única ponte conhecida entre o registro e um bioma concreto, e a 0d a substitui por uma configuração por bioma.
+
+### 10.7 Etapa 0c.5: correção do processo de validação e publicação
+
+**Problema:** o portão era uma linha de comandos sem garantia de parada, sem propagação de códigos de saída, com a saída filtrada (a mensagem de uma falha podia não ser vista nem guardada), com servidor de desenvolvimento reaproveitável e sem proteção contra um push feito depois de uma falha.
+
+**Solução** (`scripts/`, commit `fix(portao)`; usa só Node, sem dependências novas):
+
+| Peça | O que garante |
+|---|---|
+| `npm run portao` (`scripts/portao.mjs`) | roda **testes unitários, build e testes de navegador** em ordem, **para na primeira falha** e sai com código ≠ 0; lê o **código de saída real** de cada etapa (sem pipes, sem filtros); aceita `--so unit,build` para etapas parciais (que **nunca** emitem selo) |
+| Logs completos | a saída **inteira** de cada etapa vai para `.portao/logs/<rodada>/<etapa>.log` (inclui o servidor e `resultado.json`), **uma pasta por rodada**: logs de rodadas com falha não são sobrescritos. Na falha, o portão imprime as últimas linhas e o caminho do log |
+| `scripts/servidor-guardado.mjs` | o servidor do navegador é filho de um **guarda** que consulta o PID do dono a cada segundo e, quando o dono some (fim normal, erro, Ctrl+C ou **morte à força**), mata **apenas a própria árvore de processos do Vite** (`taskkill /T` no Windows). Porta já ocupada é **erro** (o portão não reaproveita nem encerra servidores alheios) |
+| Selo `.portao/ultimo.json` | emitido **somente** quando o portão **completo** passa, a árvore está **limpa** e o `HEAD` não mudou; **qualquer** saída ≠ 0 (falha, interrupção, erro) **sobrescreve** o selo com `ok: false`, então um OK antigo nunca sobra |
+| `npm run publicar` (`scripts/publicar.mjs`) | roda o portão e só faz `git push` **se ele passar, no mesmo processo**; recusa árvore suja; propaga o código de saída |
+| Hook `pre-push` (`.githooks/`, ativado por `npm run hooks:instalar`, já ativado neste repositório) | **bloqueia qualquer `git push`** cujo commit não tenha sido selado pelo portão completo (um commit mais antigo contido no selado, como uma tag, passa). Exclusão de referência remota não é bloqueada. `.gitattributes` mantém o hook com fim de linha LF |
+
+**Demonstração com falhas propositais** (sem enviar nada quebrado ao remoto: um **remoto de teste local**, um repositório *bare* em pasta temporária, e uma branch temporária, ambos apagados depois):
+
+| Cenário | Resultado |
+|---|---|
+| **A1.** Commit com um teste que falha de propósito (`expect(1).toBe(2)`) e `publicar` para o remoto de teste | o portão falha na etapa `unit` (`1 failed | 214 passed`), `publicar` sai com **código 1**, "Nada foi publicado"; `git ls-remote` do remoto de teste **vazio**; `unit.log` guarda a saída completa (`AssertionError: expected 1 to be 2`); selo com `ok: false` |
+| **A2.** `git push` direto do mesmo commit | o hook **recusou**: "o último portão NÃO passou por completo"; remoto de teste vazio |
+| **B.** Erro proposital **depois** de o servidor subir | portão sai com código 1, selo `ok: false`; **0 processos do servidor** e **porta 5191 livre** logo depois |
+| **C.** Portão **morto à força** (`Stop-Process -Force`) com o servidor no ar | o guarda encerrou o servidor em **0,3 s**; **0 processos** e porta livre; um processo **alheio** (um `node` escutando a porta 5199, criado só como controle) **continuou vivo** |
+
+Dois defeitos do próprio portão foram encontrados e corrigidos durante a demonstração: (1) uma falha **não** sobrescrevia o selo (agora sempre sobrescreve); (2) a verificação da porta usava `127.0.0.1`, mas o Vite escuta em `localhost`/IPv6 nesta máquina, então o servidor "não subia" (agora usa `localhost`).
+
+**Uso a partir de agora:** `npm run portao` para validar; `npm run publicar` para publicar. **Não se faz `git push` encadeado a outros comandos.** Os logs de falha ficam em `.portao/logs/` (ignorados pelo git).

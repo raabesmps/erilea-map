@@ -2,6 +2,8 @@
 
 Camada R1/R3 de `docs/biomas/CONSOLIDACAO-TECNICA.md`: o mapa renderizado em resolução total precisa continuar **bit a bit igual** ao registrado.
 
+> Para validar e publicar, use o portão do projeto (`npm run portao`, `npm run publicar`; ver `scripts/`): ele encerra o servidor, guarda os logs completos e impede o push depois de uma falha.
+
 ```bash
 npm run test:navegador                                   # compara com mestre.json (precisa do Google Chrome instalado)
 npm run golden:referencia                                # recupera os goldens de pixels A PARTIR DO COMMIT DE REFERÊNCIA (e34b710)
@@ -37,5 +39,5 @@ A 11 é a referência geográfica oficial. Nenhuma outra semente (1 a 400) passa
 
 ## Ambiente
 
-O SHA-256 depende do Chrome/GPU: na mesma máquina é estável (duas execuções seguidas dão o mesmo valor). Em outro ambiente, compare com tolerância usando `pixels.ts`.
+O SHA-256 depende do Chrome/GPU: na mesma máquina é estável (duas execuções seguidas dão o mesmo valor). Em outro ambiente o teste **falha**: a tolerância de `pixels.ts` serve **somente para diagnosticar** a diferença, nunca para aprovar nem para alterar valores mestre.
 A página `pagina.html` é vazia de propósito: os testes importam os módulos de `/src` pelo servidor do Vite (porta 5191; 5192 para o worktree de referência).
