@@ -6,7 +6,8 @@ import { useAppStore } from '../stores/app'
 import { MAP_H, MAP_W, renderTerrain, type MapStyle } from '../lib/terreno'
 import { iconFor } from '../lib/icons'
 import { protoDe, type PlanoTerrasen } from '../lib/proto/terrasen'
-import { construirSvgTerrasen } from '../lib/proto/camada-vetorial'
+import { construirSvgBiomas } from '../lib/biomas/camada-vetorial'
+import { ativosDeProto, type PlanoDeBioma } from '../lib/biomas/registro'
 import rotasData from '../data/rotas.json'
 import type { Route } from '../types'
 
@@ -42,14 +43,15 @@ function criarCapa(style: MapStyle): Capa {
   const proto = { ...base, vetorial: true, aoPlanejar: (p: PlanoTerrasen) => (plano = p) }
   const url = renderTerrain(MAP_W, MAP_H, 11, style, store.geo, store.hidro, proto).toDataURL('image/jpeg', 0.92)
   const modo = style === 'colorido' ? 'cor' : 'sepia'
-  const estilo = modo === 'cor' ? base.estilo : (base.estiloSepia ?? base.estilo)
   const bounds = L.latLngBounds([0, 0], [MAP_H, MAP_W])
   if (!map.getPane('terrasenImg')) {
     map.createPane('terrasenImg').style.zIndex = '390'
     map.createPane('terrasenSimbolos').style.zIndex = '395'
   }
   const img = L.imageOverlay(url, bounds, { pane: 'terrasenImg' }).addTo(map)
-  const svgEl = construirSvgTerrasen(plano!, estilo, modo, MAP_W, MAP_H, store.papel)
+  // step 0d.1: the builder takes the plans of all vector biomas; Terrasen is the only one for now
+  const planos: PlanoDeBioma[] = [{ ativo: ativosDeProto(proto)[0]!, plano: plano!, peso: () => 0 }]
+  const svgEl = construirSvgBiomas(planos, modo, MAP_W, MAP_H, store.papel)
   svgEl.style.pointerEvents = 'none'
   const svg = L.svgOverlay(svgEl, bounds, { pane: 'terrasenSimbolos', interactive: false }).addTo(map)
   const capa = { img, svg }

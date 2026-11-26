@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import '../biomas/registro' // registers the glyph types of the registered biomes
 import type { GlifoT } from './terrasen'
 import { desenharGlifo } from '../biomas/glifos'
-import { GravadorSvg } from './gravador-svg'
+import { GravadorSvg } from '../biomas/gravador-svg'
 
 const fnv = (s: string) => {
   let x = 2166136261

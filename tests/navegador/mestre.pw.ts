@@ -55,7 +55,8 @@ async function renderizar(page: Page, c: Caso, comBuffer: boolean): Promise<Medi
   return page.evaluate(
     async ({ seed, estilo, terrasen, comBuffer, W, H }) => {
       const T = await import('/src/lib/terreno.ts')
-      const V = await import('/src/lib/proto/camada-vetorial.ts')
+      const V = await import('/src/lib/biomas/camada-vetorial.ts')
+      const R = await import('/src/lib/biomas/registro.ts')
       const fnv = (s: string) => {
         let x = 2166136261
         for (let i = 0; i < s.length; i++) {
@@ -80,8 +81,10 @@ async function renderizar(page: Page, c: Caso, comBuffer: boolean): Promise<Medi
       if (plano) {
         const lista = plano.glifos.map((g) => [g.tipo, +g.x.toFixed(1), +g.y.toFixed(1), +g.tam.toFixed(2), g.neve ? 1 : 0, +g.rot.toFixed(3), +g.v.toFixed(3), g.origem])
         out.plano = { n: plano.glifos.length, hash: fnv(JSON.stringify(lista)) }
-        const svg = V.construirSvgTerrasen(plano as never, estilo === 'colorido' ? 'A' : 'B', estilo === 'colorido' ? 'cor' : 'sepia', W, H, 1)
-        out.svg = fnv(svg.outerHTML)
+        // the SVG is built by the generic builder (step 0d.1); the hash is of the text WITHOUT data-bioma, the original reference text
+        const ativo = R.ativosDeProto({ estilo: 'A', estiloSepia: 'B', vetorial: true })[0]
+        const svg = V.construirSvgBiomas([{ ativo, plano: plano as never, peso: () => 0 }], estilo === 'colorido' ? 'cor' : 'sepia', W, H, 1)
+        out.svg = fnv(V.textoDeReferencia(svg))
       }
       if (comBuffer) {
         out.buffer = await new Promise<string>((res) => {

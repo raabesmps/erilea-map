@@ -2,7 +2,7 @@
  * Single source of the "aged parchment" parameters (step 0b of docs/biomas/CONSOLIDACAO-TECNICA.md).
  *
  * Before this module the same numbers lived in three places: `terreno.ts` (sepia vignette), `colorir.ts` (colour vignette,
- * different radius and strength) and `proto/papel-sepia.ts` (an analytic copy of the sepia one, used to tint the vector symbols).
+ * different radius and strength) and `biomas/papel-sepia.ts` (an analytic copy of the sepia one, used to tint the vector symbols).
  * The values below are EXACTLY the ones that were in the code; moving them must not change a single pixel (the browser suite
  * checks the SHA-256 of the full render and of the SVG text).
  *

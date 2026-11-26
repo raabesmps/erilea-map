@@ -10,11 +10,9 @@ import { buildField, tracarRios } from '../colorir'
 import { ativos as hidroAtiva, criarObstaculos, lagoPoligono, rioPontos } from '../hidrografia'
 import { aplicarPaleta, type ProtoTerrasen } from '../proto/terrasen'
 import { TERRASEN } from '../proto/terrasen-bioma'
-import { candidatosPorPrioridade } from './amostragem'
-import { criarAceitador } from './aceitador'
-import type { BiomaRefinado, PlanoBioma } from './bioma'
+import type { BiomaRefinado } from './bioma'
+import { SINTETICO } from '../../../tests/fixtures/bioma-sintetico'
 import { aplicarPaletas, BIOMAS_REFINADOS, emOrdemDeRegistro, filtrarSubstituidos, planejarBiomas, substituidoEm, validarRegistro, type BiomaAtivo, type BiomaQualquer } from './registro'
-import type { GlifoBase } from './tipos'
 
 const fnv = (s: string) => {
   let x = 2166136261
@@ -26,22 +24,6 @@ const fnv = (s: string) => {
 }
 const hashPlano = (g: { tipo: string; x: number; y: number; tam: number; neve: boolean; rot: number; v: number; origem?: string }[]) =>
   fnv(JSON.stringify(g.map((q) => [q.tipo, +q.x.toFixed(1), +q.y.toFixed(1), +q.tam.toFixed(2), q.neve ? 1 : 0, +q.rot.toFixed(3), +q.v.toFixed(3), q.origem])))
-
-/** A biome that exists only here: it tries to fill the SAME window Terrasen uses, ignoring its own zone weight on purpose. */
-const SINTETICO: BiomaRefinado<unknown, PlanoBioma> = {
-  id: 'sintetico',
-  zonas: (id) => id.startsWith('r05-'),
-  paleta: {},
-  pesoSubstituicao: 0.12,
-  planejar(e) {
-    const ac = criarAceitador<GlifoBase>({ W: e.W, H: e.H, at: e.at, peso: () => 1, pesoMin: 0.12, obst: e.obst, folgaIcone: 30, margemRota: 13, ocupacao: e.ocupacao })
-    for (const c of candidatosPorPrioridade(0.5 * e.W, 0, 0.92 * e.W, 0.32 * e.H, 12)) ac.tentar({ x: c.x, y: c.y, tipo: 'sintetico-teste', tam: 8, neve: false, rot: 0, v: 0 }, 10, 14)
-    return { glifos: ac.glifos }
-  },
-  estilo: () => 'A',
-  vetorial: () => false,
-  registrarGlifos: () => undefined,
-}
 
 const { elevacao, ruido } = criarGeografia(mulberry32(11), MAP_W, MAP_H, 'v3')
 const at = (x: number, y: number) => elevacao(Math.min(MAP_W - 1, Math.max(0, x)), Math.min(MAP_H - 1, Math.max(0, y)))
@@ -109,7 +91,9 @@ describe('R2: registrar um segundo bioma não altera nenhum símbolo de Terrasen
     expect(itens).toHaveLength(nT + nS)
     const deT = itens.slice(0, nT)
     const deS = itens.slice(nT)
-    for (const s of deS) for (const t of deT) expect(Math.hypot(s.x - t.x, s.y - t.y), `(${s.x.toFixed(1)},${s.y.toFixed(1)})`).toBeGreaterThanOrEqual(0.5 * (s.r + t.r) * 0.95)
+    let violacoes = 0
+    for (const s of deS) for (const t of deT) if (Math.hypot(s.x - t.x, s.y - t.y) < 0.5 * (s.r + t.r) * 0.95) violacoes++
+    expect(violacoes).toBe(0)
   })
 
   it('controle negativo: sem a ocupação compartilhada o segundo bioma COLIDIRIA com Terrasen', () => {

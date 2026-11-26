@@ -4,7 +4,7 @@ import { criarGeografia, mulberry32, MAP_H, MAP_W } from '../geografia'
 import { buildField } from '../colorir'
 import { ativos, criarObstaculos, lagoPoligono, rioPontos } from '../hidrografia'
 import { aplicarPaleta, criarPeso, planejarTerrasen, ZONA_MONTANHAS, ZONAS_TERRASEN, type GlifoT } from './terrasen'
-import { GravadorSvg } from './gravador-svg'
+import { GravadorSvg } from '../biomas/gravador-svg'
 import { desenharGlifo } from '../biomas/glifos'
 import '../biomas/registro' // registers the glyph types of the registered biomes
 
