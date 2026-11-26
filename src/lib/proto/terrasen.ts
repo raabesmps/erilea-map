@@ -1,10 +1,8 @@
-import lugaresJson from '../../data/lugares.json'
-import type { Place } from '../../types'
-import { distanciaAoCurso, type Obstaculos } from '../hidrografia'
+import type { Obstaculos } from '../hidrografia'
 import arteJson from '../../data/terrasen-arte.json'
-import rotasJson from '../../data/rotas.json'
-import type { Route } from '../../types'
 import type { ModoDesenho } from '../biomas/tipos'
+import { sm, h2, candidatosPorPrioridade } from '../biomas/amostragem'
+import { criarAceitador } from '../biomas/aceitador'
 import { PALETA_TERRASEN } from './terrasen-paleta'
 import { registrarGlifosTerrasen } from './terrasen-glifos'
 
@@ -31,54 +29,15 @@ export interface ProtoTerrasen {
 export type VariacaoTerrasen = EstiloTerrasen | 'AB'
 export const protoDe = (v: VariacaoTerrasen): ProtoTerrasen => (v === 'AB' ? { estilo: 'A', estiloSepia: 'B' } : { estilo: v })
 
-// the palette lives in terrasen-paleta.ts; re-exported so the Terrasen module keeps its public surface
+// the palette lives in terrasen-paleta.ts and the sampling helpers in biomas/amostragem.ts; re-exported so the Terrasen module keeps its public surface
 export { PALETA_TERRASEN, aplicarPaleta } from './terrasen-paleta'
+export { h2, criarPeso } from '../biomas/amostragem'
 
 // Terrasen's symbol types must be in the glyph registry before anything draws them
 registrarGlifosTerrasen()
 
 export const ZONAS_TERRASEN = (id: string) => id.startsWith('r03-')
 export const ZONA_MONTANHAS = 'r03-montanhas-norte'
-
-const sm = (a: number, b: number, t: number) => {
-  const u = Math.min(1, Math.max(0, (t - a) / (b - a)))
-  return u * u * (3 - 2 * u)
-}
-
-/** Deterministic hash in [0,1): the prototype never touches the shared random stream. */
-export function h2(x: number, y: number, s: number): number {
-  let h = Math.imul(x | 0, 374761393) ^ Math.imul(y | 0, 668265263) ^ Math.imul(s | 0, 2147483647)
-  h = Math.imul(h ^ (h >>> 13), 1274126177)
-  return ((h ^ (h >>> 16)) >>> 0) / 4294967296
-}
-
-/** Feathered share (0..1) of the surroundings that belong to the chosen zones. */
-export function criarPeso(
-  field: { best: Uint8Array; LW: number },
-  zonas: { id: string }[],
-  pertence: (id: string) => boolean,
-  S = 4,
-): (x: number, y: number) => number {
-  const LH = field.best.length / field.LW
-  const em = (x: number, y: number) => {
-    const cx = (x / S) | 0
-    const cy = (y / S) | 0
-    if (x < 0 || y < 0 || cx >= field.LW || cy >= LH) return 0
-    const bi = field.best[cy * field.LW + cx]!
-    return bi !== 255 && pertence(zonas[bi]!.id) ? 1 : 0
-  }
-  return (x, y) => {
-    let s = em(x, y) * 2
-    let n = 2
-    for (let k = 0; k < 8; k++) {
-      const a = (k * Math.PI) / 4
-      s += em(x + Math.cos(a) * 24, y + Math.sin(a) * 24)
-      s += em(x + Math.cos(a) * 48, y + Math.sin(a) * 48) * 0.7
-      n += 1.7
-    }
-    return s / n
-  }
-}
 
 export interface Cumeeira {
   id: string
@@ -184,9 +143,6 @@ export interface EntradaPlano {
   ajuste?: Partial<AjusteTerrasen>
 }
 
-const PINS = (lugaresJson as Place[]).map((p) => ({ x: p.x, y: p.y }))
-const ROTAS = (rotasJson as Route[]).map((r) => r.pontos)
-
 /** Forest-core density (0..1): intentional cores with a warped, fractal fringe. */
 export function nucleoValor(x: number, y: number, noise: (x: number, y: number) => number, W: number, H: number): number {
   const wx = x + 34 * noise(x / 90 + 3, y / 90)
@@ -223,45 +179,8 @@ function dentroClareira(x: number, y: number, c: Clareira): number {
 export function planejarTerrasen(e: EntradaPlano): PlanoTerrasen {
   const { W, H, at, noise, pesoT, obst } = e
   const A = { ...AJUSTE_PADRAO, ...e.ajuste }
-  const pinsPx = PINS.map((p) => ({ x: p.x * W, y: p.y * H }))
-  const rotasPx = ROTAS.map((r) => r.map(([x, y]) => ({ x: x * W, y: y * H })))
-  const CELL = 40
-  const grade = new Map<number, { x: number; y: number; r: number }[]>()
-  const chave = (cx: number, cy: number) => cx * 4096 + cy
-  const livre = (x: number, y: number, r: number) => {
-    const cx = (x / CELL) | 0
-    const cy = (y / CELL) | 0
-    for (let i = -1; i <= 1; i++) {
-      for (let j = -1; j <= 1; j++) {
-        const lista = grade.get(chave(cx + i, cy + j))
-        if (!lista) continue
-        for (const o of lista) if (Math.hypot(o.x - x, o.y - y) < 0.5 * (r + o.r) * 0.95) return false
-      }
-    }
-    return true
-  }
-  const glifos: GlifoT[] = []
-  /** Common acceptance: land, Terrasen, icons+labels, water, routes, spacing. */
-  const tentar = (g: GlifoT, r: number, margem: number): boolean => {
-    const { x, y } = g
-    if (x < 8 || y < 8 || x > W - 8) return false
-    if (at(Math.round(x), Math.round(y)) < 0.08) return false
-    if (pesoT(x, y) < 0.12) return false
-    for (const p of pinsPx) {
-      if (Math.hypot(p.x - x, p.y - y) < A.folgaIcone) return false
-      // the label sits right under the icon
-      if (Math.abs(x - p.x) < 52 && y > p.y + 6 && y < p.y + 38) return false
-    }
-    if (obst?.perto(x, y, margem + g.tam * 0.8)) return false
-    for (const rota of rotasPx) if (distanciaAoCurso(x, y, rota) < A.margemRota + g.tam * 0.3) return false
-    if (!livre(x, y, r)) return false
-    const k = chave((x / CELL) | 0, (y / CELL) | 0)
-    const lista = grade.get(k) ?? []
-    lista.push({ x, y, r })
-    grade.set(k, lista)
-    glifos.push(g)
-    return true
-  }
+  // common acceptance (land, Terrasen, icons + labels, water, routes, spacing): biomas/aceitador.ts
+  const { tentar, glifos, pinsPx } = criarAceitador<GlifoT>({ W, H, at, peso: pesoT, pesoMin: 0.12, obst, folgaIcone: A.folgaIcone, margemRota: A.margemRota })
 
   // ---- 1. mountains along the ridges read from the printed map ----
   for (const [ri, cume] of ARTE.cumeeiras.entries()) {
@@ -346,14 +265,7 @@ export function planejarTerrasen(e: EntradaPlano): PlanoTerrasen {
   }
 
   // ---- 3. forest masses around the cores (blue-noise darts, irregular radii) ----
-  type Cand = { x: number; y: number; pri: number }
-  const cand: Cand[] = []
-  for (let gy = 0; gy < 0.32 * H; gy += 8) {
-    for (let gx = 0.5 * W; gx < 0.92 * W; gx += 8) {
-      cand.push({ x: gx + (h2(gx, gy, 1) - 0.5) * 8, y: gy + (h2(gx, gy, 2) - 0.5) * 8, pri: h2(gx, gy, 3) })
-    }
-  }
-  cand.sort((a, b) => b.pri - a.pri)
+  const cand = candidatosPorPrioridade(0.5 * W, 0, 0.92 * W, 0.32 * H, 8)
   for (const c of cand) {
     const { x, y } = c
     const wT = pesoT(x, y)
