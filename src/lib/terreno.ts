@@ -1,5 +1,6 @@
 ﻿import { desenharHidroClassico, paintColorido, protoClassico, tracarRios } from './colorir'
-import { desenharGlifoT, desenharWashes, type ProtoTerrasen } from './proto/terrasen'
+import { desenharWashes, type ProtoTerrasen } from './proto/terrasen'
+import { desenharGlifo } from './biomas/glifos'
 import { ativos, criarObstaculos, lagoPoligono, rioPontos, type NivelHidro, type Obstaculos } from './hidrografia'
 import { criarGeografia, GEO_PADRAO, mulberry32, MAP_H, MAP_W, type GeoId } from './geografia'
 import { desenharVinheta, GRAO_PIXEL } from './envelhecimento'
@@ -104,7 +105,7 @@ export function renderTerrain(W = MAP_W, H = MAP_H, seed = 11, style: MapStyle =
   if (pr) desenharWashes(ctx, pr.plano, 'sepia', proto?.ajuste)
   desenharHidroClassico(ctx, lagos, rios)
   drawGlyphs(ctx, W, H, at, rnd, n2, obst, pr ? (x, y) => pr.pesoT(x, y) > 0.12 : undefined)
-  if (pr && proto && !proto.vetorial) for (const g of pr.plano.glifos) desenharGlifoT(ctx, g, proto.estiloSepia ?? proto.estilo, 'sepia')
+  if (pr && proto && !proto.vetorial) for (const g of pr.plano.glifos) desenharGlifo(ctx, g, proto.estiloSepia ?? proto.estilo, 'sepia')
   desenharVinheta(ctx, W, H, 'sepia')
   drawFrame(ctx, W, H)
   drawCompass(ctx, W * 0.95, H * 0.905, 54, false)

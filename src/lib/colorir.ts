@@ -1,6 +1,7 @@
 import biomasData from '../data/biomas.json'
 import { desenharVinheta, GRAO_PIXEL } from './envelhecimento'
-import { aplicarPaleta, criarPeso, desenharGlifoT, desenharWashes, filtrarForaDeTerrasen, planejarTerrasen, ZONA_MONTANHAS, ZONAS_TERRASEN, type PlanoTerrasen, type ProtoTerrasen } from './proto/terrasen'
+import { desenharGlifo } from './biomas/glifos'
+import { aplicarPaleta, criarPeso, desenharWashes, filtrarForaDeTerrasen, planejarTerrasen, ZONA_MONTANHAS, ZONAS_TERRASEN, type PlanoTerrasen, type ProtoTerrasen } from './proto/terrasen'
 import { ativos, catmullRom, criarObstaculos, dentroDoPoligono, lagoPoligono, rioPontos, type HidroAtiva, type Obstaculos } from './hidrografia'
 
 /**
@@ -588,7 +589,7 @@ function drawGlyphs(p: PaintCtx, field: Field, obst: Obstaculos | undefined, zon
     const estilo = p.proto.estilo
     itens = filtrarForaDeTerrasen(itens, proto.pesoT)
     // vector mode: these symbols live in the SVG layer, so the raster must not draw them twice
-    if (!p.proto.vetorial) itens = [...itens, ...proto.plano.glifos.map((g) => ({ x: g.x, y: g.y, draw: () => desenharGlifoT(ctx, g, estilo, 'cor') }))]
+    if (!p.proto.vetorial) itens = [...itens, ...proto.plano.glifos.map((g) => ({ x: g.x, y: g.y, draw: () => desenharGlifo(ctx, g, estilo, 'cor') }))]
   }
   // far-to-near so nearer glyphs overlap the ones behind them
   itens.sort((a, b) => a.y - b.y)

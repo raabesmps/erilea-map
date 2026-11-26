@@ -3,8 +3,9 @@ import biomas from '../../data/biomas.json'
 import { criarGeografia, mulberry32, MAP_H, MAP_W } from '../geografia'
 import { buildField } from '../colorir'
 import { ativos, criarObstaculos, lagoPoligono, rioPontos } from '../hidrografia'
-import { aplicarPaleta, criarPeso, desenharGlifoT, planejarTerrasen, ZONA_MONTANHAS, ZONAS_TERRASEN, type GlifoT } from './terrasen'
+import { aplicarPaleta, criarPeso, planejarTerrasen, ZONA_MONTANHAS, ZONAS_TERRASEN, type GlifoT } from './terrasen'
 import { GravadorSvg } from './gravador-svg'
+import { desenharGlifo } from '../biomas/glifos'
 
 const { elevacao, ruido } = criarGeografia(mulberry32(11), MAP_W, MAP_H, 'v3')
 const at = (x: number, y: number) => elevacao(Math.min(MAP_W - 1, Math.max(0, x)), Math.min(MAP_H - 1, Math.max(0, y)))
@@ -19,7 +20,7 @@ const mont = plano.glifos.filter((g) => g.tipo === 'montanha')
 
 const desenhar = (g: GlifoT, estilo: 'A' | 'B', modo: 'cor' | 'sepia') => {
   const r = new GravadorSvg()
-  desenharGlifoT(r as unknown as CanvasRenderingContext2D, g, estilo, modo)
+  desenharGlifo(r as unknown as CanvasRenderingContext2D, g, estilo, modo)
   return r.elementos
 }
 const coords = (els: string[]) => {

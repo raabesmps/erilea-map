@@ -6,7 +6,10 @@
  */
 import { GravadorSvg } from './gravador-svg'
 import { aplicarTintaNoSvg, transformarCor, type NivelPapel } from './papel-sepia'
-import { desenharGlifoT, type EstiloTerrasen, type ModoDesenho, type PlanoTerrasen } from './terrasen'
+import { desenharGlifo } from '../biomas/glifos'
+import type { ModoDesenho } from '../biomas/tipos'
+import './terrasen' // registers Terrasen's glyph types in the registry
+import type { EstiloTerrasen, PlanoTerrasen } from './terrasen'
 
 const NS = 'http://www.w3.org/2000/svg'
 
@@ -21,7 +24,7 @@ export function construirSvgTerrasen(plano: PlanoTerrasen, estilo: EstiloTerrase
   // plan order is far-to-near (sorted by y), which is also the paint order
   plano.glifos.forEach((g, i) => {
     const gr = new GravadorSvg(integrar ? transformarCor(papel as 1 | 2, g.x, g.y, W, H) : undefined)
-    desenharGlifoT(gr as unknown as CanvasRenderingContext2D, g, estilo, modo)
+    desenharGlifo(gr as unknown as CanvasRenderingContext2D, g, estilo, modo)
     partes.push(`<g data-i="${i}" data-x="${g.x.toFixed(1)}" data-y="${g.y.toFixed(1)}">${gr.elementos.join('')}</g>`)
   })
   svg.innerHTML = partes.join('')
