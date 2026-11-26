@@ -9,9 +9,10 @@ import biomas from '../../data/biomas.json'
 import lugaresJson from '../../data/lugares.json'
 import mestre from '../../../tests/navegador/mestre.json'
 import { CORDAS_COSTEIRAS, criarGeografia, mulberry32, MAP_H, MAP_W, PONTOS_V3, validarLugares } from '../geografia'
-import { buildField, planoProto, tracarRios } from '../colorir'
+import { buildField, tracarRios } from '../colorir'
+import { aplicarPaletas, ativosDeProto, planejarBiomas } from '../biomas/registro'
+import type { PlanoTerrasen } from './terrasen'
 import { ativos, criarObstaculos, lagoPoligono, rioPontos } from '../hidrografia'
-import { aplicarPaleta } from './terrasen'
 import type { Place } from '../../types'
 
 const fnv = (s: string) => {
@@ -31,9 +32,10 @@ function planoDe(seed: number) {
   const lagos = hidro.lagos.map((l) => lagoPoligono(l, MAP_W, MAP_H))
   const rios = [...tracarRios({ W: MAP_W, H: MAP_H, at, noise: ruido }, hidro.substituidos).map((r) => r.pts), ...hidro.rios.map((r) => rioPontos(r, MAP_W, MAP_H, at))]
   const obst = criarObstaculos(lagos, rios)
-  const zonas = aplicarPaleta(biomas.zonas as never[]) as never[]
+  const biomasAtivos = ativosDeProto({ estilo: 'A', estiloSepia: 'B' })
+  const zonas = aplicarPaletas(biomas.zonas as never[], biomasAtivos) as never[]
   const campo = buildField(MAP_W, MAP_H, ruido, zonas)
-  const { plano } = planoProto({ W: MAP_W, H: MAP_H, at, noise: ruido, proto: { estilo: 'A', estiloSepia: 'B' } }, campo, zonas, obst)
+  const plano = planejarBiomas(biomasAtivos, { W: MAP_W, H: MAP_H, at, noise: ruido, obst, field: campo, zonas }).planos[0]!.plano as PlanoTerrasen
   const lista = plano.glifos.map((g) => [g.tipo, +g.x.toFixed(1), +g.y.toFixed(1), +g.tam.toFixed(2), g.neve ? 1 : 0, +g.rot.toFixed(3), +g.v.toFixed(3), g.origem])
   return { n: plano.glifos.length, hash: fnv(JSON.stringify(lista)) }
 }

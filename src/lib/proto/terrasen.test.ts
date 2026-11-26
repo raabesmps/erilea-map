@@ -10,7 +10,6 @@ import {
   aplicarPaleta,
   ARTE,
   criarPeso,
-  filtrarForaDeTerrasen,
   PALETA_TERRASEN,
   planejarTerrasen,
   protoDe,
@@ -18,6 +17,8 @@ import {
   ZONAS_TERRASEN,
 } from './terrasen'
 import type { Place, Route } from '../../types'
+import { filtrarSubstituidos } from '../biomas/registro'
+import { TERRASEN } from './terrasen-bioma'
 
 const lugares = lugaresJson as Place[]
 const rotas = rotasJson as Route[]
@@ -121,7 +122,7 @@ describe('protótipo de Terrasen: só toca em Terrasen', () => {
 
   it('o resto do mapa mantém o desenho: filtrar Terrasen remove só os símbolos de Terrasen', () => {
     const padrao = planejarGlifos({ W: MAP_W, H: MAP_H, at, rnd: mulberry32(5), noise: ruido }, campo, undefined, zonas as never)
-    const fora = filtrarForaDeTerrasen(padrao, pesoT)
+    const fora = filtrarSubstituidos(padrao, [{ ativo: { bioma: TERRASEN, config: { estilo: 'A' } }, plano, peso: pesoT }])
     expect(fora.length).toBeLessThan(padrao.length)
     for (const g of padrao) expect(fora.includes(g), `${g.x},${g.y}`).toBe(pesoT(g.x, g.y) <= 0.12)
   })

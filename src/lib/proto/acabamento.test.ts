@@ -6,6 +6,7 @@ import { ativos, criarObstaculos, lagoPoligono, rioPontos } from '../hidrografia
 import { aplicarPaleta, criarPeso, planejarTerrasen, ZONA_MONTANHAS, ZONAS_TERRASEN, type GlifoT } from './terrasen'
 import { GravadorSvg } from './gravador-svg'
 import { desenharGlifo } from '../biomas/glifos'
+import '../biomas/registro' // registers the glyph types of the registered biomes
 
 const { elevacao, ruido } = criarGeografia(mulberry32(11), MAP_W, MAP_H, 'v3')
 const at = (x: number, y: number) => elevacao(Math.min(MAP_W - 1, Math.max(0, x)), Math.min(MAP_H - 1, Math.max(0, y)))

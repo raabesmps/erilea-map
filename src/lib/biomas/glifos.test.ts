@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import '../proto/terrasen' // registers Terrasen's glyph types
+import './registro' // registers the glyph types of the registered biomes
 import { desenharGlifo, glifosRegistrados, registrarGlifo, type Desenhista } from './glifos'
 import type { GlifoBase } from './tipos'
 

@@ -5,7 +5,6 @@ import { sm, h2, candidatosPorPrioridade } from '../biomas/amostragem'
 import { criarAceitador } from '../biomas/aceitador'
 import type { Ocupacao } from '../biomas/ocupacao'
 import { PALETA_TERRASEN } from './terrasen-paleta'
-import { registrarGlifosTerrasen } from './terrasen-glifos'
 
 /**
  * PROTOTYPE (branch bioma-terrasen, off by default: ?terrasen=A|B|C).
@@ -33,9 +32,6 @@ export const protoDe = (v: VariacaoTerrasen): ProtoTerrasen => (v === 'AB' ? { e
 // the palette lives in terrasen-paleta.ts and the sampling helpers in biomas/amostragem.ts; re-exported so the Terrasen module keeps its public surface
 export { PALETA_TERRASEN, aplicarPaleta } from './terrasen-paleta'
 export { h2, criarPeso } from '../biomas/amostragem'
-
-// Terrasen's symbol types must be in the glyph registry before anything draws them
-registrarGlifosTerrasen()
 
 export const ZONAS_TERRASEN = (id: string) => id.startsWith('r03-')
 export const ZONA_MONTANHAS = 'r03-montanhas-norte'
@@ -343,9 +339,4 @@ export function desenharWashes(ctx: CanvasRenderingContext2D, plano: PlanoTerras
 function hexA(hex: string, a: number): string {
   const n = parseInt(hex.slice(1), 16)
   return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${Math.max(0, Math.min(1, a))})`
-}
-
-/** Drops default glyphs that fall inside Terrasen; everything else is kept untouched. */
-export function filtrarForaDeTerrasen<T extends { x: number; y: number }>(ops: T[], pesoT: (x: number, y: number) => number): T[] {
-  return ops.filter((o) => pesoT(o.x, o.y) <= 0.12)
 }

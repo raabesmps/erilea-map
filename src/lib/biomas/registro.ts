@@ -5,6 +5,7 @@
  * occupation grid, so a biome sees the symbols of the earlier ones as obstacles and never the other way round. Registering a
  * later biome therefore cannot move a single symbol of an earlier one (tests/R2). Nothing here uses the map's random stream.
  */
+import type { ProtoTerrasen } from '../proto/terrasen'
 import { TERRASEN } from '../proto/terrasen-bioma'
 import { criarPeso } from './amostragem'
 import type { BiomaRefinado, ParteZona, PlanoBioma } from './bioma'
@@ -23,6 +24,12 @@ export interface BiomaAtivo {
   bioma: BiomaQualquer
   config: unknown
 }
+
+/**
+ * Bridge from the existing URL-driven parameter (`?terrasen=`, a `ProtoTerrasen`) to the active biomes.
+ * Terrasen is the only real biome, so this is the only parameter; the layers of step 0d will generalise it.
+ */
+export const ativosDeProto = (proto?: ProtoTerrasen): BiomaAtivo[] => (proto ? [{ bioma: TERRASEN, config: proto }] : [])
 
 /** Problems of a registry: duplicated ids, a zone claimed by two biomes, a palette that touches a zone the biome does not own. */
 export function validarRegistro(biomas: readonly BiomaQualquer[], zonaIds: readonly string[]): string[] {

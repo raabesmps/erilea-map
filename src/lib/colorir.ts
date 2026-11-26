@@ -1,7 +1,8 @@
 import biomasData from '../data/biomas.json'
 import { desenharVinheta, GRAO_PIXEL } from './envelhecimento'
 import { desenharGlifo } from './biomas/glifos'
-import { aplicarPaleta, criarPeso, desenharWashes, filtrarForaDeTerrasen, planejarTerrasen, ZONA_MONTANHAS, ZONAS_TERRASEN, type PlanoTerrasen, type ProtoTerrasen } from './proto/terrasen'
+import type { ProtoTerrasen } from './proto/terrasen'
+import { aplicarPaletas, ativosDeProto, desenharFundos, filtrarSubstituidos, planejarBiomas, type BiomaAtivo, type PlanoDeBioma } from './biomas/registro'
 import { ativos, catmullRom, criarObstaculos, dentroDoPoligono, lagoPoligono, rioPontos, type HidroAtiva, type Obstaculos } from './hidrografia'
 
 /**
@@ -151,7 +152,8 @@ function sampleField(f: Field, x: number, y: number): RGB {
 
 export function paintColorido(p: PaintCtx) {
   const { ctx, W, H, elev, at, rnd, noise } = p
-  const zonasUsadas = p.proto ? aplicarPaleta(B.zonas) : B.zonas
+  const biomasAtivos = ativosDeProto(p.proto)
+  const zonasUsadas = biomasAtivos.length ? aplicarPaletas(B.zonas, biomasAtivos) : B.zonas
   const field = buildField(W, H, noise, zonasUsadas)
   const img = ctx.createImageData(W, H)
   const d = img.data
@@ -241,12 +243,12 @@ export function paintColorido(p: PaintCtx) {
   const lagos = hidro.lagos.map((l) => lagoPoligono(l, W, H))
   const rios = [...tracarRios(p, hidro.substituidos).map((r) => r.pts), ...hidro.rios.map((r) => rioPontos(r, W, H, at))]
   const obst = criarObstaculos(lagos, rios)
-  const proto = p.proto ? planoProto(p, field, zonasUsadas, obst) : undefined
+  const planos = biomasAtivos.length ? planejarBiomas(biomasAtivos, { W, H, at, noise, obst, field, zonas: zonasUsadas }).planos : undefined
   drawWaves(p)
-  if (proto) desenharWashes(ctx, proto.plano, 'cor', p.proto?.ajuste)
+  if (planos) desenharFundos(ctx, planos, 'cor')
   for (const poly of lagos) drawLake(ctx, poly)
   drawRiverSet(ctx, rios)
-  drawGlyphs(p, field, obst, zonasUsadas, proto)
+  drawGlyphs(p, field, obst, zonasUsadas, planos)
 
   // aged-paper vignette, lighter than the sepia style so the colour stays readable
   desenharVinheta(ctx, W, H, 'cor')
@@ -558,38 +560,29 @@ export function planejarGlifos(
   return ops
 }
 
-/** Prototype plan for Terrasen plus the feathered Terrasen weight (used to drop the default glyphs there). */
-export interface ProtoPlano {
-  plano: PlanoTerrasen
-  pesoT: (x: number, y: number) => number
-}
-
-export function planoProto(p: Pick<PaintCtx, 'W' | 'H' | 'at' | 'noise'> & { proto?: ProtoTerrasen }, field: Field, zonas: Zona[], obst?: Obstaculos): ProtoPlano {
-  const pesoT = criarPeso(field, zonas, ZONAS_TERRASEN)
-  const pesoMont = criarPeso(field, zonas, (id) => id === ZONA_MONTANHAS)
-  const plano = planejarTerrasen({ W: p.W, H: p.H, at: p.at, noise: p.noise, pesoT, pesoMont, obst, ajuste: p.proto?.ajuste })
-  p.proto?.aoPlanejar?.(plano)
-  return { plano, pesoT }
-}
-
-/** Sepia path: same plan, weights come from the default zones. */
-export function protoClassico(p: Pick<PaintCtx, 'W' | 'H' | 'at' | 'noise'> & { proto?: ProtoTerrasen }, obst?: Obstaculos): ProtoPlano {
-  const zonas = aplicarPaleta(B.zonas)
+/** Sepia path: the same biomes, planned over a field built from the default zones (with the biomes' palettes). */
+export function planejarClassico(p: Pick<PaintCtx, 'W' | 'H' | 'at' | 'noise'>, ativos: readonly BiomaAtivo[], obst?: Obstaculos): PlanoDeBioma[] {
+  const zonas = aplicarPaletas(B.zonas, ativos)
   const field = buildField(p.W, p.H, p.noise, zonas)
-  return planoProto(p, field, zonas, obst)
+  return planejarBiomas(ativos, { W: p.W, H: p.H, at: p.at, noise: p.noise, obst, field, zonas }).planos
 }
 
-function drawGlyphs(p: PaintCtx, field: Field, obst: Obstaculos | undefined, zonas: Zona[], proto?: ProtoPlano) {
+function drawGlyphs(p: PaintCtx, field: Field, obst: Obstaculos | undefined, zonas: Zona[], planos?: PlanoDeBioma[]) {
   const { ctx } = p
   ctx.lineJoin = 'round'
   ctx.lineCap = 'round'
   type Item = { x: number; y: number; draw: () => void }
   let itens: Item[] = planejarGlifos(p, field, obst, zonas)
-  if (proto && p.proto) {
-    const estilo = p.proto.estilo
-    itens = filtrarForaDeTerrasen(itens, proto.pesoT)
-    // vector mode: these symbols live in the SVG layer, so the raster must not draw them twice
-    if (!p.proto.vetorial) itens = [...itens, ...proto.plano.glifos.map((g) => ({ x: g.x, y: g.y, draw: () => desenharGlifo(ctx, g, estilo, 'cor') }))]
+  if (planos) {
+    // where a refined biome draws its own symbols, the default ones are dropped
+    itens = filtrarSubstituidos(itens, planos)
+    for (const pl of planos) {
+      const b = pl.ativo.bioma
+      // vector mode: these symbols live in the SVG layer, so the raster must not draw them twice
+      if (b.vetorial(pl.ativo.config)) continue
+      const estilo = b.estilo('cor', pl.ativo.config)
+      itens = [...itens, ...pl.plano.glifos.map((g) => ({ x: g.x, y: g.y, draw: () => desenharGlifo(ctx, g, estilo, 'cor') }))]
+    }
   }
   // far-to-near so nearer glyphs overlap the ones behind them
   itens.sort((a, b) => a.y - b.y)

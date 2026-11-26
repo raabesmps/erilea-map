@@ -8,7 +8,7 @@ import { GravadorSvg } from './gravador-svg'
 import { aplicarTintaNoSvg, transformarCor, type NivelPapel } from './papel-sepia'
 import { desenharGlifo } from '../biomas/glifos'
 import type { ModoDesenho } from '../biomas/tipos'
-import './terrasen' // registers Terrasen's glyph types in the registry
+import '../biomas/registro' // registers every registered biome's glyph types
 import type { EstiloTerrasen, PlanoTerrasen } from './terrasen'
 
 const NS = 'http://www.w3.org/2000/svg'
