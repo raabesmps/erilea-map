@@ -1,8 +1,7 @@
 import biomasData from '../data/biomas.json'
 import { desenharVinheta, GRAO_PIXEL } from './envelhecimento'
 import { desenharGlifo } from './biomas/glifos'
-import type { ProtoTerrasen } from './proto/terrasen'
-import { aplicarPaletas, ativosDeProto, desenharFundos, filtrarSubstituidos, planejarBiomas, type BiomaAtivo, type PlanoDeBioma } from './biomas/registro'
+import { aplicarPaletas, desenharFundos, filtrarSubstituidos, planejarBiomas, type BiomaAtivo, type BiomaQualquer, type OpcoesBiomas, type PlanoDeBioma } from './biomas/registro'
 import { ativos, catmullRom, criarObstaculos, dentroDoPoligono, lagoPoligono, rioPontos, type HidroAtiva, type Obstaculos } from './hidrografia'
 
 /**
@@ -59,8 +58,8 @@ export interface PaintCtx {
   noise: (x: number, y: number) => number
   /** Active lakes and rivers read from the printed map; defaults to the highest-confidence tier. */
   hidro?: HidroAtiva
-  /** PROTOTYPE (off by default): Terrasen visual proposal, see proto/terrasen.ts. */
-  proto?: ProtoTerrasen
+  /** Refined biomes (Terrasen is the only real one): active biomes, registry and the plan callback. */
+  biomas?: OpcoesBiomas
 }
 
 const INK: RGB = [64, 56, 45] // #40382D from the guide
@@ -152,7 +151,7 @@ function sampleField(f: Field, x: number, y: number): RGB {
 
 export function paintColorido(p: PaintCtx) {
   const { ctx, W, H, elev, at, rnd, noise } = p
-  const biomasAtivos = ativosDeProto(p.proto)
+  const biomasAtivos = p.biomas?.ativos ?? []
   const zonasUsadas = biomasAtivos.length ? aplicarPaletas(B.zonas, biomasAtivos) : B.zonas
   const field = buildField(W, H, noise, zonasUsadas)
   const img = ctx.createImageData(W, H)
@@ -243,7 +242,8 @@ export function paintColorido(p: PaintCtx) {
   const lagos = hidro.lagos.map((l) => lagoPoligono(l, W, H))
   const rios = [...tracarRios(p, hidro.substituidos).map((r) => r.pts), ...hidro.rios.map((r) => rioPontos(r, W, H, at))]
   const obst = criarObstaculos(lagos, rios)
-  const planos = biomasAtivos.length ? planejarBiomas(biomasAtivos, { W, H, at, noise, obst, field, zonas: zonasUsadas }).planos : undefined
+  const planos = biomasAtivos.length ? planejarBiomas(biomasAtivos, { W, H, at, noise, obst, field, zonas: zonasUsadas }, p.biomas?.registro).planos : undefined
+  if (planos) p.biomas?.aoPlanejar?.(planos)
   drawWaves(p)
   if (planos) desenharFundos(ctx, planos, 'cor')
   for (const poly of lagos) drawLake(ctx, poly)
@@ -561,10 +561,10 @@ export function planejarGlifos(
 }
 
 /** Sepia path: the same biomes, planned over a field built from the default zones (with the biomes' palettes). */
-export function planejarClassico(p: Pick<PaintCtx, 'W' | 'H' | 'at' | 'noise'>, ativos: readonly BiomaAtivo[], obst?: Obstaculos): PlanoDeBioma[] {
+export function planejarClassico(p: Pick<PaintCtx, 'W' | 'H' | 'at' | 'noise'>, ativos: readonly BiomaAtivo[], obst?: Obstaculos, registro?: readonly BiomaQualquer[]): PlanoDeBioma[] {
   const zonas = aplicarPaletas(B.zonas, ativos)
   const field = buildField(p.W, p.H, p.noise, zonas)
-  return planejarBiomas(ativos, { W: p.W, H: p.H, at: p.at, noise: p.noise, obst, field, zonas }).planos
+  return planejarBiomas(ativos, { W: p.W, H: p.H, at: p.at, noise: p.noise, obst, field, zonas }, registro).planos
 }
 
 function drawGlyphs(p: PaintCtx, field: Field, obst: Obstaculos | undefined, zonas: Zona[], planos?: PlanoDeBioma[]) {

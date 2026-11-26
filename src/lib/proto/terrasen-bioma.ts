@@ -4,7 +4,7 @@
  */
 import type { BiomaRefinado } from '../biomas/bioma'
 import { criarPeso } from '../biomas/amostragem'
-import { desenharWashes, planejarTerrasen, ZONA_MONTANHAS, ZONAS_TERRASEN, type PlanoTerrasen, type ProtoTerrasen } from './terrasen'
+import { desenharWashes, planejarTerrasen, protoDe, ZONA_MONTANHAS, ZONAS_TERRASEN, type PlanoTerrasen, type ProtoTerrasen } from './terrasen'
 import { PALETA_ZONAS } from './terrasen-paleta'
 import { registrarGlifosTerrasen } from './terrasen-glifos'
 
@@ -32,4 +32,7 @@ export const TERRASEN: BiomaRefinado<ProtoTerrasen, PlanoTerrasen> = {
   estilo: (modo, config) => (modo === 'cor' ? config.estilo : (config.estiloSepia ?? config.estilo)),
   vetorial: (config) => config.vetorial === true,
   registrarGlifos: registrarGlifosTerrasen,
+  parametroUrl: 'terrasen',
+  // ?terrasen=A|B|C|AB, exactly the values the URL state accepts; ?vetor=0 keeps the symbols in the raster
+  configDaUrl: (valor, { vetor }) => (valor === 'A' || valor === 'B' || valor === 'C' || valor === 'AB' ? { ...protoDe(valor), vetorial: vetor } : null),
 }

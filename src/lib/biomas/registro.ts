@@ -31,6 +31,43 @@ export interface BiomaAtivo {
  */
 export const ativosDeProto = (proto?: ProtoTerrasen): BiomaAtivo[] => (proto ? [{ bioma: TERRASEN, config: proto }] : [])
 
+/**
+ * Generic selection of the active biomes from the map state: for each registered biome, in registry order, the value of
+ * its URL parameter (`estado[bioma.parametroUrl]`) is turned into its configuration. Unknown or empty values activate nothing.
+ */
+export function ativosDoEstado(estado: Readonly<Record<string, string | null | undefined>>, opcoes: { vetor: boolean }, registro: readonly BiomaQualquer[] = BIOMAS_REFINADOS): BiomaAtivo[] {
+  const ativos: BiomaAtivo[] = []
+  for (const bioma of registro) {
+    const valor = estado[bioma.parametroUrl]
+    if (!valor) continue
+    const config = bioma.configDaUrl(valor, opcoes)
+    if (config !== null) ativos.push({ bioma, config })
+  }
+  return ativos
+}
+
+/** True when at least one active biome draws its symbols in the SVG layer. */
+export const algumVetorial = (ativos: readonly BiomaAtivo[]) => ativos.some((a) => a.bioma.vetorial(a.config))
+
+/** Stable text that identifies a selection (for caches). */
+export const assinaturaDosAtivos = (ativos: readonly BiomaAtivo[]) => ativos.map((a) => `${a.bioma.id}:${JSON.stringify(a.config)}`).join('|') || 'x'
+
+/** What the raster painters receive about the refined biomes. */
+export interface OpcoesBiomas {
+  ativos: BiomaAtivo[]
+  /** Registry to plan with (production by default; tests pass one with a synthetic biome). */
+  registro?: readonly BiomaQualquer[]
+  /** Receives the plans of every active biome, once per render (the vector layer is built from them). */
+  aoPlanejar?: (planos: PlanoDeBioma[]) => void
+}
+
+/** Accepts the historical `ProtoTerrasen` parameter or the generic options. */
+export function normalizarBiomas(entrada?: ProtoTerrasen | OpcoesBiomas): OpcoesBiomas {
+  if (!entrada) return { ativos: [] }
+  if ('ativos' in entrada) return entrada
+  return { ativos: ativosDeProto(entrada) }
+}
+
 /** Problems of a registry: duplicated ids, a zone claimed by two biomes, a palette that touches a zone the biome does not own. */
 export function validarRegistro(biomas: readonly BiomaQualquer[], zonaIds: readonly string[]): string[] {
   const problemas: string[] = []

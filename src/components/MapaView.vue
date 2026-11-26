@@ -5,9 +5,8 @@ import { useI18n } from 'vue-i18n'
 import { useAppStore } from '../stores/app'
 import { MAP_H, MAP_W, renderTerrain, type MapStyle } from '../lib/terreno'
 import { iconFor } from '../lib/icons'
-import { protoDe, type PlanoTerrasen } from '../lib/proto/terrasen'
 import { construirSvgBiomas } from '../lib/biomas/camada-vetorial'
-import { ativosDeProto, type PlanoDeBioma } from '../lib/biomas/registro'
+import { algumVetorial, assinaturaDosAtivos, ativosDoEstado, type PlanoDeBioma } from '../lib/biomas/registro'
 import rotasData from '../data/rotas.json'
 import type { Route } from '../types'
 
@@ -23,10 +22,14 @@ let overlay: L.ImageOverlay
 const painting = ref(false)
 const cache: Record<string, string> = {}
 
+/** Active refined biomes for the current state (URL parameters of every registered biome; ?vetor=0 keeps symbols in the raster). */
+const ativosAtuais = (vetor: boolean) => ativosDoEstado({ terrasen: store.terrasen }, { vetor })
+
 function overlayUrl(style: MapStyle) {
-  const key = `${store.geo}-${style}-${store.hidro}-${store.terrasen ?? 'x'}`
-  const proto = store.terrasen ? protoDe(store.terrasen) : undefined
-  cache[key] ??= renderTerrain(MAP_W, MAP_H, 11, style, store.geo, store.hidro, proto).toDataURL('image/jpeg', 0.92)
+  // single-image path (no vector layer): every active biome draws its symbols in the raster
+  const ativos = ativosAtuais(false)
+  const key = `${store.geo}-${style}-${store.hidro}-${assinaturaDosAtivos(ativos)}`
+  cache[key] ??= renderTerrain(MAP_W, MAP_H, 11, style, store.geo, store.hidro, { ativos }).toDataURL('image/jpeg', 0.92)
   return cache[key]!
 }
 
@@ -35,13 +38,12 @@ function overlayUrl(style: MapStyle) {
 // four elements in one frame, so raster and symbols never disagree. Custom panes keep them under the routes.
 type Capa = { img: L.ImageOverlay; svg: L.SVGOverlay }
 const capas: Partial<Record<MapStyle, Capa>> = {}
-const vetorial = () => !!store.terrasen && store.vetor
+const vetorial = () => store.vetor && algumVetorial(ativosAtuais(true))
 
 function criarCapa(style: MapStyle): Capa {
-  const base = protoDe(store.terrasen!)
-  let plano: PlanoTerrasen | undefined
-  const proto = { ...base, vetorial: true, aoPlanejar: (p: PlanoTerrasen) => (plano = p) }
-  const url = renderTerrain(MAP_W, MAP_H, 11, style, store.geo, store.hidro, proto).toDataURL('image/jpeg', 0.92)
+  // the raster leaves out exactly the symbols of the biomes the SVG draws (same `vetorial` predicate on both sides)
+  let planos: PlanoDeBioma[] = []
+  const url = renderTerrain(MAP_W, MAP_H, 11, style, store.geo, store.hidro, { ativos: ativosAtuais(true), aoPlanejar: (p: PlanoDeBioma[]) => (planos = p) }).toDataURL('image/jpeg', 0.92)
   const modo = style === 'colorido' ? 'cor' : 'sepia'
   const bounds = L.latLngBounds([0, 0], [MAP_H, MAP_W])
   if (!map.getPane('terrasenImg')) {
@@ -49,8 +51,6 @@ function criarCapa(style: MapStyle): Capa {
     map.createPane('terrasenSimbolos').style.zIndex = '395'
   }
   const img = L.imageOverlay(url, bounds, { pane: 'terrasenImg' }).addTo(map)
-  // step 0d.1: the builder takes the plans of all vector biomas; Terrasen is the only one for now
-  const planos: PlanoDeBioma[] = [{ ativo: ativosDeProto(proto)[0]!, plano: plano!, peso: () => 0 }]
   const svgEl = construirSvgBiomas(planos, modo, MAP_W, MAP_H, store.papel)
   svgEl.style.pointerEvents = 'none'
   const svg = L.svgOverlay(svgEl, bounds, { pane: 'terrasenSimbolos', interactive: false }).addTo(map)

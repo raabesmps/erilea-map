@@ -44,4 +44,6 @@ export const SINTETICO: BiomaRefinado<ConfigSintetico, PlanoBioma> = {
   estilo: () => 'A',
   vetorial: (config) => config.vetorial === true,
   registrarGlifos: () => registrarGlifo(TIPO_SINTETICO, desenhar),
+  parametroUrl: 'sintetico',
+  configDaUrl: (valor, { vetor }) => (valor === '1' ? { vetorial: vetor } : null),
 }

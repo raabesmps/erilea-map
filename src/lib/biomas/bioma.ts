@@ -52,4 +52,8 @@ export interface BiomaRefinado<C = unknown, P extends PlanoBioma = PlanoBioma> {
   vetorial(config: C): boolean
   /** Registers the symbol types of this biome in the glyph registry (idempotent). */
   registrarGlifos(): void
+  /** Name of the URL parameter that activates this biome (`terrasen` for Terrasen). */
+  parametroUrl: string
+  /** Configuration for a URL value, or null when the value does not activate the biome. `vetor`: symbols drawn by the SVG layer. */
+  configDaUrl(valor: string, opcoes: { vetor: boolean }): C | null
 }

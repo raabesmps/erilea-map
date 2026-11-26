@@ -1,6 +1,7 @@
 ﻿import { desenharHidroClassico, paintColorido, planejarClassico, tracarRios } from './colorir'
 import type { ProtoTerrasen } from './proto/terrasen'
-import { ativosDeProto, desenharFundos, substituidoEm } from './biomas/registro'
+import { normalizarBiomas, type OpcoesBiomas } from './biomas/registro'
+import { desenharFundos, substituidoEm } from './biomas/registro'
 import { desenharGlifo } from './biomas/glifos'
 import { ativos, criarObstaculos, lagoPoligono, rioPontos, type NivelHidro, type Obstaculos } from './hidrografia'
 import { criarGeografia, GEO_PADRAO, mulberry32, MAP_H, MAP_W, type GeoId } from './geografia'
@@ -22,7 +23,9 @@ const LAND_HI: [number, number, number] = [214, 190, 142]
 const SEA: [number, number, number] = [205, 192, 154]
 const SEA_DEEP: [number, number, number] = [188, 172, 132]
 
-export function renderTerrain(W = MAP_W, H = MAP_H, seed = 11, style: MapStyle = 'colorido', geo: GeoId = GEO_PADRAO, nivel: NivelHidro = 'alta', proto?: ProtoTerrasen): HTMLCanvasElement {
+export function renderTerrain(W = MAP_W, H = MAP_H, seed = 11, style: MapStyle = 'colorido', geo: GeoId = GEO_PADRAO, nivel: NivelHidro = 'alta', proto?: ProtoTerrasen | OpcoesBiomas): HTMLCanvasElement {
+  // the historical ?terrasen parameter object is still accepted; everything inside works with the generic options
+  const biomas = normalizarBiomas(proto)
   const rnd = mulberry32(seed)
   const { elevacao, ruido: n2 } = criarGeografia(rnd, W, H, geo)
 
@@ -36,7 +39,7 @@ export function renderTerrain(W = MAP_W, H = MAP_H, seed = 11, style: MapStyle =
   const at = (x: number, y: number) => elev[Math.min(H - 1, Math.max(0, y)) * W + Math.min(W - 1, Math.max(0, x))]!
 
   if (style === 'colorido') {
-    paintColorido({ ctx, W, H, elev, at, rnd, noise: n2, hidro: ativos(nivel), proto })
+    paintColorido({ ctx, W, H, elev, at, rnd, noise: n2, hidro: ativos(nivel), biomas })
     drawFrame(ctx, W, H)
     drawCompass(ctx, W * 0.95, H * 0.905, 54, true)
     return canvas
@@ -102,8 +105,9 @@ export function renderTerrain(W = MAP_W, H = MAP_H, seed = 11, style: MapStyle =
   const lagos = hidro.lagos.map((l) => lagoPoligono(l, W, H))
   const rios = [...tracarRios({ W, H, at, noise: n2 }, hidro.substituidos).map((r) => r.pts), ...hidro.rios.map((r) => rioPontos(r, W, H, at))]
   const obst = criarObstaculos(lagos, rios)
-  const biomasAtivos = ativosDeProto(proto)
-  const pr = biomasAtivos.length ? planejarClassico({ W, H, at, noise: n2 }, biomasAtivos, obst) : undefined
+  const biomasAtivos = biomas.ativos
+  const pr = biomasAtivos.length ? planejarClassico({ W, H, at, noise: n2 }, biomasAtivos, obst, biomas.registro) : undefined
+  if (pr) biomas.aoPlanejar?.(pr)
   if (pr) desenharFundos(ctx, pr, 'sepia')
   desenharHidroClassico(ctx, lagos, rios)
   drawGlyphs(ctx, W, H, at, rnd, n2, obst, pr ? (x, y) => substituidoEm(x, y, pr) : undefined)
