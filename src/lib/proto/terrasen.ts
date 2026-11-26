@@ -3,6 +3,7 @@ import arteJson from '../../data/terrasen-arte.json'
 import type { ModoDesenho } from '../biomas/tipos'
 import { sm, h2, candidatosPorPrioridade } from '../biomas/amostragem'
 import { criarAceitador } from '../biomas/aceitador'
+import type { Ocupacao } from '../biomas/ocupacao'
 import { PALETA_TERRASEN } from './terrasen-paleta'
 import { registrarGlifosTerrasen } from './terrasen-glifos'
 
@@ -141,6 +142,8 @@ export interface EntradaPlano {
   pesoMont: (x: number, y: number) => number
   obst?: Obstaculos
   ajuste?: Partial<AjusteTerrasen>
+  /** Occupation shared with other biomes of the same planning run (a new one by default). */
+  ocupacao?: Ocupacao
 }
 
 /** Forest-core density (0..1): intentional cores with a warped, fractal fringe. */
@@ -180,7 +183,7 @@ export function planejarTerrasen(e: EntradaPlano): PlanoTerrasen {
   const { W, H, at, noise, pesoT, obst } = e
   const A = { ...AJUSTE_PADRAO, ...e.ajuste }
   // common acceptance (land, Terrasen, icons + labels, water, routes, spacing): biomas/aceitador.ts
-  const { tentar, glifos, pinsPx } = criarAceitador<GlifoT>({ W, H, at, peso: pesoT, pesoMin: 0.12, obst, folgaIcone: A.folgaIcone, margemRota: A.margemRota })
+  const { tentar, glifos, pinsPx } = criarAceitador<GlifoT>({ W, H, at, peso: pesoT, pesoMin: 0.12, obst, folgaIcone: A.folgaIcone, margemRota: A.margemRota, ocupacao: e.ocupacao })
 
   // ---- 1. mountains along the ridges read from the printed map ----
   for (const [ri, cume] of ARTE.cumeeiras.entries()) {

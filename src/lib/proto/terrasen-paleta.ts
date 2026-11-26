@@ -17,7 +17,7 @@ export const PALETA_TERRASEN = {
   tinta: '#40382D',
 } as const
 
-const PALETA_ZONAS: Record<string, { cor?: string; arv?: string; rocha?: string }> = {
+export const PALETA_ZONAS: Record<string, { cor?: string; arv?: string; rocha?: string }> = {
   'r03-terrasen': { cor: PALETA_TERRASEN.chao, arv: PALETA_TERRASEN.floresta, rocha: PALETA_TERRASEN.rocha },
   'r03-pinhal-denso': { cor: '#2B4F4B', arv: PALETA_TERRASEN.floresta },
   'r03-montanhas-norte': { cor: '#7A8680', rocha: PALETA_TERRASEN.rocha },
