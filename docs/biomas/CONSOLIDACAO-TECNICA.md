@@ -1,6 +1,6 @@
 # Consolidação técnica antes do segundo bioma (Adarlan)
 
-**Status:** a consolidação foi **aprovada com ressalvas** (revisão de 2026-11-25). **Etapas 0a e 0b aprovadas.** A etapa 0c (extração mínima do planejador) foi autorizada em subetapas (seção 10). A 0d em diante **não começou**. A branch `bioma-adarlan` parte da `v1.0.0` (commit `e34b710`).
+**Status:** a consolidação foi **aprovada com ressalvas** (revisão de 2026-11-25). **Etapas 0a e 0b aprovadas.** A etapa 0c (extração mínima do planejador) está **concluída e aguardando revisão** (seção 10). A 0d em diante **não começou**. A branch `bioma-adarlan` parte da `v1.0.0` (commit `e34b710`).
 O objetivo é decidir, **antes** de desenhar Adarlan, como o que foi construído para Terrasen vira uma base para vários biomas **sem mudar um pixel de Terrasen**.
 
 Legenda: **[MEDIDO]** número obtido nesta análise · **[CÓDIGO]** lido no código · **[PROPOSTA]** decisão a revisar.
@@ -310,7 +310,7 @@ Leitura:
 | **R9 · Envelhecimento** | raster e vetor iguais (seção 2) | equivalência `desenharVinheta` × `vinhetaEm`, tolerância 2/255 (**implementada na 0b**: `tests/navegador/envelhecimento.pw.ts`) | sempre (navegador) |
 | **R10 · Orçamento** | tempo de renderização ≤ +10%; caminhos ≤ 30 mil/modo; SVG ≤ 4 MB/modo; carga inicial | medição repetida (2 execuções) com a mesma ferramenta de hoje | por mudança de bioma |
 
-**Estado:** R1 e R3 existem desde a etapa 0a (`src/lib/proto/mestre.test.ts` e `tests/navegador/mestre.pw.ts`, com o comparador de pixels). **R9 existe desde a 0b.** R5 e parte de R6/R7 existem desde Terrasen. R2 e a propriedade exclusiva das zonas (parte de R6) entram na 0c (com um bioma sintético de teste); R8 e R10, na 0d; R4, na etapa de Adarlan.
+**Estado:** R1 e R3 existem desde a etapa 0a (`src/lib/proto/mestre.test.ts` e `tests/navegador/mestre.pw.ts`, com o comparador de pixels). **R9 existe desde a 0b.** R5 e parte de R6/R7 existem desde Terrasen. **R2 e a propriedade exclusiva das zonas (parte de R6) existem desde a 0c** (com um bioma sintético que só existe no teste); R8 e R10 entram na 0d; R4, na etapa de Adarlan.
 
 Infraestrutura (**implementada na 0a**): `@playwright/test` como `devDependency`, `tests/navegador/` (config, página vazia, comparador de pixels, `mestre.pw.ts`), scripts `npm run test:navegador`, `npm run golden:referencia` e `npm run mestre:atualizar -- --motivo "..."`; usa o Google Chrome instalado (`channel: 'chrome'`), sem baixar navegador. As camadas R1 (plano), R2, R5, R6, R7 rodam em Vitest puro, sem navegador.
 
@@ -326,7 +326,7 @@ Cada etapa é **pequena, em commits separados**, e só passa por um **portão**:
 |---|---|---|---|
 | **0a** | testes mestre e infraestrutura de navegador (Playwright), comparador de pixels, outras sementes; goldens recuperáveis da referência | os valores mestre foram gerados do código de `e34b710` e conferem com os documentos anteriores | **aprovada** |
 | 0b | `envelhecimento.ts`: centralizar a vinheta, **preservando os parâmetros de cada modo**; teste de equivalência raster × vetor (R9) | mestre idêntico; sem vinheta nos símbolos vetoriais coloridos | **aprovada** (seção 9) |
-| 0c | módulo `biomas/` com Terrasen como cliente (só o que Adarlan usa), registro, ordem fixa | mestre idêntico; R2 (independência de ordem) | não iniciada |
+| 0c | módulo `biomas/` com Terrasen como cliente (só o que Adarlan usa), registro, ordem fixa | mestre idêntico; R2 (independência de ordem) | **concluída, aguarda revisão** (seção 10) |
 | 0d | `MapaView` para vários biomas (`data-bioma` por símbolo, ordem global por `y`), orçamento provisório (R10), investigação dos picos de zoom (3.5) | mestre idêntico; R8 (vetor × raster) | não iniciada |
 
 Depois da consolidação: Adarlan (protótipo desligado por padrão), conforme o [plano de Adarlan](adarlan/PLANO-ADARLAN.md), comparações, aprovação e merge. A demo só é atualizada depois. Nada disto começa sem aprovação.
@@ -404,6 +404,97 @@ Interpretação das diferenças:
 
 **Também nesta etapa (ressalva da revisão 0a):** os goldens agora são recuperáveis a partir de `e34b710` e as atualizações dos valores mestre são deliberadas e registradas (ver 5.1). Foi provado: os 18 goldens foram **apagados e regenerados** a partir de um *worktree* de `e34b710`; as tentativas de gravar golden do código atual e de atualizar o mestre sem motivo foram **recusadas**.
 
-## 10. Etapa 0c (extração mínima do planejador): em execução
+## 10. Etapa 0c (extração mínima do planejador) — concluída, aguarda revisão
 
-Autorizada em 2026-11-25, em **quatro subetapas com commits separados e portão de regressão entre elas** (testes unitários, build e testes de navegador com os valores mestre **sem regenerar**; se um valor mestre mudar, a execução para e o diagnóstico é apresentado). Terrasen é o **único** cliente real; Adarlan não é implementado nem registrado. O resultado de cada subetapa é registrado abaixo.
+Autorizada em 2026-11-25, em **quatro subetapas com commits separados e portão de regressão entre elas** (testes unitários, build e testes de navegador com os valores mestre **sem regenerar**). Terrasen é o **único** cliente real; Adarlan **não** foi implementado nem registrado. **Nenhum valor mestre mudou** em nenhum portão (SHA-256 integral dos pixels, hash do plano e hash do SVG, nos 18 casos; `mestre.json` não foi tocado, `atualizacoes` continua vazia). A regra de interrupção não foi acionada.
+
+### 10.1 Subetapas e portões
+
+| Subetapa | Commit | O que mudou | Portão (testes unitários / navegador) |
+|---|---|---|---|
+| 0c.1 | `5d93f66` | desenhos de Terrasen (`conifera`, `montanha`, `cores`) saem de `terrasen.ts` **verbatim** para `terrasen-glifos.ts`; a paleta vai para `terrasen-paleta.ts`; nasce o **registro de glifos** (`biomas/glifos.ts`) | 176 / 22 passam |
+| 0c.2 | `92fc570` | `aceitador`, `ocupacao` e `amostragem` (`h2`, `sm`, `criarPeso`, candidatos por prioridade) saem do planejador, preservando a ordem das verificações, os limites e o determinismo | 198 / 22 passam |
+| 0c.3 | `36c291a` | contrato `BiomaRefinado`, `TERRASEN` como instância, registro de ordem fixa, validação de propriedade das zonas; **R2** com bioma sintético de teste | 214 / 22 passam |
+| 0c.4 | `1653c4b` | `colorir.ts` e `terreno.ts` passam a usar o registro (paleta, planejamento, fundos, substituição dos símbolos padrão, desenho); `planoProto`, `protoClassico`, `ProtoPlano` e `filtrarForaDeTerrasen` saem (ficaram sem uso) | 214 / 22 passam |
+
+Congelamentos feitos **antes** de mexer (para provar neutralidade além dos pixels de Terrasen): as operações de desenho de **cada símbolo, estilo e modo** (18 combinações × 12 amostras; hash do texto SVG gravado), **fixadas a partir do código de `e34b710`** em `src/lib/proto/glifos.test.ts` e conferidas depois da extração (incluindo o fato de o estilo C de montanha recusar `clip()`); a sequência de candidatos (8.568 pontos) e a grade de ocupação foram comparadas com **cópias literais do código antigo** (e, no caso da ocupação, com a verificação ingênua todos-contra-todos em 2.000 tentativas).
+
+### 10.2 Estrutura final dos módulos
+
+```
+src/lib/
+  envelhecimento.ts          (0b) vinhetas, grão e tons do papel: fonte única
+  colorir.ts / terreno.ts    pintores raster (colorido e sépia); usam o registro, sem citar Terrasen
+  biomas/
+    tipos.ts                 ModoDesenho, GlifoBase (campos que o desenho lê)
+    glifos.ts                registro de glifos: registrarGlifo, desenharGlifo; recusa sobrescrita silenciosa
+    amostragem.ts            sm, h2 (hash determinístico), criarPeso, candidatosPorPrioridade
+    ocupacao.ts              grade de ocupação (células de 40 px): livre / ocupar / itens
+    aceitador.ts             criarAceitador: as 7 verificações de aceitação, na ordem original
+    bioma.ts                 contrato BiomaRefinado, EntradaBioma, PlanoBioma, ParteZona
+    registro.ts              BIOMAS_REFINADOS (ordem fixa), ativosDeProto, validarRegistro, emOrdemDeRegistro,
+                             aplicarPaletas, planejarBiomas (ocupação compartilhada), filtrarSubstituidos,
+                             substituidoEm, desenharFundos; registra os glifos de cada bioma
+  proto/                     (nome histórico; Terrasen e a camada vetorial ainda moram aqui)
+    terrasen.ts              ESPECÍFICO DE TERRASEN: parâmetros (?terrasen=), dados de arte, ajustes, planejador
+                             (cumeeiras, clareiras, bosques, massas), núcleos florestais, lavagens
+    terrasen-bioma.ts        TERRASEN: a instância do contrato (liga o código de Terrasen ao registro)
+    terrasen-glifos.ts       desenhos de conífera e montanha (A/B/C), cores por modo, registro dos 3 tipos
+    terrasen-paleta.ts       PALETA_TERRASEN (inclui bordaSul, preservada), PALETA_ZONAS, aplicarPaleta
+    camada-vetorial.ts       SVG dos símbolos (continua específico de Terrasen até a 0d)
+    gravador-svg.ts          gravador do subconjunto do canvas em SVG
+    papel-sepia.ts           integração do SVG ao pergaminho sépia (usa envelhecimento.ts)
+```
+
+| Arquivo | Responsabilidade | Sabe de Terrasen? |
+|---|---|---|
+| `biomas/aceitador.ts` | decide se um símbolo é aceito (terra, peso, ícones e rótulos, água, rotas, espaçamento) | não |
+| `biomas/ocupacao.ts` | memória de espaço ocupado, **compartilhada entre biomas** | não |
+| `biomas/amostragem.ts` | hash determinístico, suavização, peso de zona, candidatos | não |
+| `biomas/glifos.ts` | tipo de símbolo → função de desenho | não |
+| `biomas/registro.ts` | ordem fixa, propriedade das zonas, planejar todos, substituir símbolos padrão, fundos | só importa `TERRASEN` e `ProtoTerrasen` (a ponte do parâmetro de URL) |
+| `proto/terrasen*.ts` | tudo o que é próprio de Terrasen | sim |
+
+### 10.3 O que deliberadamente permaneceu específico de Terrasen
+
+- **Cumeeiras** (`terrasen-arte.json`, polilinhas, envelope, tamanhos), **clareiras**, **massas**, **bosques de 3 a 7 árvores**, **núcleos florestais** (`nucleoValor`): ainda não há segundo cliente que os use; extrair agora seria especulação. Se Adarlan pedir bosques ou aglomerados parecidos, só então se generaliza o que for comum.
+- **Lavagens** (`desenharWashes`), `AjusteTerrasen` e os parâmetros `?terrasen=`, `?vetor=`, `?papel=` (`ProtoTerrasen`).
+- **Paleta de Terrasen** e a constante **`bordaSul`** (preservada, sem uso).
+- **Desenhos** de conífera e montanha: estão em módulo próprio, mas são de Terrasen.
+- **`camada-vetorial.ts`** (um plano de Terrasen por vez), `MapaView.vue`, `store` e URL: a generalização é a **0d**.
+- O nome do diretório `proto/` (renomear para `biomas/terrasen/` é cosmético e fica para quando Adarlan existir).
+
+### 10.4 R2 e os testes novos (nenhum bioma real além de Terrasen)
+
+`src/lib/biomas/registro.test.ts` usa um bioma **sintético** que só existe no teste (ele tenta preencher a mesma janela que Terrasen, ignorando de propósito o próprio peso, para forçar a disputa por espaço):
+
+| Prova | Resultado |
+|---|---|
+| Registrar o segundo bioma **não altera nenhum símbolo de Terrasen** | a lista de Terrasen (151) é **idêntica, símbolo a símbolo**, com e sem o sintético; também reproduz o hash mestre `8a7cb845` |
+| A ordem em que os biomas são passados não importa | o registro impõe a sua ordem (`terrasen`, `sintetico`) e o resultado é o mesmo |
+| O segundo bioma **respeita a ocupação do primeiro** | todos os pares (sintético × Terrasen) cumprem `d ≥ 0,5 · (r + r′) · 0,95`; o sintético coloca mais de 20 símbolos (o teste não é vazio) |
+| Controle negativo | sem a ocupação compartilhada, o sintético **colide** com Terrasen (> 10 colisões) |
+| A ordem do registro é o que protege Terrasen | se o sintético viesse **primeiro**, os símbolos de Terrasen **mudariam** |
+| **Propriedade exclusiva das zonas** | nenhuma zona de `biomas.json` pertence a dois biomas; Terrasen possui exatamente `r03-terrasen`, `r03-pinhal-denso` e `r03-montanhas-norte`; o validador detecta zona disputada, id repetido e paleta sobre zona alheia |
+| **Determinismo do registro** | dois planejamentos iguais dão os mesmos planos e a mesma ocupação |
+| Paleta e substituição | `aplicarPaletas` com Terrasen = `aplicarPaleta`; as zonas dos outros biomas passam intactas (mesmo objeto); `filtrarSubstituidos` = filtro antigo (`peso ≤ 0,12` permanece) |
+
+Também: testes do registro de glifos (tipo desconhecido é erro; outra função para o mesmo tipo é erro; a mesma função, inofensivo), da grade de ocupação, do aceitador (cada motivo de recusa, sem deixar rastro; ordem: lago/rio só é consultado depois das verificações anteriores; margens 0,8 e 0,3 do tamanho) e da amostragem.
+
+### 10.5 Compatibilidade
+
+- **Parâmetros de URL:** `?terrasen=A|B|C|AB`, `?vetor=0`, `?papel=0|1|2`, `?estilo=classico` continuam como antes (`urlState.ts` e `store` não foram tocados). Verificado no app real, sem erros de console, em 6 combinações (padrão, `AB`, `AB` sépia, `C` com `vetor=0`, `A` sépia com `papel=2`, `AB` sépia com `vetor=0`); o número de símbolos do SVG continua 151.
+- **Mapa padrão** (sem `?terrasen`): SHA-256 dos pixels idêntico ao de `e34b710`, em cor e sépia, nas 4 sementes.
+- **Costa, hidrografia, lugares, rotas, outros biomas, interface:** nenhum arquivo de dados ou de interface foi alterado; a demo não foi atualizada.
+
+### 10.6 Resultado final desta etapa
+
+| Verificação | Resultado |
+|---|---|
+| Testes unitários | **214** passam (176 após a 0c.1; 198 após a 0c.2) |
+| Build (`vue-tsc` + Vite) | passa |
+| Testes de navegador | **22** passam: SHA-256 integral dos pixels, plano e SVG dos 18 casos idênticos à referência |
+| `mestre.json` | inalterado (`atualizacoes`: 0 entradas) |
+| Interrupções | nenhuma |
+
+Observações: (1) o `pesoMont` que o planejador de Terrasen recebe continua sendo calculado (e continua sem uso), para não mudar a assinatura nem nada do que foi aprovado; (2) `registro.ts` importa `TERRASEN` e o tipo `ProtoTerrasen`: é a única ponte conhecida entre o registro e um bioma concreto, e a 0d a substitui por uma configuração por bioma.
