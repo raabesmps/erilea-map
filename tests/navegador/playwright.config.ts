@@ -19,7 +19,8 @@ export default defineConfig({
   reporter: [['list']],
   outputDir: './resultados',
   use: { baseURL: `http://localhost:${PORTA}`, channel: 'chrome', headless: true, viewport: { width: 1280, height: 760 } },
-  webServer: {
+  // SERVIDOR_EXTERNO=1: the validation gate (scripts/portao.mjs) owns the server and its cleanup
+  webServer: process.env.SERVIDOR_EXTERNO === '1' ? undefined : {
     command: `npm run dev -- --port ${PORTA} --strictPort`,
     url: `http://localhost:${PORTA}/tests/navegador/pagina.html`,
     reuseExistingServer: true,

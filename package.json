@@ -10,7 +10,10 @@
     "test": "vitest run",
     "test:navegador": "playwright test -c tests/navegador/playwright.config.ts",
     "golden:referencia": "node tests/navegador/executar.mjs golden-referencia",
-    "mestre:atualizar": "node tests/navegador/executar.mjs mestre"
+    "mestre:atualizar": "node tests/navegador/executar.mjs mestre",
+    "portao": "node scripts/portao.mjs",
+    "publicar": "node scripts/publicar.mjs",
+    "hooks:instalar": "git config --local core.hooksPath .githooks"
   },
   "dependencies": {
     "leaflet": "^1.9.4",

@@ -1,0 +1,3 @@
+#!/bin/sh
+# Blocks a push unless the validation gate sealed the pushed commits (see scripts/portao.mjs). Enable with: npm run hooks:instalar
+exec node scripts/verificar-selo.mjs

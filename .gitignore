@@ -34,3 +34,6 @@ playwright-report/
 
 # temporary worktree of the reference commit used by golden:referencia
 tests/navegador/.referencia/
+
+# validation gate: complete logs of every run and the publish seal
+.portao/
