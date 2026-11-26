@@ -1,6 +1,6 @@
 # Consolidação técnica antes do segundo bioma (Adarlan)
 
-**Status:** a consolidação foi **aprovada com ressalvas** (revisão de 2026-11-25). **Etapa 0a aprovada; etapa 0b concluída e aguardando revisão** (seção 9). As etapas 0c em diante **não começaram**. A branch `bioma-adarlan` parte da `v1.0.0` (commit `e34b710`).
+**Status:** a consolidação foi **aprovada com ressalvas** (revisão de 2026-11-25). **Etapas 0a e 0b aprovadas.** A etapa 0c (extração mínima do planejador) foi autorizada em subetapas (seção 10). A 0d em diante **não começou**. A branch `bioma-adarlan` parte da `v1.0.0` (commit `e34b710`).
 O objetivo é decidir, **antes** de desenhar Adarlan, como o que foi construído para Terrasen vira uma base para vários biomas **sem mudar um pixel de Terrasen**.
 
 Legenda: **[MEDIDO]** número obtido nesta análise · **[CÓDIGO]** lido no código · **[PROPOSTA]** decisão a revisar.
@@ -113,14 +113,15 @@ Regras de composição:
 
 Estado e URL (compatível): `store.terrasen` vira `store.biomas: Set<string>` com o estilo por bioma. `?terrasen=AB` continua valendo (atalho para `biomas=terrasen`), e a demo liga `terrasen` por padrão como hoje; novos parâmetros: `?biomas=terrasen,adarlan`, `?adarlan=AB`.
 
-### 1.3 Sequência de extração (cada etapa só passa se os valores mestre não mudarem; ver também a seção 6)
+### 1.3 Sequência de extração (revisada: **só o que Adarlan precisa**; cada subetapa só passa se os valores mestre não mudarem; ver as seções 6 e 10)
 
-1. **Congelar os valores mestre** (seção 5): testes novos, **antes** de qualquer refatoração.
-2. Mover os desenhos (`conifera`, `montanha`) para `glifos/` sem alterar o código.
-3. Extrair `aceitador.ts` (grade e `tentar`) e fazer `planejarTerrasen` usá-lo.
-4. Extrair os passos (`cumeeiras`, `nucleos`, `clareiras`, `bosques`, `massas`) um por vez.
-5. Introduzir `BiomaRefinado` + `registro.ts`; Terrasen vira o primeiro cliente; trocar os ganchos de `colorir.ts`, `terreno.ts`, `MapaView.vue` e `store`.
-6. **`bordaSul` permanece** (decisão da revisão) até a estratégia definitiva de transição Terrasen → Adarlan. Só se removem tipos que ficarem sem uso.
+1. **Valores mestre congelados** (seção 5, etapa 0a, feita), antes de qualquer refatoração.
+2. **0c.1:** extrair os desenhos existentes (`conifera`, `montanha`) para um módulo próprio e introduzir o **registro de glifos**, sem mudar as operações de desenho, os estilos nem a serialização SVG.
+3. **0c.2:** extrair o **aceitador**, a **grade de ocupação** e as funções de **amostragem de baixo nível** que Adarlan usa (`h2`, suavização, `criarPeso`, ordenação de candidatos por prioridade), preservando a ordem das verificações, os limites, os espaçamentos e o determinismo.
+4. **0c.3:** introduzir o contrato `BiomaRefinado` e o **registro de biomas com ordem fixa**; Terrasen é o primeiro e **único** bioma real registrado.
+5. **0c.4:** ligar o planejador genérico aos **pintores raster**, no escopo mínimo. Generalizar as camadas SVG e o `MapaView` fica para a **0d**.
+6. **Fica específico de Terrasen, de propósito, até haver um segundo cliente:** cumeeiras, clareiras, massas, núcleos florestais (`nucleoValor`), as lavagens, os dados `terrasen-arte.json`, a paleta e os ajustes de Terrasen, o filtro de símbolos padrão por peso de Terrasen.
+7. **`bordaSul` permanece** (decisão da revisão) até a estratégia definitiva de transição Terrasen → Adarlan. Só se removem tipos que ficarem sem uso.
 
 Custo de execução: o planejamento de Terrasen leva dezenas de milissegundos [MEDIDO: os testes completos, planejador incluído, rodam em ~1,5 s]; vários biomas não mudam a ordem de grandeza.
 
@@ -159,7 +160,7 @@ export const TOM_QUENTE, GRAO...                           // constantes do pape
 ```
 
 - `terreno.ts` e `colorir.ts` chamam `desenharVinheta`; `papel-sepia.ts` chama `vinhetaEm`. Sem literais repetidos.
-- **Teste de equivalência (navegador):** desenhar `desenharVinheta` sobre um canvas branco e comparar com `vinhetaEm` em ≥ 200 pontos (diferença ≤ 1/255). Isso amarra raster e vetor, que hoje só têm um teste "analítico" isolado.
+- **Teste de equivalência (navegador):** desenhar `desenharVinheta` sobre um canvas branco e comparar com `vinhetaEm` em 1.120 pontos por caso, com tolerância de **2/255** (valor fixado pela medição da etapa 0b: diferença máxima observada 1,54/255, atribuída a arredondamento de 8 bits; seção 9). Isso amarra raster e vetor, que antes só tinham um teste "analítico" isolado.
 - **Neutralidade:** substituir os literais pelas constantes deve produzir o **mesmo mapa** (hash do mapa padrão e de Terrasen, seção 5).
 - **Decisão da revisão:** os parâmetros atuais de **cada modo** são preservados exatamente (`sepia` e `cor` ficam como estão) e a vinheta **não** é aplicada aos símbolos vetoriais coloridos nesta etapa. Aplicá-la alteraria levemente (≤ 6% em Terrasen) o que foi aprovado e só poderá ser proposto depois, com comparação visual.
 
@@ -192,7 +193,7 @@ Chrome desktop, 1280 × 760, mapa em zoom 0. Réplicas do conjunto de Terrasen e
 
 Leitura honesta:
 - **O pan não degrada** com até 24 mil caminhos.
-- No zoom há quadros longos isolados (100 a 250 ms) **inclusive na linha de base de 151 símbolos (226 ms)**; não crescem com o tamanho, ou seja, são custo de primeira rasterização, não de escala.
+- No zoom há quadros longos isolados (100 a 250 ms) **inclusive na linha de base de 151 símbolos (226 ms)** e sem crescimento evidente com o tamanho do SVG nesta amostra. **A causa não é conhecida.** "Primeira rasterização" é só uma das hipóteses (outras: decodificação da imagem de 2400 px, rasterização do Leaflet, coleta de lixo, compositor, o próprio método de amostragem); o método para investigá-la está na seção 3.5. Esta medição **não** permite concluir que o custo seja ou não de escala.
 - O mapa inteiro, se todos os símbolos virassem vetor, teria da ordem de 1.500 a 2.000 símbolos **[ESTIMATIVA, a medir]** (grade de 22 px, ~25% de ocupação), dentro da faixa medida.
 - **Limites desta medição:** só Chrome desktop; símbolos sintéticos replicados (sem a variedade de formas de Adarlan); **celular não medido**; memória de rasterização do navegador não medida.
 
@@ -285,6 +286,12 @@ Leitura:
 - Hashes de **plano e de SVG** são texto determinístico (igualdade estrita). O **SHA-256 do buffer** depende do navegador/GPU: a igualdade vale na mesma máquina e no mesmo Chrome (duas execuções seguidas deram o mesmo valor). Em outro ambiente, usar o comparador de pixels com tolerância.
 - **Comparador de pixels** (`tests/navegador/pixels.ts`): quando o SHA-256 muda, compara o buffer com o *golden* local (`tests/navegador/golden/`, ignorado pelo git, ≈ 117 MB) e relata: nº de pixels diferentes, percentual, maior diferença, caixa delimitadora e as regiões (células de 160 px) com mais diferenças, além de uma imagem de diferenças em `tests/navegador/resultados/`.
 - **Os goldens são sempre recuperáveis da referência original `e34b710`** e **nunca** saem do código em desenvolvimento: `npm run golden:referencia` cria um *git worktree* temporário do commit de referência, serve aquele código e só grava um golden se o render reproduzir o SHA-256 mestre. Gravar golden à mão (`GERAR_GOLDEN=1` sem o runner) falha. O teste também rejeita um golden cujo SHA-256 não seja o valor mestre. Procedimento completo em [`tests/navegador/README.md`](../../tests/navegador/README.md).
+- **Outros ambientes (o SHA-256 dos pixels depende do ambiente de renderização).** Os valores mestre de pixels foram gravados em **Windows 11 (10.0.26300), Google Chrome 157.0.8103.80, headless, renderização por software do Playwright**. Mudar de máquina, de versão do Chrome, de sistema ou de GPU pode alterar bytes do canvas **sem que o código tenha mudado**. Regras, nada flexibilizado automaticamente:
+  1. **Hashes de plano e de SVG** são texto determinístico e **continuam estritos em qualquer ambiente**.
+  2. O **SHA-256 dos pixels** é estrito **no ambiente em que foi gravado**. Em outro ambiente, o teste **falha** com a mensagem "O MAPA MUDOU"; **nada é relaxado nem regravado sozinho**.
+  3. **Como distinguir ambiente de regressão:** (a) se plano e SVG batem e só o SHA-256 dos pixels difere, suspeite do ambiente; (b) rode `npm run golden:referencia` **naquele ambiente**: ele renderiza o commit de referência `e34b710` e exige que o resultado reproduza o mestre. Se **nem a referência** reproduz o mestre, o ambiente é diferente (não há regressão do código atual); se a referência reproduz e o código atual não, é **regressão** e vale a regra de interromper e diagnosticar.
+  4. **Para trabalhar em outro ambiente de forma legítima**, o caminho é **gravar uma referência própria do ambiente a partir do commit `e34b710`** (nunca do código em desenvolvimento) e registrá-la de forma deliberada, com motivo, ao lado do mestre original: isso **ainda não está implementado** e será proposto antes de ser necessário. Até lá, a conclusão "passou" para pixels só vale no ambiente de gravação.
+  5. Comparações com tolerância (≤ 1/255 por canal e uma fração mínima de pixels, usando `pixels.ts`) servem apenas como **diagnóstico** de um relatório, nunca como critério de aprovação do mestre.
 - **Atualização deliberada dos valores mestre:** `npm run mestre:atualizar -- --motivo "..."` (recusa sem motivo). A seção `referencia` de `mestre.json` (os SHA-256 originais de `e34b710`) **nunca é reescrita**; cada atualização entra em `atualizacoes` com data, commit do código, casos alterados, SHA-256 anteriores e o motivo. Um teste de Vitest **falha** se `casos` diferir de `referencia` sem uma entrada registrada.
 - **Prova de que o portão funciona:** trocar `#527A70` por `#527A71` (1/255 de diferença) na paleta de Terrasen fez o teste falhar com "72.239 pixels diferentes (1,79%), maior diferença 1/255, caixa [1285, 19, 2047, 457]". A alteração foi revertida.
 
@@ -300,10 +307,10 @@ Leitura:
 | **R6 · Propriedades por bioma** (para todo bioma registrado) | símbolos em terra, dentro do bioma, a ≥ 14 px da água, ≥ 13 px das rotas, fora do ícone + rótulo; determinismo; sem sobreposição entre biomas; dono único por zona | testes de propriedade que percorrem o `registro` (um conjunto, N biomas) | sempre |
 | **R7 · Métricas de aceitação** | critérios de cada plano (ΔE, contraste, regularidade, aglomeração, vazios, contagens) | `*.test.ts` por bioma, como `terrasen.test.ts` | sempre |
 | **R8 · Vetor × raster** | sem duplicação (0 pixels fora das caixas), alinhamento 0 px, troca cor ↔ sépia sem quadro incoerente, ordem das camadas, interação (zoom, busca, marcadores, rotas) | script de navegador (Playwright) com os critérios das rodadas 3 e 4 | por mudança de camada/bioma |
-| **R9 · Envelhecimento** | raster e vetor iguais (seção 2) | equivalência `desenharVinheta` × `vinhetaEm` | sempre (navegador) |
+| **R9 · Envelhecimento** | raster e vetor iguais (seção 2) | equivalência `desenharVinheta` × `vinhetaEm`, tolerância 2/255 (**implementada na 0b**: `tests/navegador/envelhecimento.pw.ts`) | sempre (navegador) |
 | **R10 · Orçamento** | tempo de renderização ≤ +10%; caminhos ≤ 30 mil/modo; SVG ≤ 4 MB/modo; carga inicial | medição repetida (2 execuções) com a mesma ferramenta de hoje | por mudança de bioma |
 
-**Estado (etapa 0a):** R1 e R3 já existem (`src/lib/proto/mestre.test.ts` e `tests/navegador/mestre.pw.ts`, com o comparador de pixels). R5 e parte de R6/R7 existem desde Terrasen. R2, R4, R8, R9 e R10 serão criadas nas etapas 0b a 0d e na de Adarlan.
+**Estado:** R1 e R3 existem desde a etapa 0a (`src/lib/proto/mestre.test.ts` e `tests/navegador/mestre.pw.ts`, com o comparador de pixels). **R9 existe desde a 0b.** R5 e parte de R6/R7 existem desde Terrasen. R2 e a propriedade exclusiva das zonas (parte de R6) entram na 0c (com um bioma sintético de teste); R8 e R10, na 0d; R4, na etapa de Adarlan.
 
 Infraestrutura (**implementada na 0a**): `@playwright/test` como `devDependency`, `tests/navegador/` (config, página vazia, comparador de pixels, `mestre.pw.ts`), scripts `npm run test:navegador`, `npm run golden:referencia` e `npm run mestre:atualizar -- --motivo "..."`; usa o Google Chrome instalado (`channel: 'chrome'`), sem baixar navegador. As camadas R1 (plano), R2, R5, R6, R7 rodam em Vitest puro, sem navegador.
 
@@ -318,7 +325,7 @@ Cada etapa é **pequena, em commits separados**, e só passa por um **portão**:
 | Etapa | Conteúdo | Portão específico | Estado |
 |---|---|---|---|
 | **0a** | testes mestre e infraestrutura de navegador (Playwright), comparador de pixels, outras sementes; goldens recuperáveis da referência | os valores mestre foram gerados do código de `e34b710` e conferem com os documentos anteriores | **aprovada** |
-| 0b | `envelhecimento.ts`: centralizar a vinheta, **preservando os parâmetros de cada modo**; teste de equivalência raster × vetor (R9) | mestre idêntico; sem vinheta nos símbolos vetoriais coloridos | **concluída, aguarda revisão** (seção 9) |
+| 0b | `envelhecimento.ts`: centralizar a vinheta, **preservando os parâmetros de cada modo**; teste de equivalência raster × vetor (R9) | mestre idêntico; sem vinheta nos símbolos vetoriais coloridos | **aprovada** (seção 9) |
 | 0c | módulo `biomas/` com Terrasen como cliente (só o que Adarlan usa), registro, ordem fixa | mestre idêntico; R2 (independência de ordem) | não iniciada |
 | 0d | `MapaView` para vários biomas (`data-bioma` por símbolo, ordem global por `y`), orçamento provisório (R10), investigação dos picos de zoom (3.5) | mestre idêntico; R8 (vetor × raster) | não iniciada |
 
@@ -355,7 +362,7 @@ Depois da consolidação: Adarlan (protótipo desligado por padrão), conforme o
 
 **Limitações:** o SHA-256 do buffer só vale no mesmo ambiente de navegador; o golden local não é versionado (≈ 117 MB) e precisa ser gerado em cada máquina com `npm run golden:referencia` antes de refatorar.
 
-## 9. Resultado da etapa 0b (centralização do envelhecimento)
+## 9. Resultado da etapa 0b (centralização do envelhecimento) — **aprovada**
 
 **Código** (commit específico da 0b): `src/lib/envelhecimento.ts` (novo), `colorir.ts`, `terreno.ts` e `proto/papel-sepia.ts` passam a usá-lo.
 
@@ -396,3 +403,7 @@ Interpretação das diferenças:
 **Interrupção (regra 9):** não foi necessária; nenhum valor mestre mudou.
 
 **Também nesta etapa (ressalva da revisão 0a):** os goldens agora são recuperáveis a partir de `e34b710` e as atualizações dos valores mestre são deliberadas e registradas (ver 5.1). Foi provado: os 18 goldens foram **apagados e regenerados** a partir de um *worktree* de `e34b710`; as tentativas de gravar golden do código atual e de atualizar o mestre sem motivo foram **recusadas**.
+
+## 10. Etapa 0c (extração mínima do planejador): em execução
+
+Autorizada em 2026-11-25, em **quatro subetapas com commits separados e portão de regressão entre elas** (testes unitários, build e testes de navegador com os valores mestre **sem regenerar**; se um valor mestre mudar, a execução para e o diagnóstico é apresentado). Terrasen é o **único** cliente real; Adarlan não é implementado nem registrado. O resultado de cada subetapa é registrado abaixo.
