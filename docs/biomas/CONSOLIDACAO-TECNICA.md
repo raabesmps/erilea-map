@@ -1,6 +1,6 @@
 # Consolidação técnica antes do segundo bioma (Adarlan)
 
-**Status:** a consolidação foi **aprovada com ressalvas** (revisão de 2026-11-25). **Etapas 0a, 0b e 0c aprovadas** (a 0c com ressalva de processo). A **0c.5** (correção do processo, seção 10.7) foi concluída e validada; a **0d** (camada vetorial e `MapaView` para vários biomas) está **concluída e aguardando revisão** (seção 11). A branch `bioma-adarlan` parte da `v1.0.0` (commit `e34b710`).
+**Status:** **consolidação técnica encerrada** (revisão de 2026-11-27) para fins de início do desenvolvimento artístico de Adarlan. **Etapas 0a, 0b, 0c, 0c.5 e 0d aprovadas**: a 0c com ressalva de processo (resolvida pela 0c.5); a 0d **funcionalmente aprovada, com ressalvas de desempenho** (seção 11.7). Nenhuma nova etapa de refatoração será iniciada agora, e nenhuma otimização foi implementada. A branch `bioma-adarlan` parte da `v1.0.0` (commit `e34b710`).
 O objetivo é decidir, **antes** de desenhar Adarlan, como o que foi construído para Terrasen vira uma base para vários biomas **sem mudar um pixel de Terrasen**.
 
 Legenda: **[MEDIDO]** número obtido nesta análise · **[CÓDIGO]** lido no código · **[PROPOSTA]** decisão a revisar.
@@ -289,7 +289,7 @@ Leitura:
 - **Outros ambientes (o SHA-256 dos pixels depende do ambiente de renderização).** Os valores mestre de pixels foram gravados em **Windows 11 (10.0.26300), Google Chrome 157.0.8103.80, headless, renderização por software do Playwright**. Mudar de máquina, de versão do Chrome, de sistema ou de GPU pode alterar bytes do canvas **sem que o código tenha mudado**. Regras, nada flexibilizado automaticamente:
   1. **Hashes de plano e de SVG** são texto determinístico e **continuam estritos em qualquer ambiente**.
   2. O **SHA-256 dos pixels** é estrito **no ambiente em que foi gravado**. Em outro ambiente, o teste **falha** com a mensagem "O MAPA MUDOU"; **nada é relaxado nem regravado sozinho**.
-  3. **Como distinguir ambiente de regressão:** (a) se plano e SVG batem e só o SHA-256 dos pixels difere, suspeite do ambiente; (b) rode `npm run golden:referencia` **naquele ambiente**: ele renderiza o commit de referência `e34b710` e exige que o resultado reproduza o mestre. Se **nem a referência** reproduz o mestre, o ambiente é diferente (não há regressão do código atual); se a referência reproduz e o código atual não, é **regressão** e vale a regra de interromper e diagnosticar.
+  3. **Como distinguir ambiente de regressão:** (a) se plano e SVG batem e só o SHA-256 dos pixels difere, suspeite do ambiente; (b) rode `npm run golden:referencia` **naquele ambiente**: ele renderiza o commit de referência `e34b710` e exige que o resultado reproduza o mestre. Se a referência reproduz e o código atual não, é **regressão** e vale a regra de interromper e diagnosticar. Se **nem a referência** reproduz o mestre, o ambiente é diferente, **mas isso não exclui uma regressão simultânea do código atual**: só mostra que, naquele ambiente, o mestre não serve de comparação. Nesse caso a conclusão sobre o código atual fica **em aberto** até haver uma referência própria do ambiente (item 4) e a comparação do código atual com ela (ou a execução no ambiente de gravação).
   4. **Para trabalhar em outro ambiente de forma legítima**, o caminho é **gravar uma referência própria do ambiente a partir do commit `e34b710`** (nunca do código em desenvolvimento) e registrá-la de forma deliberada, com motivo, ao lado do mestre original: isso **ainda não está implementado** e será proposto antes de ser necessário. Até lá, a conclusão "passou" para pixels só vale no ambiente de gravação.
   5. Comparações com tolerância (≤ 1/255 por canal e uma fração mínima de pixels, usando `pixels.ts`) servem apenas como **diagnóstico** de um relatório, nunca como critério de aprovação do mestre.
 - **Atualização deliberada dos valores mestre:** `npm run mestre:atualizar -- --motivo "..."` (recusa sem motivo). A seção `referencia` de `mestre.json` (os SHA-256 originais de `e34b710`) **nunca é reescrita**; cada atualização entra em `atualizacoes` com data, commit do código, casos alterados, SHA-256 anteriores e o motivo. Um teste de Vitest **falha** se `casos` diferir de `referencia` sem uma entrada registrada.
@@ -310,7 +310,17 @@ Leitura:
 | **R9 · Envelhecimento** | raster e vetor iguais (seção 2) | equivalência `desenharVinheta` × `vinhetaEm`, tolerância 2/255 (**implementada na 0b**: `tests/navegador/envelhecimento.pw.ts`) | sempre (navegador) |
 | **R10 · Orçamento** | tempo de renderização ≤ +10%; caminhos ≤ 30 mil/modo; SVG ≤ 4 MB/modo; carga inicial | medição repetida (2 execuções) com a mesma ferramenta de hoje | por mudança de bioma |
 
-**Estado:** R1 e R3 existem desde a etapa 0a (`src/lib/proto/mestre.test.ts` e `tests/navegador/mestre.pw.ts`, com o comparador de pixels). **R9 existe desde a 0b.** R5 e parte de R6/R7 existem desde Terrasen. **R2 e a propriedade exclusiva das zonas (parte de R6) existem desde a 0c** (com um bioma sintético que só existe no teste); R8 e R10 entram na 0d; R4, na etapa de Adarlan.
+**Estado (após a 0d):**
+
+| Camada | Estado |
+|---|---|
+| R1, R3 | **implementadas** desde a 0a (`src/lib/proto/mestre.test.ts`, `tests/navegador/mestre.pw.ts`, comparador de pixels). Desde a 0d, o hash do SVG é calculado sobre a **serialização de referência** (ver 11.2) |
+| R2 e propriedade exclusiva das zonas (parte de R6) | **implementadas** desde a 0c, com bioma sintético só de teste |
+| R5, parte de R6/R7 | existem desde Terrasen |
+| **R8** | **implementada na 0d** (`tests/navegador/integracao.pw.ts`, 6 testes, com Terrasen + bioma sintético): sem duplicação, ordem global, alinhamento, troca de modo, interação, URLs. **Ainda não exercitada com um segundo bioma real**; será repetida com Adarlan |
+| **R10** | **parcial**: caminhos e tamanho do SVG medidos (≈ 7% do orçamento provisório); picos de zoom investigados **sem causa confirmada**; **o orçamento de +10% de tempo de renderização permanece não verificado** (medição inconclusiva, 11.5); celular só emulado. É ferramenta manual (`tests/desempenho/medir-zoom.mjs`), **fora do portão** |
+| R9 | implementada na 0b |
+| R4 | entra com Adarlan |
 
 Infraestrutura (**implementada na 0a**): `@playwright/test` como `devDependency`, `tests/navegador/` (config, página vazia, comparador de pixels, `mestre.pw.ts`), scripts `npm run test:navegador`, `npm run golden:referencia` e `npm run mestre:atualizar -- --motivo "..."`; usa o Google Chrome instalado (`channel: 'chrome'`), sem baixar navegador. As camadas R1 (plano), R2, R5, R6, R7 rodam em Vitest puro, sem navegador.
 
@@ -326,10 +336,11 @@ Cada etapa é **pequena, em commits separados**, e só passa por um **portão**:
 |---|---|---|---|
 | **0a** | testes mestre e infraestrutura de navegador (Playwright), comparador de pixels, outras sementes; goldens recuperáveis da referência | os valores mestre foram gerados do código de `e34b710` e conferem com os documentos anteriores | **aprovada** |
 | 0b | `envelhecimento.ts`: centralizar a vinheta, **preservando os parâmetros de cada modo**; teste de equivalência raster × vetor (R9) | mestre idêntico; sem vinheta nos símbolos vetoriais coloridos | **aprovada** (seção 9) |
-| 0c | módulo `biomas/` com Terrasen como cliente (só o que Adarlan usa), registro, ordem fixa | mestre idêntico; R2 (independência de ordem) | **concluída, aguarda revisão** (seção 10) |
-| 0d | `MapaView` para vários biomas (`data-bioma` por símbolo, ordem global por `y`), orçamento provisório (R10), investigação dos picos de zoom (3.5) | mestre idêntico; R8 (vetor × raster) | **concluída, aguarda revisão** (seção 11) |
+| 0c | módulo `biomas/` com Terrasen como cliente (só o que Adarlan usa), registro, ordem fixa | mestre idêntico; R2 (independência de ordem) | **aprovada** com ressalva de processo (seção 10; ressalva resolvida pela 0c.5) |
+| 0c.5 | processo de validação e publicação: `npm run portao`, logs completos, servidor guardado, selo, `npm run publicar`, hook `pre-push` | demonstração com falhas propositais | **aprovada** (seção 10.7) |
+| 0d | `MapaView` para vários biomas (`data-bioma` por símbolo, ordem global por `y`), orçamento provisório (R10), investigação dos picos de zoom (3.5) | mestre idêntico; R8 (vetor × raster) | **funcionalmente aprovada, com ressalvas de desempenho** (seções 11 e 11.7) |
 
-Depois da consolidação: Adarlan (protótipo desligado por padrão), conforme o [plano de Adarlan](adarlan/PLANO-ADARLAN.md), comparações, aprovação e merge. A demo só é atualizada depois. Nada disto começa sem aprovação.
+**A consolidação está encerrada.** Próxima fase: **revisão artística e canônica de Adarlan** ([REVISAO-ARTISTICA-ADARLAN.md](adarlan/REVISAO-ARTISTICA-ADARLAN.md)), depois protótipos desligados por padrão, comparações, aprovação e merge. A demo só é atualizada depois. Nada disto começa sem aprovação.
 
 ## 7. Riscos
 
@@ -537,7 +548,7 @@ Dois defeitos do próprio portão foram encontrados e corrigidos durante a demon
 
 **Uso a partir de agora:** `npm run portao` para validar; `npm run publicar` para publicar. **Não se faz `git push` encadeado a outros comandos.** Os logs de falha ficam em `.portao/logs/` (ignorados pelo git).
 
-## 11. Etapa 0d: camada vetorial e `MapaView` para vários biomas — concluída, aguarda revisão
+## 11. Etapa 0d: camada vetorial e `MapaView` para vários biomas — funcionalmente aprovada, com ressalvas de desempenho
 
 Terrasen continua o **único** bioma real; o segundo bioma usado nos testes é **sintético** (`tests/fixtures/bioma-sintetico.ts`) e **nunca** é registrado em produção. Nenhum valor mestre foi regenerado (`mestre.json › atualizacoes` continua vazia); geografia, hidrografia, lugares, rotas e `bordaSul` intactos; demo não atualizada; sem merge; sem protótipo de Adarlan.
 
@@ -558,6 +569,7 @@ Todos os portões rodaram com `npm run portao` (seção 10.7): unidade, build e 
 - `src/lib/biomas/camada-vetorial.ts` (sai de `proto/`, junto com `gravador-svg.ts` e `papel-sepia.ts`, que já eram genéricos): `ordenarParaPintura` junta os símbolos de **todos** os biomas desenhados pelo vetor e ordena por `y` crescente; **desempate determinístico**: posição do bioma no registro, depois a posição no próprio plano. Com Terrasen sozinha, a ordem é **exatamente** a do plano de Terrasen (testado).
 - **Cada símbolo é um `<g>` próprio** com `data-bioma`; não há grupo por bioma, então símbolos de biomas diferentes **se intercalam** (testado: mais de 20 trocas de bioma ao longo da ordem com o sintético).
 - **Hash textual preservado sem tocar na referência:** `data-bioma` é posto no DOM **depois** que o texto é montado e lido (`setAttribute`), e `textoDeReferencia(svg)` devolve a serialização **sem** `data-bioma`. O teste mestre de navegador passou a calcular o hash do SVG sobre `textoDeReferencia` do construtor genérico e **bateu com o valor original de `e34b710`** (`77624929` em cor, `16ab64e4` no sépia). Essa igualdade é a prova de equivalência; nenhuma proposta estrutural foi necessária e nenhum valor mestre foi alterado.
+- **O que esse hash cobre, e o que não cobre:** o hash textual do SVG representa a **serialização de referência** (geometria, estilos, ordem e atributos `data-i`, `data-x`, `data-y`), **sem os metadados `data-bioma`** adicionados ao DOM. Os metadados **não** são protegidos pelo hash mestre; continuam protegidos por **testes próprios**: `camada-vetorial.test.ts` (o texto de cada símbolo não contém `data-bioma`; `textoDeReferencia` remove só esse atributo e devolve o texto original caractere por caractere) e `integracao.pw.ts` (no DOM, um `<g>` por símbolo com `data-bioma`; 151 símbolos com `data-bioma="terrasen"` no app; intercalação entre biomas com o sintético).
 - Só entram no SVG os biomas com `vetorial(config) = true`; os outros ficam no raster.
 
 ### 11.3 0d.2: seleção genérica, `MapaView`, estado e raster
@@ -606,7 +618,7 @@ O registro de produção é verificado em cada execução: `['terrasen']`.
 | cor | p95 61,7 ms · **4,0** quadros > 50 ms por zoom | p95 67,1 ms · **3,9** |
 | sépia | p95 45,7 ms · **1,1** | p95 45,8 ms · **1,5** |
 
-Com a ordem controlada, **antes e depois são equivalentes**: a diferença da primeira tabela (3,4 × 9,8) **não se repete** e deve ser tratada como efeito de ordem/ruído, não como regressão.
+Com a ordem controlada, a diferença da primeira tabela (3,4 × 9,8) **não se repete**: **nenhuma regressão demonstrada nas condições medidas** (desktop, uma máquina, Chrome 157, zoom frio com SVG ligado, 10 repetições alternadas). Isso não prova ausência de regressão em outras condições (celular, outros navegadores, outra carga da máquina).
 
 **Uma hipótese de cada vez (desktop, sépia, SVG ligado, zoom frio):** máscara de grão **ligada**: 5,6 quadros > 50 ms por zoom (p95 68,9); **desligada**: 2,2 (p95 60,5), mas com máximos isolados maiores (633 e 417 ms). Indício fraco de que a máscara acrescenta custo no zoom frio; **não conclusivo** com 5 repetições.
 
@@ -624,7 +636,7 @@ No zoom quente: 4× cor ligado 3,0 por zoom (p95 87 ms) contra 0,6 sem SVG; 6× 
 **O que a evidência permite dizer, e o que não permite:**
 - **Suportado:** os quadros longos do **zoom frio** aparecem quando o SVG está **visível** e quase desaparecem com o SVG **oculto** ou **ausente**; no **zoom quente** quase não aparecem. Os traces mostram, nessas condições, **trabalho de rasterização no processo de GPU** muito maior com o SVG visível. Isso é **compatível** com a hipótese de rasterizar o SVG na nova escala na primeira animação.
 - **Não demonstrado:** que essa seja **a** causa. Há um trace por condição, o ruído é alto (máximos isolados aparecem também sem SVG e no "antes") e a máquina estava com outro Chrome em uso. A hipótese continua hipótese, agora com evidência a favor.
-- **Sem regressão demonstrada** da 0d em relação à referência (controle alternado).
+- **Nenhuma regressão demonstrada nas condições medidas** da 0d em relação à referência (controle alternado, desktop).
 
 **Tempo de renderização (orçamento provisório: +10%):** medi `renderTerrain` sozinho (sem carregar página), antes e depois **alternados**, 6 amostras por caso, em **duas rodadas**: as diferenças **trocaram de sinal** entre as rodadas (por exemplo, cor padrão +20,8% e depois −5,4%; sépia com símbolos no raster −30,4% e depois +9,3%), e os tempos (3 a 5 s) ficaram bem acima dos ≈ 1,8 s medidos em rodadas anteriores, sinal de máquina ocupada. **Resultado: inconclusivo** neste ambiente; o orçamento de +10% **não foi verificado** (nem confirmado, nem refutado). Nenhuma otimização foi feita.
 
@@ -638,3 +650,13 @@ No zoom quente: 4× cor ligado 3,0 por zoom (p95 87 ms) contra 0,6 sem SVG; 6× 
 6. O spike `spikes/vetorial/` está **obsoleto** (importa funções removidas na 0c) e foi marcado como tal no seu README.
 7. Os nomes `terrasenImg`/`terrasenSimbolos` dos painéis e o diretório `proto/` ficaram por compatibilidade; renomear é cosmético.
 8. A suíte de navegador ficou mais longa (≈ 6 min no portão) por causa dos testes de app e de composição.
+
+### 11.7 Aprovação (revisão de 2026-11-27) e ressalvas de desempenho
+
+**0c.5 aprovada. 0d funcionalmente aprovada, com ressalvas de desempenho.** A consolidação técnica está encerrada para o início do desenvolvimento artístico de Adarlan; nenhuma otimização é implementada agora.
+
+**Ressalvas registradas:**
+1. **Desempenho:** nenhuma regressão demonstrada **nas condições medidas** (11.5); isso não equivale a equivalência comprovada.
+2. **O orçamento de +10% de tempo de renderização permanece não verificado.**
+3. **Dívida técnica prioritária:** a **pintura síncrona do terreno** (2400 × 1680, no fio principal) e o **carregamento inicial em dispositivos de menor capacidade** (15 a 25 s com CPU 4× e 20 a 56 s com 6×, em emulação). A primeira troca de modo, também síncrona, é parte da mesma dívida.
+4. **Revisão obrigatória de desempenho antes da aprovação final de Adarlan**, com: **aparelho real** (além da emulação); **Chrome, Safari e Firefox** (incluindo `mask-image` do papel sépia); **carregamento inicial**; **primeira troca de modo** colorido ↔ sépia; zoom frio e quente com Terrasen e Adarlan reais (método da 3.5, antes × depois alternados); tempo de renderização contra o orçamento de +10%, em máquina sem carga concorrente. Adarlan **não** é aprovada em definitivo sem essa revisão.

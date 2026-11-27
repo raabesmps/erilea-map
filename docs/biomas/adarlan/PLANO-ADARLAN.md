@@ -1,6 +1,7 @@
 # Adarlan, segundo bioma: diagnóstico, plano técnico e proposta visual
 
 **Status:** diagnóstico e **proposta**, com a **direção preliminar** da revisão de 2026-11-25 incorporada (seção abaixo). Nada disto foi implementado e nada foi mesclado. A branch `bioma-adarlan` parte da `v1.0.0` (`e34b710`) e só contém documentação.
+**Revisão de 2026-11-27:** a consolidação foi encerrada; as propostas deste plano que mudaram com a arquitetura construída, a separação canônico × inferência × arte, as referências pendentes, a sequência de protótipos e os critérios de aceitação revistos estão em [REVISAO-ARTISTICA-ADARLAN.md](REVISAO-ARTISTICA-ADARLAN.md), que **prevalece** sobre este documento onde os dois divergirem.
 A consolidação técnica que precisa vir **antes** (planejador genérico, envelhecimento, overlays, testes) está em [CONSOLIDACAO-TECNICA.md](../CONSOLIDACAO-TECNICA.md).
 
 **Referências usadas:** o mapa impresso (apenas os recortes que já estão em `referencia-local/`, que não é publicado), os dados do projeto e **a minha memória dos livros, que precisa da sua conferência**.
