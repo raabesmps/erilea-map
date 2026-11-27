@@ -1,0 +1,97 @@
+{
+ "quando": "2026-11-26T20:24:23.048Z",
+ "commitAtual": "0cbe2b289c9c693bf6f7e050e3308563f7544dd5",
+ "commitRef": "e34b710fd729b6f0f1979dffaaa13990d971e401",
+ "repeticoes": 5,
+ "navegador": "157.0.8103.80",
+ "desktop": {},
+ "mobile": {},
+ "hipoteses": {},
+ "traces": {},
+ "alternado": {
+  "ref|cor": {
+   "n": 418,
+   "mediana": 16.9,
+   "p95": 61.7,
+   "max": 119.2,
+   "zooms": 10,
+   "longos50PorZoom": 4,
+   "longos33PorZoom": 10.2,
+   "maxPorZoom": [
+    40.9,
+    28.3,
+    119.2,
+    66.3,
+    84.2,
+    58.6,
+    56.8,
+    61.7,
+    47.8,
+    45
+   ]
+  },
+  "atual|cor": {
+   "n": 385,
+   "mediana": 16.9,
+   "p95": 67.1,
+   "max": 409.1,
+   "zooms": 10,
+   "longos50PorZoom": 3.9,
+   "longos33PorZoom": 9.8,
+   "maxPorZoom": [
+    28.4,
+    31.3,
+    126.8,
+    75,
+    46.8,
+    118.7,
+    409.1,
+    43.8,
+    50.4,
+    44.6
+   ]
+  },
+  "ref|sepia": {
+   "n": 497,
+   "mediana": 16.9,
+   "p95": 45.7,
+   "max": 85.9,
+   "zooms": 10,
+   "longos50PorZoom": 1.1,
+   "longos33PorZoom": 5.3,
+   "maxPorZoom": [
+    19.4,
+    35.3,
+    85.9,
+    53.1,
+    39.2,
+    49.8,
+    34.9,
+    51.4,
+    36.6,
+    36.2
+   ]
+  },
+  "atual|sepia": {
+   "n": 486,
+   "mediana": 16.9,
+   "p95": 45.8,
+   "max": 80,
+   "zooms": 10,
+   "longos50PorZoom": 1.5,
+   "longos33PorZoom": 5.4,
+   "maxPorZoom": [
+    47.4,
+    59.9,
+    70.5,
+    80,
+    38.7,
+    55,
+    36.2,
+    37.7,
+    37.9,
+    43.3
+   ]
+  }
+ }
+}

@@ -1,0 +1,1135 @@
+{
+ "quando": "2026-11-26T19:38:04.839Z",
+ "commitAtual": "0cbe2b289c9c693bf6f7e050e3308563f7544dd5",
+ "commitRef": "e34b710fd729b6f0f1979dffaaa13990d971e401",
+ "repeticoes": 5,
+ "navegador": "157.0.8103.80",
+ "desktop": {
+  "ref|cor|ligado": {
+   "frio": {
+    "n": 204,
+    "mediana": 16.8,
+    "p95": 81.7,
+    "max": 667,
+    "longos33PorZoom": 5.4,
+    "longos50PorZoom": 3.4,
+    "maxPorZoom": [
+     48.5,
+     86.8,
+     667,
+     101.1,
+     33.5
+    ]
+   },
+   "quente": {
+    "n": 330,
+    "mediana": 16.7,
+    "p95": 17.3,
+    "max": 52.8,
+    "longos33PorZoom": 0.2,
+    "longos50PorZoom": 0.2,
+    "maxPorZoom": [
+     17.3,
+     17.8,
+     18.5,
+     18.6,
+     52.8
+    ]
+   },
+   "svg": {
+    "caminhos": 2020,
+    "kb": 259,
+    "mascara": false
+   },
+   "tempoAteSvgMs": 6386
+  },
+  "ref|cor|oculto": {
+   "frio": {
+    "n": 329,
+    "mediana": 16.7,
+    "p95": 18.4,
+    "max": 30.5,
+    "longos33PorZoom": 0,
+    "longos50PorZoom": 0,
+    "maxPorZoom": [
+     18.4,
+     26.2,
+     17.3,
+     30.5,
+     23.2
+    ]
+   },
+   "quente": {
+    "n": 333,
+    "mediana": 16.7,
+    "p95": 17.6,
+    "max": 23.1,
+    "longos33PorZoom": 0,
+    "longos50PorZoom": 0,
+    "maxPorZoom": [
+     17.1,
+     17.3,
+     23.1,
+     19.3,
+     17.7
+    ]
+   },
+   "svg": {
+    "caminhos": 2020,
+    "kb": 259,
+    "mascara": false
+   },
+   "tempoAteSvgMs": 8830
+  },
+  "ref|cor|ausente": {
+   "frio": {
+    "n": 311,
+    "mediana": 16.7,
+    "p95": 22.1,
+    "max": 208.4,
+    "longos33PorZoom": 0.2,
+    "longos50PorZoom": 0.2,
+    "maxPorZoom": [
+     23.6,
+     30.8,
+     208.4,
+     20.8,
+     17.7
+    ]
+   },
+   "quente": {
+    "n": 268,
+    "mediana": 16.7,
+    "p95": 17.3,
+    "max": 406.9,
+    "longos33PorZoom": 1.4,
+    "longos50PorZoom": 1,
+    "maxPorZoom": [
+     283.7,
+     406.9,
+     39.2,
+     17.8,
+     118.9
+    ]
+   },
+   "svg": {
+    "caminhos": 2020,
+    "kb": 259,
+    "mascara": false
+   },
+   "tempoAteSvgMs": 2978
+  },
+  "ref|sepia|ligado": {
+   "frio": {
+    "n": 235,
+    "mediana": 16.9,
+    "p95": 38.6,
+    "max": 94.4,
+    "longos33PorZoom": 3.4,
+    "longos50PorZoom": 1.8,
+    "maxPorZoom": [
+     45.5,
+     41.5,
+     34.5,
+     31.5,
+     94.4
+    ]
+   },
+   "quente": {
+    "n": 331,
+    "mediana": 16.7,
+    "p95": 29.1,
+    "max": 33.4,
+    "longos33PorZoom": 0,
+    "longos50PorZoom": 0,
+    "maxPorZoom": [
+     17.7,
+     20,
+     31.2,
+     33.3,
+     33.4
+    ]
+   },
+   "svg": {
+    "caminhos": 1738,
+    "kb": 303,
+    "mascara": true
+   },
+   "tempoAteSvgMs": 4677
+  },
+  "ref|sepia|oculto": {
+   "frio": {
+    "n": 330,
+    "mediana": 16.7,
+    "p95": 17.8,
+    "max": 24.4,
+    "longos33PorZoom": 0,
+    "longos50PorZoom": 0,
+    "maxPorZoom": [
+     18.2,
+     21.3,
+     20,
+     19.3,
+     24.4
+    ]
+   },
+   "quente": {
+    "n": 332,
+    "mediana": 16.7,
+    "p95": 17.4,
+    "max": 24.7,
+    "longos33PorZoom": 0,
+    "longos50PorZoom": 0,
+    "maxPorZoom": [
+     17.6,
+     18.4,
+     24.7,
+     23.7,
+     22.8
+    ]
+   },
+   "svg": {
+    "caminhos": 1738,
+    "kb": 303,
+    "mascara": true
+   },
+   "tempoAteSvgMs": 2842
+  },
+  "ref|sepia|ausente": {
+   "frio": {
+    "n": 330,
+    "mediana": 16.7,
+    "p95": 17.7,
+    "max": 19.4,
+    "longos33PorZoom": 0,
+    "longos50PorZoom": 0,
+    "maxPorZoom": [
+     19.4,
+     18.8,
+     18.7,
+     19,
+     18.9
+    ]
+   },
+   "quente": {
+    "n": 329,
+    "mediana": 16.7,
+    "p95": 17.3,
+    "max": 67.4,
+    "longos33PorZoom": 0.2,
+    "longos50PorZoom": 0.2,
+    "maxPorZoom": [
+     17.2,
+     17.5,
+     22.9,
+     67.4,
+     18.1
+    ]
+   },
+   "svg": {
+    "caminhos": 1738,
+    "kb": 303,
+    "mascara": true
+   },
+   "tempoAteSvgMs": 3455
+  },
+  "atual|cor|ligado": {
+   "frio": {
+    "n": 164,
+    "mediana": 16.8,
+    "p95": 84.2,
+    "max": 131.3,
+    "longos33PorZoom": 9.8,
+    "longos50PorZoom": 9.8,
+    "maxPorZoom": [
+     70.3,
+     65.4,
+     84.7,
+     72.9,
+     131.3
+    ]
+   },
+   "quente": {
+    "n": 330,
+    "mediana": 16.7,
+    "p95": 17.6,
+    "max": 70.6,
+    "longos33PorZoom": 0.2,
+    "longos50PorZoom": 0.2,
+    "maxPorZoom": [
+     70.6,
+     29.6,
+     19,
+     32.7,
+     32.4
+    ]
+   },
+   "svg": {
+    "caminhos": 2020,
+    "kb": 259,
+    "mascara": false
+   },
+   "tempoAteSvgMs": 6598
+  },
+  "atual|cor|oculto": {
+   "frio": {
+    "n": 330,
+    "mediana": 16.6,
+    "p95": 17.9,
+    "max": 21.1,
+    "longos33PorZoom": 0,
+    "longos50PorZoom": 0,
+    "maxPorZoom": [
+     18.7,
+     20.3,
+     20.7,
+     18,
+     21.1
+    ]
+   },
+   "quente": {
+    "n": 330,
+    "mediana": 16.7,
+    "p95": 28.2,
+    "max": 41.3,
+    "longos33PorZoom": 0.4,
+    "longos50PorZoom": 0,
+    "maxPorZoom": [
+     17.2,
+     17.3,
+     32,
+     41.3,
+     33.2
+    ]
+   },
+   "svg": {
+    "caminhos": 2020,
+    "kb": 259,
+    "mascara": false
+   },
+   "tempoAteSvgMs": 3286
+  },
+  "atual|cor|ausente": {
+   "frio": {
+    "n": 327,
+    "mediana": 16.6,
+    "p95": 19,
+    "max": 25.7,
+    "longos33PorZoom": 0,
+    "longos50PorZoom": 0,
+    "maxPorZoom": [
+     19.8,
+     25.7,
+     19.1,
+     18.7,
+     24.2
+    ]
+   },
+   "quente": {
+    "n": 319,
+    "mediana": 16.7,
+    "p95": 17.1,
+    "max": 395.9,
+    "longos33PorZoom": 0.6,
+    "longos50PorZoom": 0.4,
+    "maxPorZoom": [
+     17,
+     395.9,
+     120.1,
+     18.9,
+     17.8
+    ]
+   },
+   "svg": {
+    "caminhos": 2020,
+    "kb": 259,
+    "mascara": false
+   },
+   "tempoAteSvgMs": 4830
+  },
+  "atual|sepia|ligado": {
+   "frio": {
+    "n": 191,
+    "mediana": 16.8,
+    "p95": 64.8,
+    "max": 301.4,
+    "longos33PorZoom": 8.4,
+    "longos50PorZoom": 4.6,
+    "maxPorZoom": [
+     301.4,
+     80.2,
+     74.4,
+     32,
+     57.1
+    ]
+   },
+   "quente": {
+    "n": 329,
+    "mediana": 16.7,
+    "p95": 25.9,
+    "max": 33.6,
+    "longos33PorZoom": 0.4,
+    "longos50PorZoom": 0,
+    "maxPorZoom": [
+     18.7,
+     17.9,
+     33.6,
+     33.6,
+     32.7
+    ]
+   },
+   "svg": {
+    "caminhos": 1738,
+    "kb": 303,
+    "mascara": true
+   },
+   "tempoAteSvgMs": 4185
+  },
+  "atual|sepia|oculto": {
+   "frio": {
+    "n": 303,
+    "mediana": 16.7,
+    "p95": 19,
+    "max": 172.9,
+    "longos33PorZoom": 0.8,
+    "longos50PorZoom": 0.8,
+    "maxPorZoom": [
+     172.9,
+     19.8,
+     162,
+     19.4,
+     115.4
+    ]
+   },
+   "quente": {
+    "n": 331,
+    "mediana": 16.7,
+    "p95": 17.3,
+    "max": 50.8,
+    "longos33PorZoom": 0.2,
+    "longos50PorZoom": 0.2,
+    "maxPorZoom": [
+     20,
+     18.7,
+     50.8,
+     18.2,
+     17.3
+    ]
+   },
+   "svg": {
+    "caminhos": 1738,
+    "kb": 303,
+    "mascara": true
+   },
+   "tempoAteSvgMs": 4116
+  },
+  "atual|sepia|ausente": {
+   "frio": {
+    "n": 325,
+    "mediana": 16.7,
+    "p95": 19.6,
+    "max": 30.7,
+    "longos33PorZoom": 0,
+    "longos50PorZoom": 0,
+    "maxPorZoom": [
+     20.6,
+     20.2,
+     18.2,
+     22.5,
+     30.7
+    ]
+   },
+   "quente": {
+    "n": 327,
+    "mediana": 16.7,
+    "p95": 30.5,
+    "max": 49.9,
+    "longos33PorZoom": 0.6,
+    "longos50PorZoom": 0,
+    "maxPorZoom": [
+     17.2,
+     49.9,
+     32.3,
+     33.5,
+     32.8
+    ]
+   },
+   "svg": {
+    "caminhos": 1738,
+    "kb": 303,
+    "mascara": true
+   },
+   "tempoAteSvgMs": 5157
+  }
+ },
+ "mobile": {
+  "atual|cor|ligado|cpu4x": {
+   "frio": {
+    "n": 210,
+    "mediana": 16.8,
+    "p95": 59,
+    "max": 873.4,
+    "longos33PorZoom": 4.6,
+    "longos50PorZoom": 3.2,
+    "maxPorZoom": [
+     873.4,
+     242.1,
+     91.1,
+     59,
+     69.3
+    ]
+   },
+   "quente": {
+    "n": 205,
+    "mediana": 16.9,
+    "p95": 87.1,
+    "max": 245.8,
+    "longos33PorZoom": 5.6,
+    "longos50PorZoom": 3,
+    "maxPorZoom": [
+     245.8,
+     187.8,
+     172.3,
+     155.7,
+     208
+    ]
+   },
+   "svg": {
+    "caminhos": 2020,
+    "kb": 259,
+    "mascara": false
+   },
+   "tempoAteSvgMs": 17603
+  },
+  "atual|cor|ausente|cpu4x": {
+   "frio": {
+    "n": 303,
+    "mediana": 16.7,
+    "p95": 25,
+    "max": 132.3,
+    "longos33PorZoom": 1.8,
+    "longos50PorZoom": 1.6,
+    "maxPorZoom": [
+     75.2,
+     132.3,
+     60,
+     55,
+     52.5
+    ]
+   },
+   "quente": {
+    "n": 314,
+    "mediana": 16.7,
+    "p95": 20.5,
+    "max": 82,
+    "longos33PorZoom": 1.6,
+    "longos50PorZoom": 0.6,
+    "maxPorZoom": [
+     41.9,
+     43.9,
+     41.5,
+     69,
+     82
+    ]
+   },
+   "svg": {
+    "caminhos": 2020,
+    "kb": 259,
+    "mascara": false
+   },
+   "tempoAteSvgMs": 25499
+  },
+  "atual|sepia|ligado|cpu4x": {
+   "frio": {
+    "n": 319,
+    "mediana": 16.7,
+    "p95": 19.4,
+    "max": 76.2,
+    "longos33PorZoom": 1.6,
+    "longos50PorZoom": 0.2,
+    "maxPorZoom": [
+     76.2,
+     45.4,
+     48.9,
+     45.2,
+     43.6
+    ]
+   },
+   "quente": {
+    "n": 312,
+    "mediana": 16.7,
+    "p95": 26.6,
+    "max": 115,
+    "longos33PorZoom": 1.4,
+    "longos50PorZoom": 0.4,
+    "maxPorZoom": [
+     47.8,
+     62.6,
+     115,
+     38.5,
+     29.1
+    ]
+   },
+   "svg": {
+    "caminhos": 1738,
+    "kb": 303,
+    "mascara": true
+   },
+   "tempoAteSvgMs": 17566
+  },
+  "ref|cor|ligado|cpu4x": {
+   "frio": {
+    "n": 313,
+    "mediana": 16.7,
+    "p95": 23,
+    "max": 74.2,
+    "longos33PorZoom": 1.6,
+    "longos50PorZoom": 0.6,
+    "maxPorZoom": [
+     53.4,
+     44.3,
+     45.5,
+     74.2,
+     50.9
+    ]
+   },
+   "quente": {
+    "n": 313,
+    "mediana": 16.7,
+    "p95": 24.7,
+    "max": 85.2,
+    "longos33PorZoom": 2,
+    "longos50PorZoom": 0.6,
+    "maxPorZoom": [
+     34.7,
+     48.8,
+     85.2,
+     60.9,
+     37.1
+    ]
+   },
+   "svg": {
+    "caminhos": 2020,
+    "kb": 259,
+    "mascara": false
+   },
+   "tempoAteSvgMs": 14792
+  },
+  "atual|cor|ligado|cpu6x": {
+   "frio": {
+    "n": 110,
+    "mediana": 16.9,
+    "p95": 275.5,
+    "max": 882.8,
+    "longos33PorZoom": 4.8,
+    "longos50PorZoom": 3.8,
+    "maxPorZoom": [
+     112.2,
+     335.9,
+     882.8,
+     629.7,
+     252.4
+    ]
+   },
+   "quente": {
+    "n": 261,
+    "mediana": 16.8,
+    "p95": 39.8,
+    "max": 326.3,
+    "longos33PorZoom": 3.4,
+    "longos50PorZoom": 2,
+    "maxPorZoom": [
+     80.5,
+     326.3,
+     60.1,
+     48,
+     145.4
+    ]
+   },
+   "svg": {
+    "caminhos": 2020,
+    "kb": 259,
+    "mascara": false
+   },
+   "tempoAteSvgMs": 55969
+  },
+  "atual|cor|ausente|cpu6x": {
+   "frio": {
+    "n": 170,
+    "mediana": 17.2,
+    "p95": 89.6,
+    "max": 862.6,
+    "longos33PorZoom": 4.8,
+    "longos50PorZoom": 2.8,
+    "maxPorZoom": [
+     528.5,
+     862.6,
+     89.6,
+     147.1,
+     98.9
+    ]
+   },
+   "quente": {
+    "n": 139,
+    "mediana": 17.6,
+    "p95": 185.3,
+    "max": 549.6,
+    "longos33PorZoom": 4.6,
+    "longos50PorZoom": 3.4,
+    "maxPorZoom": [
+     549.6,
+     531.7,
+     322.5,
+     185.3,
+     301.9
+    ]
+   },
+   "svg": {
+    "caminhos": 2020,
+    "kb": 259,
+    "mascara": false
+   },
+   "tempoAteSvgMs": 46874
+  },
+  "atual|sepia|ligado|cpu6x": {
+   "frio": {
+    "n": 234,
+    "mediana": 16.7,
+    "p95": 39.5,
+    "max": 848.6,
+    "longos33PorZoom": 3.2,
+    "longos50PorZoom": 2,
+    "maxPorZoom": [
+     107.6,
+     98.4,
+     848.6,
+     55.4,
+     89.5
+    ]
+   },
+   "quente": {
+    "n": 205,
+    "mediana": 17.1,
+    "p95": 70.6,
+    "max": 350.3,
+    "longos33PorZoom": 7,
+    "longos50PorZoom": 3.2,
+    "maxPorZoom": [
+     350.3,
+     117.7,
+     182.7,
+     223.7,
+     198.3
+    ]
+   },
+   "svg": {
+    "caminhos": 1738,
+    "kb": 303,
+    "mascara": true
+   },
+   "tempoAteSvgMs": 20560
+  },
+  "ref|cor|ligado|cpu6x": {
+   "frio": {
+    "n": 220,
+    "mediana": 17,
+    "p95": 47.9,
+    "max": 653.7,
+    "longos33PorZoom": 3.8,
+    "longos50PorZoom": 2,
+    "maxPorZoom": [
+     63.8,
+     653.7,
+     121.6,
+     95.1,
+     139.2
+    ]
+   },
+   "quente": {
+    "n": 302,
+    "mediana": 16.7,
+    "p95": 30,
+    "max": 78,
+    "longos33PorZoom": 2.4,
+    "longos50PorZoom": 1.2,
+    "maxPorZoom": [
+     54.8,
+     78,
+     67.1,
+     73,
+     56.5
+    ]
+   },
+   "svg": {
+    "caminhos": 2020,
+    "kb": 259,
+    "mascara": false
+   },
+   "tempoAteSvgMs": 39756
+  }
+ },
+ "hipoteses": {
+  "atual|sepia|ligado|mascara=true": {
+   "frio": {
+    "n": 170,
+    "mediana": 17,
+    "p95": 68.9,
+    "max": 283.6,
+    "longos33PorZoom": 10.8,
+    "longos50PorZoom": 5.6,
+    "maxPorZoom": [
+     283.6,
+     47.7,
+     72.6,
+     94.5,
+     215.9
+    ]
+   },
+   "quente": {
+    "n": 330,
+    "mediana": 16.7,
+    "p95": 29.3,
+    "max": 74.9,
+    "longos33PorZoom": 0.4,
+    "longos50PorZoom": 0.2,
+    "maxPorZoom": [
+     17,
+     17.2,
+     74.9,
+     33.8,
+     32.2
+    ]
+   },
+   "svg": {
+    "caminhos": 1738,
+    "kb": 303,
+    "mascara": true
+   },
+   "tempoAteSvgMs": 8081
+  },
+  "atual|sepia|ligado|mascara=false": {
+   "frio": {
+    "n": 172,
+    "mediana": 16.9,
+    "p95": 60.5,
+    "max": 632.8,
+    "longos33PorZoom": 3.2,
+    "longos50PorZoom": 2.2,
+    "maxPorZoom": [
+     102.3,
+     28.6,
+     632.8,
+     416.5,
+     78.4
+    ]
+   },
+   "quente": {
+    "n": 321,
+    "mediana": 16.7,
+    "p95": 17.5,
+    "max": 206.5,
+    "longos33PorZoom": 0.4,
+    "longos50PorZoom": 0.4,
+    "maxPorZoom": [
+     23.5,
+     18.3,
+     17.7,
+     57.9,
+     206.5
+    ]
+   },
+   "svg": {
+    "caminhos": 1738,
+    "kb": 303,
+    "mascara": true
+   },
+   "tempoAteSvgMs": 9814
+  }
+ },
+ "traces": {
+  "atual-cor-ligado": {
+   "arquivo": "c:\\xampp\\htdocs\\portfolio\\erilea-map\\.portao\\traces\\atual-cor-ligado.json",
+   "somaPorEvento": [
+    {
+     "evento": "CrGpuMain · RunTask",
+     "ms": 689.8
+    },
+    {
+     "evento": "CrGpuMain · Scheduler::RunTask",
+     "ms": 682.2
+    },
+    {
+     "evento": "CrGpuMain · GPUTask",
+     "ms": 582.3
+    },
+    {
+     "evento": "CrGpuMain · GpuChannel::ExecuteDeferredRequest",
+     "ms": 582.2
+    },
+    {
+     "evento": "CrGpuMain · RendererRasterWorker",
+     "ms": 578.6
+    },
+    {
+     "evento": "CrGpuMain · CommandBuffer::Flush",
+     "ms": 577.7
+    },
+    {
+     "evento": "CrGpuMain · CommandBufferStub::OnAsyncFlush",
+     "ms": 577
+    },
+    {
+     "evento": "CrGpuMain · CommandBufferService:PutChanged",
+     "ms": 574.8
+    },
+    {
+     "evento": "CrGpuMain · RasterDecoderImpl::DoEndRasterCHROMIUM",
+     "ms": 459.4
+    },
+    {
+     "evento": "CrGpuMain · RasterDecoderImpl::DoEndRasterCHROMIUM::Flush",
+     "ms": 456.1
+    },
+    {
+     "evento": "CrRendererMain · RunTask",
+     "ms": 284.2
+    },
+    {
+     "evento": "CrRendererMain · ProxyMain::BeginMainFrame",
+     "ms": 267.6
+    }
+   ],
+   "eventosLongos": [
+    {
+     "thread": "CrGpuMain",
+     "nome": "Scheduler::RunTask",
+     "ms": 42.6
+    },
+    {
+     "thread": "CrGpuMain",
+     "nome": "GpuChannel::ExecuteDeferredRequest",
+     "ms": 42.6
+    },
+    {
+     "thread": "CrGpuMain",
+     "nome": "GPUTask",
+     "ms": 42.6
+    },
+    {
+     "thread": "CrGpuMain",
+     "nome": "RendererRasterWorker",
+     "ms": 42.6
+    },
+    {
+     "thread": "CrGpuMain",
+     "nome": "CommandBuffer::Flush",
+     "ms": 42.6
+    },
+    {
+     "thread": "CrGpuMain",
+     "nome": "CommandBufferStub::OnAsyncFlush",
+     "ms": 42.6
+    },
+    {
+     "thread": "CrGpuMain",
+     "nome": "CommandBufferService:PutChanged",
+     "ms": 42.6
+    },
+    {
+     "thread": "CrGpuMain",
+     "nome": "Scheduler::RunTask",
+     "ms": 37.1
+    },
+    {
+     "thread": "CrGpuMain",
+     "nome": "GpuChannel::ExecuteDeferredRequest",
+     "ms": 37.1
+    },
+    {
+     "thread": "CrGpuMain",
+     "nome": "GPUTask",
+     "ms": 37.1
+    },
+    {
+     "thread": "CrGpuMain",
+     "nome": "RendererRasterWorker",
+     "ms": 37.1
+    },
+    {
+     "thread": "CrGpuMain",
+     "nome": "CommandBuffer::Flush",
+     "ms": 37.1
+    }
+   ]
+  },
+  "atual-cor-ausente": {
+   "arquivo": "c:\\xampp\\htdocs\\portfolio\\erilea-map\\.portao\\traces\\atual-cor-ausente.json",
+   "somaPorEvento": [
+    {
+     "evento": "CrRendererMain · RunTask",
+     "ms": 408.8
+    },
+    {
+     "evento": "CrRendererMain · ProxyMain::BeginMainFrame",
+     "ms": 378.7
+    },
+    {
+     "evento": "CrGpuMain · RunTask",
+     "ms": 328.5
+    },
+    {
+     "evento": "CrGpuMain · Scheduler::RunTask",
+     "ms": 319.1
+    },
+    {
+     "evento": "CrRendererMain · WebFrameWidgetImpl::BeginMainFrame",
+     "ms": 233.5
+    },
+    {
+     "evento": "CrGpuMain · GpuChannel::ExecuteDeferredRequest",
+     "ms": 217.8
+    },
+    {
+     "evento": "CrGpuMain · GPUTask",
+     "ms": 215.9
+    },
+    {
+     "evento": "CrRendererMain · Blink.Animate.UpdateTime",
+     "ms": 215.1
+    },
+    {
+     "evento": "CrRendererMain · PageAnimator::serviceScriptedAnimations",
+     "ms": 214.6
+    },
+    {
+     "evento": "CrGpuMain · RendererRasterWorker",
+     "ms": 210.9
+    },
+    {
+     "evento": "CrRendererMain · FrameRequestCallbackCollection::ExecuteFrameCallbacks",
+     "ms": 210.1
+    },
+    {
+     "evento": "CrGpuMain · CommandBuffer::Flush",
+     "ms": 210.1
+    }
+   ],
+   "eventosLongos": []
+  },
+  "atual-sepia-ligado": {
+   "arquivo": "c:\\xampp\\htdocs\\portfolio\\erilea-map\\.portao\\traces\\atual-sepia-ligado.json",
+   "somaPorEvento": [
+    {
+     "evento": "CrGpuMain · RunTask",
+     "ms": 719.1
+    },
+    {
+     "evento": "CrGpuMain · Scheduler::RunTask",
+     "ms": 711.7
+    },
+    {
+     "evento": "CrGpuMain · GpuChannel::ExecuteDeferredRequest",
+     "ms": 587.8
+    },
+    {
+     "evento": "CrGpuMain · GPUTask",
+     "ms": 584.4
+    },
+    {
+     "evento": "CrGpuMain · RendererRasterWorker",
+     "ms": 581.4
+    },
+    {
+     "evento": "CrGpuMain · CommandBuffer::Flush",
+     "ms": 580.3
+    },
+    {
+     "evento": "CrGpuMain · CommandBufferStub::OnAsyncFlush",
+     "ms": 579.9
+    },
+    {
+     "evento": "CrGpuMain · CommandBufferService:PutChanged",
+     "ms": 578.1
+    },
+    {
+     "evento": "CrGpuMain · RasterDecoderImpl::DoEndRasterCHROMIUM",
+     "ms": 417.7
+    },
+    {
+     "evento": "CrGpuMain · RasterDecoderImpl::DoEndRasterCHROMIUM::Flush",
+     "ms": 410.9
+    },
+    {
+     "evento": "CrRendererMain · RunTask",
+     "ms": 341.8
+    },
+    {
+     "evento": "CrRendererMain · ProxyMain::BeginMainFrame",
+     "ms": 334.8
+    }
+   ],
+   "eventosLongos": [
+    {
+     "thread": "CrGpuMain",
+     "nome": "Scheduler::RunTask",
+     "ms": 23.3
+    },
+    {
+     "thread": "CrGpuMain",
+     "nome": "GpuChannel::ExecuteDeferredRequest",
+     "ms": 23.3
+    },
+    {
+     "thread": "CrGpuMain",
+     "nome": "GPUTask",
+     "ms": 23.3
+    },
+    {
+     "thread": "CrGpuMain",
+     "nome": "RendererRasterWorker",
+     "ms": 23.3
+    },
+    {
+     "thread": "CrGpuMain",
+     "nome": "CommandBuffer::Flush",
+     "ms": 23.3
+    },
+    {
+     "thread": "CrGpuMain",
+     "nome": "CommandBufferStub::OnAsyncFlush",
+     "ms": 23.3
+    },
+    {
+     "thread": "CrGpuMain",
+     "nome": "CommandBufferService:PutChanged",
+     "ms": 23.3
+    },
+    {
+     "thread": "CrGpuMain",
+     "nome": "Scheduler::RunTask",
+     "ms": 21.6
+    },
+    {
+     "thread": "CrGpuMain",
+     "nome": "GpuChannel::ExecuteDeferredRequest",
+     "ms": 21.6
+    },
+    {
+     "thread": "CrGpuMain",
+     "nome": "GPUTask",
+     "ms": 21.6
+    },
+    {
+     "thread": "CrGpuMain",
+     "nome": "RendererRasterWorker",
+     "ms": 21.6
+    },
+    {
+     "thread": "CrGpuMain",
+     "nome": "CommandBuffer::Flush",
+     "ms": 21.6
+    }
+   ]
+  }
+ }
+}

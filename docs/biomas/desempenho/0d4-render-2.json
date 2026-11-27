@@ -1,0 +1,85 @@
+{
+ "quando": "2026-11-26T20:37:14.415Z",
+ "commitAtual": "0cbe2b289c9c693bf6f7e050e3308563f7544dd5",
+ "commitRef": "e34b710fd729b6f0f1979dffaaa13990d971e401",
+ "repeticoes": 5,
+ "navegador": "157.0.8103.80",
+ "desktop": {},
+ "mobile": {},
+ "hipoteses": {},
+ "traces": {},
+ "render": {
+  "atual|colorido|padrao": {
+   "n": 6,
+   "mediana": 3680.7,
+   "p95": 5250.3,
+   "max": 5250.3
+  },
+  "ref|colorido|padrao": {
+   "n": 6,
+   "mediana": 3892.1,
+   "p95": 8013.8,
+   "max": 8013.8
+  },
+  "atual|classico|padrao": {
+   "n": 6,
+   "mediana": 3811.7,
+   "p95": 5218.8,
+   "max": 5218.8
+  },
+  "ref|classico|padrao": {
+   "n": 6,
+   "mediana": 3347.9,
+   "p95": 4222.6,
+   "max": 4222.6
+  },
+  "atual|colorido|vetorial": {
+   "n": 6,
+   "mediana": 4088.5,
+   "p95": 4894,
+   "max": 4894
+  },
+  "ref|colorido|vetorial": {
+   "n": 6,
+   "mediana": 3859.8,
+   "p95": 6104.6,
+   "max": 6104.6
+  },
+  "atual|classico|vetorial": {
+   "n": 6,
+   "mediana": 3574.4,
+   "p95": 8671.7,
+   "max": 8671.7
+  },
+  "ref|classico|vetorial": {
+   "n": 6,
+   "mediana": 3680.7,
+   "p95": 5413.3,
+   "max": 5413.3
+  },
+  "atual|colorido|raster": {
+   "n": 6,
+   "mediana": 4275.2,
+   "p95": 7675.4,
+   "max": 7675.4
+  },
+  "ref|colorido|raster": {
+   "n": 6,
+   "mediana": 4412.1,
+   "p95": 8738.2,
+   "max": 8738.2
+  },
+  "atual|classico|raster": {
+   "n": 6,
+   "mediana": 4154.8,
+   "p95": 6092.9,
+   "max": 6092.9
+  },
+  "ref|classico|raster": {
+   "n": 6,
+   "mediana": 3802.8,
+   "p95": 6278,
+   "max": 6278
+  }
+ }
+}

@@ -1,6 +1,6 @@
 # Consolidação técnica antes do segundo bioma (Adarlan)
 
-**Status:** a consolidação foi **aprovada com ressalvas** (revisão de 2026-11-25). **Etapas 0a, 0b e 0c aprovadas** (a 0c com ressalva de processo). A **0c.5** (correção do processo de validação e publicação, seção 10.7) é pré-requisito da **0d**, que foi autorizada só depois dela. A branch `bioma-adarlan` parte da `v1.0.0` (commit `e34b710`).
+**Status:** a consolidação foi **aprovada com ressalvas** (revisão de 2026-11-25). **Etapas 0a, 0b e 0c aprovadas** (a 0c com ressalva de processo). A **0c.5** (correção do processo, seção 10.7) foi concluída e validada; a **0d** (camada vetorial e `MapaView` para vários biomas) está **concluída e aguardando revisão** (seção 11). A branch `bioma-adarlan` parte da `v1.0.0` (commit `e34b710`).
 O objetivo é decidir, **antes** de desenhar Adarlan, como o que foi construído para Terrasen vira uma base para vários biomas **sem mudar um pixel de Terrasen**.
 
 Legenda: **[MEDIDO]** número obtido nesta análise · **[CÓDIGO]** lido no código · **[PROPOSTA]** decisão a revisar.
@@ -327,7 +327,7 @@ Cada etapa é **pequena, em commits separados**, e só passa por um **portão**:
 | **0a** | testes mestre e infraestrutura de navegador (Playwright), comparador de pixels, outras sementes; goldens recuperáveis da referência | os valores mestre foram gerados do código de `e34b710` e conferem com os documentos anteriores | **aprovada** |
 | 0b | `envelhecimento.ts`: centralizar a vinheta, **preservando os parâmetros de cada modo**; teste de equivalência raster × vetor (R9) | mestre idêntico; sem vinheta nos símbolos vetoriais coloridos | **aprovada** (seção 9) |
 | 0c | módulo `biomas/` com Terrasen como cliente (só o que Adarlan usa), registro, ordem fixa | mestre idêntico; R2 (independência de ordem) | **concluída, aguarda revisão** (seção 10) |
-| 0d | `MapaView` para vários biomas (`data-bioma` por símbolo, ordem global por `y`), orçamento provisório (R10), investigação dos picos de zoom (3.5) | mestre idêntico; R8 (vetor × raster) | não iniciada |
+| 0d | `MapaView` para vários biomas (`data-bioma` por símbolo, ordem global por `y`), orçamento provisório (R10), investigação dos picos de zoom (3.5) | mestre idêntico; R8 (vetor × raster) | **concluída, aguarda revisão** (seção 11) |
 
 Depois da consolidação: Adarlan (protótipo desligado por padrão), conforme o [plano de Adarlan](adarlan/PLANO-ADARLAN.md), comparações, aprovação e merge. A demo só é atualizada depois. Nada disto começa sem aprovação.
 
@@ -536,3 +536,105 @@ Observações: (1) o `pesoMont` que o planejador de Terrasen recebe continua sen
 Dois defeitos do próprio portão foram encontrados e corrigidos durante a demonstração: (1) uma falha **não** sobrescrevia o selo (agora sempre sobrescreve); (2) a verificação da porta usava `127.0.0.1`, mas o Vite escuta em `localhost`/IPv6 nesta máquina, então o servidor "não subia" (agora usa `localhost`).
 
 **Uso a partir de agora:** `npm run portao` para validar; `npm run publicar` para publicar. **Não se faz `git push` encadeado a outros comandos.** Os logs de falha ficam em `.portao/logs/` (ignorados pelo git).
+
+## 11. Etapa 0d: camada vetorial e `MapaView` para vários biomas — concluída, aguarda revisão
+
+Terrasen continua o **único** bioma real; o segundo bioma usado nos testes é **sintético** (`tests/fixtures/bioma-sintetico.ts`) e **nunca** é registrado em produção. Nenhum valor mestre foi regenerado (`mestre.json › atualizacoes` continua vazia); geografia, hidrografia, lugares, rotas e `bordaSul` intactos; demo não atualizada; sem merge; sem protótipo de Adarlan.
+
+### 11.1 Subetapas, commits e portões
+
+Todos os portões rodaram com `npm run portao` (seção 10.7): unidade, build e navegador, com código de saída real e log completo.
+
+| Subetapa | Commits | Portão |
+|---|---|---|
+| 0d.1 · construção genérica do SVG | `6a37159` | OK (223 testes unitários; 22 de navegador) |
+| 0d.2 · `MapaView`, estado e raster | `1bb965f` | **FALHOU** na etapa `unit`: `Test timed out in 5000ms` em `mestre.test.ts` (o teste calcula o mapa inteiro; com 18 arquivos em paralelo passou de 5 s). **Nenhum valor mudou** (o teste não chegou a comparar). Diagnóstico pelo log completo preservado em `.portao/logs/2026-11-26T18-31-50-238Z/unit.log` |
+| (correção) | `2cabcff` | tempo limite de 30 s por teste (`vitest.config.ts`) e o plano da semente 11 calculado uma vez nesse teste; portão OK (230 / 22) |
+| 0d.3 · testes de integração R8 | `0cbe2b2` | OK (230 / 28 de navegador, 5,8 min) |
+| 0d.4 · desempenho e picos de zoom | commit desta seção | medições fora do portão (dependem da máquina); portão OK antes da publicação |
+
+### 11.2 0d.1: um SVG por modo, ordem global e identificação por bioma
+
+- `src/lib/biomas/camada-vetorial.ts` (sai de `proto/`, junto com `gravador-svg.ts` e `papel-sepia.ts`, que já eram genéricos): `ordenarParaPintura` junta os símbolos de **todos** os biomas desenhados pelo vetor e ordena por `y` crescente; **desempate determinístico**: posição do bioma no registro, depois a posição no próprio plano. Com Terrasen sozinha, a ordem é **exatamente** a do plano de Terrasen (testado).
+- **Cada símbolo é um `<g>` próprio** com `data-bioma`; não há grupo por bioma, então símbolos de biomas diferentes **se intercalam** (testado: mais de 20 trocas de bioma ao longo da ordem com o sintético).
+- **Hash textual preservado sem tocar na referência:** `data-bioma` é posto no DOM **depois** que o texto é montado e lido (`setAttribute`), e `textoDeReferencia(svg)` devolve a serialização **sem** `data-bioma`. O teste mestre de navegador passou a calcular o hash do SVG sobre `textoDeReferencia` do construtor genérico e **bateu com o valor original de `e34b710`** (`77624929` em cor, `16ab64e4` no sépia). Essa igualdade é a prova de equivalência; nenhuma proposta estrutural foi necessária e nenhum valor mestre foi alterado.
+- Só entram no SVG os biomas com `vetorial(config) = true`; os outros ficam no raster.
+
+### 11.3 0d.2: seleção genérica, `MapaView`, estado e raster
+
+- Contrato ganhou `parametroUrl` e `configDaUrl(valor, { vetor })`; `ativosDoEstado(estado, { vetor })` percorre o registro e transforma o parâmetro de URL de cada bioma na sua configuração. Terrasen aceita exatamente os mesmos valores de antes (`A`, `B`, `C`, `AB`); valores inválidos não ativam nada.
+- `renderTerrain` aceita o objeto histórico (`ProtoTerrasen`) **ou** opções genéricas (`{ ativos, registro?, aoPlanejar? }`); `aoPlanejar` recebe os planos de **todos** os biomas ativos, uma vez por renderização.
+- `MapaView.vue`: a camada é montada a partir de `ativosDoEstado`; o raster omite **exatamente** os símbolos que o SVG desenha (o mesmo predicado `vetorial` dos dois lados); painéis (`terrasenImg` z 390, `terrasenSimbolos` z 395), limites, máscara, grão, vinheta, pré-carga e troca por `visibility` **inalterados**. Os nomes dos painéis ficaram os históricos (renomear quebraria testes e não muda nada visualmente).
+- **Store e `urlState.ts` não foram tocados**: as URLs existentes e o comportamento da branch da demo (que altera justamente essas linhas) continuam como estão.
+
+### 11.4 0d.3: testes de integração R8 (`tests/navegador/integracao.pw.ts`, 6 testes)
+
+| Teste | Resultado |
+|---|---|
+| **Sem duplicação**, com Terrasen + sintético, nos dois modos, por pixels exatos: raster com os dois no raster × raster com os dois no vetor; e Terrasen no raster + sintético no vetor | **0 pixels diferentes fora das caixas dos símbolos**; diferenças só dentro delas; o SVG tem exatamente os símbolos que o raster omitiu (151 de Terrasen + os do sintético, uma vez cada); os planos não dependem de onde os símbolos são desenhados |
+| **Ordem global de pintura** no DOM | `data-y` crescente, `data-i` contínuo, um `<g>` por símbolo (sem grupo por bioma), > 20 intercalações, nenhum `data-bioma` no texto de referência |
+| **Alinhamento** no app (6 zooms, pan, animação de zoom quadro a quadro) | **0 px** em todos; 151 símbolos com `data-bioma="terrasen"` |
+| **Troca colorido ↔ sépia** quadro a quadro (4 trocas) | **0 quadros incoerentes**, 0 quadros sem camada; ordem das camadas imagem < símbolos < rotas < marcadores; `pointer-events: none` |
+| **Zoom, busca, marcador, arrastar, rota animada** | todos funcionam; o elemento sob o marcador de Orynth é o marcador |
+| **URLs existentes** (7: padrão, `AB`, `AB` sépia, `C&vetor=0`, `A` sépia `papel=2`, `AB` sépia `vetor=0`, valor inválido) | camadas e número de símbolos como antes; parâmetros preservados na URL; máscara do papel presente no sépia; sem erros de console |
+
+O registro de produção é verificado em cada execução: `['terrasen']`.
+
+### 11.5 0d.4: desempenho e investigação dos picos de zoom (R10)
+
+**Como foi medido** (`tests/desempenho/medir-zoom.mjs`, resultados brutos em [`desempenho/`](desempenho/)): mesma máquina e mesma execução, **antes** = referência `e34b710` (servida de um *worktree* temporário) e **depois** = `0cbe2b2`; Chrome 157, desktop 1280 × 760; zoom por teclado (animação do Leaflet), intervalos entre quadros por `requestAnimationFrame` durante 1,1 s. **Zoom frio:** primeira animação depois de carregar a página (página nova a cada repetição). **Zoom quente:** mesma página, depois de 2 ciclos de aquecimento. **5 repetições** por condição (10 no controle alternado). "Quadro longo": intervalo > 50 ms (e > 33,4 ms, dois quadros perdidos). Celular: 390 × 844, DPR 3, toque, **CPU limitada a 4× e 6×** via CDP.
+
+**Tamanho da camada (orçamento provisório: ≤ 30 mil caminhos e ≤ 4 MB por modo):** colorido **2.020 caminhos, 259 KB**; sépia **1.738 caminhos, 303 KB** (cerca de 7% do orçamento). Idêntico antes e depois.
+
+**Desktop, zoom frio, por estado do SVG** (mediana / p95 / máximo do intervalo entre quadros em ms; quadros > 50 ms por zoom):
+
+| Condição | Antes (`e34b710`) | Depois (`0cbe2b2`) |
+|---|---|---|
+| cor · SVG ligado | 16,8 / 81,7 / 667 · **3,4** | 16,8 / 84,2 / 131 · **9,8** |
+| cor · SVG oculto | 16,7 / 18,4 / 30,5 · 0 | 16,6 / 17,9 / 21,1 · 0 |
+| cor · SVG ausente | 16,7 / 22,1 / 208 · 0,2 | 16,6 / 19,0 / 25,7 · 0 |
+| sépia · SVG ligado | 16,9 / 38,6 / 94,4 · **1,8** | 16,8 / 64,8 / 301 · **4,6** |
+| sépia · SVG oculto | 16,7 / 17,8 / 24,4 · 0 | 16,7 / 19,0 / 173 · 0,8 |
+| sépia · SVG ausente | 16,7 / 17,7 / 19,4 · 0 | 16,7 / 19,6 / 30,7 · 0 |
+
+**Zoom quente** (mesmas condições): quadros > 50 ms por zoom entre **0 e 0,4** em todas, com SVG ligado inclusive (cor 0,2 antes e depois; sépia 0 antes e depois); máximos isolados de 67 a 407 ms aparecem também **sem** SVG (cor ausente: 407 ms antes, 396 ms depois).
+
+**Controle de ordem (o "antes × depois" acima não é conclusivo):** as condições foram medidas em sequência (todas as de "antes" primeiro). Para separar efeito de ordem, repeti o zoom frio com SVG ligado **alternando** antes e depois, 10 vezes cada:
+
+| Zoom frio, SVG ligado, alternado | Antes | Depois |
+|---|---|---|
+| cor | p95 61,7 ms · **4,0** quadros > 50 ms por zoom | p95 67,1 ms · **3,9** |
+| sépia | p95 45,7 ms · **1,1** | p95 45,8 ms · **1,5** |
+
+Com a ordem controlada, **antes e depois são equivalentes**: a diferença da primeira tabela (3,4 × 9,8) **não se repete** e deve ser tratada como efeito de ordem/ruído, não como regressão.
+
+**Uma hipótese de cada vez (desktop, sépia, SVG ligado, zoom frio):** máscara de grão **ligada**: 5,6 quadros > 50 ms por zoom (p95 68,9); **desligada**: 2,2 (p95 60,5), mas com máximos isolados maiores (633 e 417 ms). Indício fraco de que a máscara acrescenta custo no zoom frio; **não conclusivo** com 5 repetições.
+
+**Celular emulado** (zoom frio, quadros > 50 ms por zoom · p95):
+
+| CPU | depois · cor ligado | depois · cor ausente | depois · sépia ligado | antes · cor ligado |
+|---|---|---|---|---|
+| 4× | 3,2 · 59 ms (máx. 873) | 1,6 · 25 ms | 0,2 · 19 ms | 0,6 · 23 ms |
+| 6× | 3,8 · 276 ms (máx. 883) | 2,8 · 90 ms (máx. 863) | 2,0 · 40 ms | 2,0 · 48 ms |
+
+No zoom quente: 4× cor ligado 3,0 por zoom (p95 87 ms) contra 0,6 sem SVG; 6× cor ligado 2,0 (p95 40 ms) contra **3,4 sem SVG (p95 185 ms)**. O celular emulado é **muito ruidoso** e **não foi alternado**; não permite concluir antes × depois. O que ele mostra com clareza é outro custo: **carregar a página** leva 15 a 25 s com CPU 4× e **20 a 56 s com 6×**, por causa da pintura síncrona do terreno (2400 × 1680), antes de qualquer SVG.
+
+**Traces do Chrome** (um zoom frio por condição, depois): com o **SVG ligado** (cor), o processo de GPU passa **≈ 580 ms** em trabalho de rasterização (`RendererRasterWorker`, `CommandBuffer::Flush`) dentro da janela de 1,4 s, com tarefas isoladas de até **42,6 ms**; no **sépia ligado**, ≈ 580 ms e tarefas de até 23,3 ms; com o **SVG ausente** (cor), ≈ 216 ms de GPU e **nenhuma** tarefa ≥ 16 ms (o maior custo passa a ser `BeginMainFrame` do processo da página, ≈ 379 ms no total, distribuído). Arquivos completos em `.portao/traces/` (não versionados).
+
+**O que a evidência permite dizer, e o que não permite:**
+- **Suportado:** os quadros longos do **zoom frio** aparecem quando o SVG está **visível** e quase desaparecem com o SVG **oculto** ou **ausente**; no **zoom quente** quase não aparecem. Os traces mostram, nessas condições, **trabalho de rasterização no processo de GPU** muito maior com o SVG visível. Isso é **compatível** com a hipótese de rasterizar o SVG na nova escala na primeira animação.
+- **Não demonstrado:** que essa seja **a** causa. Há um trace por condição, o ruído é alto (máximos isolados aparecem também sem SVG e no "antes") e a máquina estava com outro Chrome em uso. A hipótese continua hipótese, agora com evidência a favor.
+- **Sem regressão demonstrada** da 0d em relação à referência (controle alternado).
+
+**Tempo de renderização (orçamento provisório: +10%):** medi `renderTerrain` sozinho (sem carregar página), antes e depois **alternados**, 6 amostras por caso, em **duas rodadas**: as diferenças **trocaram de sinal** entre as rodadas (por exemplo, cor padrão +20,8% e depois −5,4%; sépia com símbolos no raster −30,4% e depois +9,3%), e os tempos (3 a 5 s) ficaram bem acima dos ≈ 1,8 s medidos em rodadas anteriores, sinal de máquina ocupada. **Resultado: inconclusivo** neste ambiente; o orçamento de +10% **não foi verificado** (nem confirmado, nem refutado). Nenhuma otimização foi feita.
+
+### 11.6 Limitações e pendências
+
+1. **Orçamentos continuam provisórios.** Caminhos e tamanho do SVG estão em ≈ 7% do limite; o de tempo de renderização ficou **inconclusivo** (11.5).
+2. **Picos do zoom frio:** associados ao SVG visível e a trabalho de rasterização na GPU, **sem causa confirmada**. Próximos passos sugeridos (não executados): mais traces por condição, a mesma medição numa máquina sem outros processos pesados, e variar uma hipótese de cada vez (máscara, `opacity`, tamanho do SVG, `will-change`).
+3. **Celular:** só emulação; o custo dominante é a **pintura síncrona do terreno** no carregamento (até 56 s com 6×). **Validação em aparelho real continua pendente** até haver Terrasen e Adarlan reais.
+4. **Primeira troca colorido ↔ sépia** continua síncrona (renderiza o outro modo).
+5. Pendências herdadas: fórmula do envelhecimento já centralizada (0b), mas `mask-image` ainda sem teste em Safari/Firefox.
+6. O spike `spikes/vetorial/` está **obsoleto** (importa funções removidas na 0c) e foi marcado como tal no seu README.
+7. Os nomes `terrasenImg`/`terrasenSimbolos` dos painéis e o diretório `proto/` ficaram por compatibilidade; renomear é cosmético.
+8. A suíte de navegador ficou mais longa (≈ 6 min no portão) por causa dos testes de app e de composição.
